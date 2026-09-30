@@ -115,7 +115,7 @@
 @media (prefers-reduced-motion: reduce){ .scroll-cue .stick{ animation: none; } }
 
 @media (max-width:640px){
-  .coat-track{height:340vh;}
+   .coat-track{height:300vh;}
   .coat-imgwrap{padding:0;align-items:center;justify-content:center;}
   .hero-frame-canvas{
     width:100%;
