@@ -50,7 +50,7 @@ jobs:
               Image.fromarray(rgb).save(
                   out / f"frame_{i+1:04d}.webp",
                   format="WEBP",
-                  quality=100,
+                  lossless=True,
                   method=6
               )
               i += 1
