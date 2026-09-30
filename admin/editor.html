@@ -32,6 +32,63 @@
         Don't worry about writing this perfectly. Tell the story naturally. You can edit everything before publishing.
       </div>
 
+      <section class="ai-draft-panel" aria-labelledby="aiDraftHeading">
+        <div class="ai-draft-head">
+          <div>
+            <span class="wizard-step-num">AI ASSISTED DRAFT</span>
+            <h2 id="aiDraftHeading">Give the doctor’s notes. Let AI do the first draft.</h2>
+            <p class="step-helper">Add the medical information you already know. Gemini will turn only those notes into a patient-friendly draft. Nothing is published automatically.</p>
+          </div>
+          <span class="ai-badge">DOCTOR REVIEW REQUIRED</span>
+        </div>
+
+        <div class="ai-fields">
+          <div class="field-group">
+            <label for="aiTopic">Topic / concern</label>
+            <input class="field-input" id="aiTopic" type="text" placeholder="e.g. Persistent tiredness">
+          </div>
+          <div class="field-group">
+            <label for="aiGoal">What should patients understand?</label>
+            <textarea class="field-textarea" id="aiGoal" placeholder="The main message you want patients to understand."></textarea>
+          </div>
+          <div class="field-group">
+            <label for="aiNotes">Rough medical notes <span class="required">*</span></label>
+            <textarea class="field-textarea tall" id="aiNotes" placeholder="Write your medical points in your own words. They do not need to be polished."></textarea>
+          </div>
+          <div class="ai-two-col">
+            <div class="field-group">
+              <label for="aiImportant">Important points</label>
+              <textarea class="field-textarea" id="aiImportant" placeholder="Key facts, patterns, explanations, or points you want included."></textarea>
+            </div>
+            <div class="field-group">
+              <label for="aiRedFlags">Red flags / urgent advice</label>
+              <textarea class="field-textarea" id="aiRedFlags" placeholder="Only add warning signs you want the doctor to communicate."></textarea>
+            </div>
+            <div class="field-group">
+              <label for="aiTreatment">Treatment information</label>
+              <textarea class="field-textarea" id="aiTreatment" placeholder="General treatment information you have approved for patient education."></textarea>
+            </div>
+            <div class="field-group">
+              <label for="aiMisconceptions">Common misconceptions</label>
+              <textarea class="field-textarea" id="aiMisconceptions" placeholder="Things patients commonly misunderstand about this topic."></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="ai-actions">
+          <button class="btn-dark" id="generateAiBtn" type="button">Generate patient-friendly draft</button>
+          <span class="ai-status" id="aiStatus" role="status"></span>
+        </div>
+
+        <div class="ai-review" id="aiReview" hidden>
+          <div class="ai-review-warning">
+            <strong>AI draft. Doctor review required.</strong>
+            <span id="aiReviewNotes"></span>
+          </div>
+          <button class="btn-ghost" id="useAiDraftBtn" type="button">Use this draft in the editor</button>
+        </div>
+      </section>
+
       <div class="wizard-progress" id="wizardProgress"></div>
 
       <!-- STEP 1 -->
@@ -85,11 +142,9 @@
       <!-- STEP 2 -->
       <section class="wizard-step" data-step="2">
         <div class="wizard-step-num">02 &middot; THE PATIENT'S WORDS</div>
-        <h2>Tell it as a conversation</h2>
+        <h2>Draft the conversation</h2>
         <p class="step-helper">
-          This section is a simple conversation between you and the patient. Ask questions that help another person
-          understand what the experience actually felt like. Keep the answers as close as possible to the patient's
-          own words &mdash; they don't need to sound professional.
+          This section is a simple conversation between you and the patient. AI-generated answers are draft wording, not verified patient quotations. Replace or edit them so the published story accurately reflects the patient's actual experience. Ask questions that help another person understand what the experience actually felt like.
         </p>
 
         <div class="suggested-questions">

@@ -1,6 +1,5 @@
 /* =========================================================
-   Hero: coat rotation (scroll-scrubbed image sequence, 60 real
-   frames) then sequential doctor-identity reveal. Warm dark
+   Hero: scroll-scrubbed cinematic coat video, then sequential doctor-identity reveal. Warm dark
    backdrop matching the brand's reference motion piece.
    ========================================================= */
 
@@ -18,15 +17,20 @@
 
 .coat-imgwrap{
   position:absolute; inset:0;
-  display:flex; align-items:center; justify-content:center;
-  padding-bottom: 8vh;
+  display:flex; align-items:center; justify-content:flex-start;
+  padding: 7vh 0 12vh;
 }
 .coat-imgwrap canvas{
-  height: min(64vh, 560px);
-  width: auto;
-  aspect-ratio: 400 / 560;
   display:block;
+  width:min(52vw, 560px);
+  height:72vh;
+  max-height:780px;
+  max-width:58vw;
+  aspect-ratio:400 / 560;
+  object-fit:contain;
+  object-position:left center;
 }
+.coat-imgwrap .hero-video{ display:none; }
 
 /* fixed-position hook lines - one settles left, one settles right,
    so the two moments in the rotation don't feel identical */
@@ -117,8 +121,9 @@
 
 @media (max-width: 640px){
   .coat-track{ height: 460vh; }
-  .coat-imgwrap{ padding: max(31vh, 236px) 0 0; align-items:flex-start; }
-  .coat-imgwrap canvas{ height: min(56vh, 520px); transform-origin: 50% 0; }
+  .coat-imgwrap{ padding: 0 0 4vh; align-items:center; justify-content:center; }
+  .coat-imgwrap canvas,
+  .coat-imgwrap .hero-video{ height: min(68vh, 760px); transform-origin: 50% 0; max-width: 94vw; }
   .identity-block{ bottom: 5%; }
   .hook-line{ width: min(78vw, 340px); top: 122px; }
   #hook3{ width: min(90vw, 360px); }
@@ -149,3 +154,15 @@
 .contact-detail .value{ font-size: 1.1rem; font-weight: 700; font-family: var(--font-display); }
 .contact-map-note{ border: 1px solid var(--line); border-radius: 16px; padding: 24px; background: var(--paper); }
 @media (max-width: 820px){ .contact-panel{ grid-template-columns: 1fr; gap: 28px; } }
+
+
+@media (max-width:640px){
+  .coat-imgwrap{padding:7vh 0 12vh;justify-content:flex-start;}
+  .coat-imgwrap canvas,.coat-imgwrap .hero-video{width:50vw;max-width:540px;height:64vh;max-height:760px;object-position:left center;}
+  .hook-line{top:17%;width:min(72vw,390px);}
+  #hook1{left:7%;}
+  #hook2{right:7%;}
+  #hook3{left:50%;}
+  .identity-block{bottom:10%;width:92vw;}
+  .scroll-cue{bottom:4%;}
+}

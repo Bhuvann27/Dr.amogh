@@ -119,6 +119,123 @@
   document.getElementById("prevBtn").addEventListener("click", () => goToStep(currentStep - 1));
   document.getElementById("nextBtn").addEventListener("click", () => goToStep(currentStep + 1));
 
+  // ---------------- AI patient insight drafting ----------------
+  const aiEls = {
+    topic: document.getElementById("aiTopic"),
+    goal: document.getElementById("aiGoal"),
+    notes: document.getElementById("aiNotes"),
+    important: document.getElementById("aiImportant"),
+    redFlags: document.getElementById("aiRedFlags"),
+    treatment: document.getElementById("aiTreatment"),
+    misconceptions: document.getElementById("aiMisconceptions"),
+    button: document.getElementById("generateAiBtn"),
+    status: document.getElementById("aiStatus"),
+    review: document.getElementById("aiReview"),
+    reviewNotes: document.getElementById("aiReviewNotes"),
+    use: document.getElementById("useAiDraftBtn"),
+  };
+
+  function setAiStatus(message, kind){
+    if(!aiEls.status) return;
+    aiEls.status.textContent = message || "";
+    aiEls.status.className = "ai-status" + (kind ? " " + kind : "");
+  }
+
+  function fillAiSourceFromStory(){
+    if(!aiEls.topic) return;
+    aiEls.topic.value = story.topic || "";
+    if(!aiEls.notes.value) aiEls.notes.value = story.intro || "";
+  }
+
+  function applyAiDraft(draft){
+    story.title = draft.title || story.title;
+    story.subtitle = draft.subtitle || story.subtitle;
+    story.intro = draft.intro || story.intro;
+    story.topic = draft.topic || story.topic;
+    story.dialogue = Array.isArray(draft.dialogue) ? draft.dialogue.map((d) => ({ q: d.q || "", a: d.a || "" })) : story.dialogue;
+    story.relateIntro = draft.relateIntro || "";
+    story.relatePoints = Array.isArray(draft.relatePoints) ? draft.relatePoints.filter(Boolean) : [];
+    story.relateClose = draft.relateClose || "";
+    story.actionPoints = Array.isArray(draft.actionPoints) ? draft.actionPoints.filter(Boolean) : [];
+    story.urgent = draft.urgent || "";
+    story.urgentReviewed = false;
+    story.status = "draft";
+    populateForm();
+    goToStep(1);
+    markDirty();
+  }
+
+  async function generateAiDraft(){
+    const notes = aiEls.notes.value.trim();
+    if(!notes){
+      setAiStatus("Add the doctor’s rough medical notes first.", "error");
+      aiEls.notes.focus();
+      return;
+    }
+
+    aiEls.button.disabled = true;
+    setAiStatus("Generating a draft…", "busy");
+    aiEls.review.hidden = true;
+
+    try {
+      const session = await window.PatientInsightsDB.getSession();
+      if(!session?.access_token) throw new Error("Your admin session has expired. Please log in again.");
+
+      const payload = {
+        topic: aiEls.topic.value.trim(),
+        patientGoal: aiEls.goal.value.trim(),
+        roughNotes: notes,
+        importantPoints: aiEls.important.value.trim(),
+        redFlags: aiEls.redFlags.value.trim(),
+        treatmentInfo: aiEls.treatment.value.trim(),
+        misconceptions: aiEls.misconceptions.value.trim(),
+      };
+
+      const response = await fetch(window.SUPABASE_CONFIG.url + "/functions/v1/generate-patient-insight", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer " + session.access_token,
+          "apikey": window.SUPABASE_CONFIG.anonKey,
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await response.json().catch(() => ({}));
+      if(!response.ok) throw new Error(data.error || "The AI draft could not be generated.");
+
+      const draft = data.draft || {};
+      aiEls.reviewNotes.innerHTML = "";
+      const notesList = Array.isArray(draft.needsDoctorReview) ? draft.needsDoctorReview : [];
+      if(notesList.length){
+        const ul = document.createElement("ul");
+        notesList.forEach((note) => {
+          const li = document.createElement("li");
+          li.textContent = note;
+          ul.appendChild(li);
+        });
+        aiEls.reviewNotes.appendChild(ul);
+      } else {
+        aiEls.reviewNotes.textContent = "Review every medical statement before publication.";
+      }
+
+      aiEls.review.hidden = false;
+      aiEls.use.onclick = () => {
+        applyAiDraft(draft);
+        aiEls.review.hidden = true;
+        setAiStatus("Draft loaded into the editor. Review and edit it before saving or publishing.", "success");
+      };
+      setAiStatus("Draft generated. It has not been published.", "success");
+    } catch(e){
+      setAiStatus(e.message || "Could not generate the draft.", "error");
+    } finally {
+      aiEls.button.disabled = false;
+    }
+  }
+
+  if(aiEls.button) aiEls.button.addEventListener("click", generateAiDraft);
+  fillAiSourceFromStory();
+
   // ---------------- step 1: story basics ----------------
   const fieldTitle = document.getElementById("fieldTitle");
   const fieldTopic = document.getElementById("fieldTopic");
@@ -405,6 +522,7 @@
       }
     }
     populateForm();
+    fillAiSourceFromStory();
     const step = params.get("step");
     goToStep(step === "preview" ? TOTAL_STEPS : 1);
     if(step === "preview") showPreview();

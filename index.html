@@ -11,6 +11,18 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/main.css">
 <link rel="stylesheet" href="css/hero.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+.about-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(300px,.75fr);gap:48px;align-items:start}
+.about-credentials{display:grid;gap:12px}
+.about-credentials>div{padding:18px 0;border-top:1px solid var(--line)}
+.about-credentials span,.care-category-note span{display:block;font-size:.7rem;letter-spacing:.12em;font-weight:800;color:var(--text-dim);margin-bottom:5px}
+.about-credentials strong{display:block;font-size:1.05rem}
+.about-credentials small{display:block;margin-top:5px;color:var(--text-dim)}
+.care-category-note{margin:0 0 26px;padding:20px;border-left:3px solid var(--text);background:var(--stone)}
+.care-category-note p{margin:7px 0 0;max-width:72ch}
+@media(max-width:760px){.about-grid{grid-template-columns:1fr;gap:28px}}
+</style>
 </head>
 <body>
 
@@ -91,13 +103,22 @@
     <div class="section-head reveal">
       <span class="eyebrow">ABOUT DR. AMOGH</span>
       <h2>General Medicine, done carefully</h2>
+      <p>Dr. Amogh G is a General Medicine physician at Arogya Hospital, Mandya. The details below are presented from the information currently supplied for this website.</p>
     </div>
-    <div class="reveal" style="max-width:620px;">
-      <p style="font-size:1.05rem;">
-        General Medicine looks at the bigger picture of your health — from everyday symptoms to ongoing
-        health concerns that need a closer look. Dr. Amogh takes time to understand the patient's concerns,
-        medical history, and the changes they've been noticing before deciding what a problem needs.
-      </p>
+    <div class="about-grid reveal">
+      <div style="max-width:620px;">
+        <p style="font-size:1.05rem;">
+          General Medicine looks at the bigger picture of your health — from everyday symptoms to ongoing
+          health concerns that need a closer look. Dr. Amogh takes time to understand the patient's concerns,
+          medical history, and the changes they've been noticing before deciding what a problem needs.
+        </p>
+      </div>
+      <div class="about-credentials">
+        <div><span>QUALIFICATION</span><strong>MBBS</strong><small>Institution details can be added after verification.</small></div>
+        <div><span>POSTGRADUATE TRAINING</span><strong>MD General Medicine</strong><small>Institution details can be added after verification.</small></div>
+        <div><span>CLINICAL AFFILIATION</span><strong>Arogya Hospital, Mandya</strong><small>Current affiliation as represented on this website.</small></div>
+        <div><span>EXPERIENCE</span><strong>10+ years</strong><small>As currently stated in the supplied website content.</small></div>
+      </div>
     </div>
   </div>
 </section>
@@ -110,7 +131,11 @@
     <div class="section-head reveal">
       <span class="eyebrow">AREAS OF CARE</span>
       <h2>Areas of care</h2>
-      <p>General Medicine covers a wide range of health concerns. Here are some of the common concerns Dr. Amogh sees.</p>
+      <p>General Medicine covers a wide range of health concerns. The sections below are some common concerns and examples, not a complete list of everything Dr. Amogh may evaluate or manage.</p>
+    </div>
+    <div class="care-category-note reveal">
+      <span>BEYOND COMMON CONCERNS</span>
+      <p>Depending on the clinical situation, hospital-based care may also involve urgent medical assessment, complex chronic conditions, acute medical illness and specialised procedures. The exact care provided depends on the patient's condition and clinical assessment.</p>
     </div>
     <div class="care-accordion reveal" id="careAccordion">
 
@@ -337,12 +362,14 @@
         <div class="contact-detail"><div class="label">Phone</div><div class="value"><a href="tel:+917406886226">7406886226</a></div></div>
         <div style="margin-top:26px; display:flex; gap:14px; flex-wrap:wrap;">
           <a class="btn btn-primary" href="tel:+917406886226">CALL</a>
-          <a class="btn btn-outline" href="https://www.google.com/maps/search/?api=1&query=Arogya+Hospital+Mandya" target="_blank" rel="noopener">GET DIRECTIONS</a>
+          <a class="btn btn-outline" href="https://www.google.com/maps/search/?api=1&query=Mandya+Institute+of+Medical+Sciences+Mandya" target="_blank" rel="noopener">GET DIRECTIONS</a>
         </div>
       </div>
       <div class="contact-map-note">
-        <p style="margin:0 0 10px; font-family:var(--font-display); font-weight:700; font-size:1.1rem;">Before you visit</p>
-        <p class="callout" style="border-left:none; padding-left:0;">
+        <p style="margin:0 0 10px; font-family:var(--font-display); font-weight:700; font-size:1.1rem;">Find MIMS, Mandya</p>
+        <div id="clinicMap" class="clinic-map" aria-label="Map showing Arogya Hospital, Mandya"></div>
+        <a class="map-link" href="https://www.google.com/maps/search/?api=1&query=Mandya+Institute+of+Medical+Sciences+Mandya" target="_blank" rel="noopener">Open MIMS in Google Maps &rarr;</a>
+        <p class="callout" style="border-left:none; padding-left:0; margin-top:18px;">
           If your concern isn't urgent, calling ahead helps the clinic plan your visit.
           If your symptoms are sudden or severe, seek immediate medical attention.
         </p>
@@ -383,6 +410,23 @@
   </div>
 </footer>
 
+<!-- website assistant -->
+<div class="site-assistant" id="siteAssistant">
+  <button class="assistant-toggle" id="assistantToggle" type="button" aria-expanded="false" aria-controls="assistantPanel" aria-label="Ask about the practice">
+  <span class="assistant-bot-icon" aria-hidden="true"><svg viewBox="0 0 48 48" width="25" height="25" fill="none"><rect x="8" y="11" width="32" height="25" rx="10" fill="currentColor"/><path d="M24 6v5M18 25h.01M30 25h.01" stroke="#171717" stroke-width="3.5" stroke-linecap="round"/><path d="M18 31c3.4 2.5 8.6 2.5 12 0" stroke="#171717" stroke-width="2.5" stroke-linecap="round"/></svg></span>
+</button>
+  <div class="assistant-panel" id="assistantPanel" hidden>
+    <div class="assistant-head"><strong>Dr. Amogh's website assistant</strong><button id="assistantClose" type="button" aria-label="Close">&times;</button></div>
+    <div class="assistant-messages" id="assistantMessages">
+      <div class="assistant-msg bot">I can help you find information about Dr. Amogh, areas of care, patient insights, appointments and the hospital. I can't diagnose symptoms.</div>
+    </div>
+    <div class="assistant-suggestions" id="assistantSuggestions">
+      <button type="button">What does Dr. Amogh treat?</button><button type="button">How do I book?</button><button type="button">Where is the hospital?</button>
+    </div>
+    <form class="assistant-form" id="assistantForm"><input id="assistantInput" autocomplete="off" placeholder="Ask a question…"><button type="submit">Send</button></form>
+  </div>
+</div>
+
 <!-- floating contact — appears only once the hero has fully scrolled past -->
 <div class="floating-contact" id="floatingContact">
   <a class="fc-whatsapp" href="https://wa.me/917406886226?text=Hello%20Dr.%20Amogh%2C%20I%20have%20a%20question." target="_blank" rel="noopener" aria-label="Message on WhatsApp">
@@ -398,7 +442,10 @@
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="js/supabase-config.js"></script>
+<script src="js/site-assistant.js"></script>
+<script src="js/clinic-map.js"></script>
 <script src="js/booking-db.js"></script>
 <script src="js/main.js"></script>
 <script src="js/booking-widget.js"></script>

@@ -22,38 +22,37 @@
   const coatImgWrap = document.getElementById("coatImgWrap");
 
   // -----------------------------------------------------------
-  // Rotation sequence: 89 real frames covering one full 360 turn
-  // (front -> 3/4 -> side -> back -> side -> 3/4 -> front), taken from the
-  // reference motion piece and pre-aligned so the coat never drifts or
-  // changes size between frames. Frames are decoded once up front and
-  // painted on a canvas; scroll sets a target position and the coat eases
-  // toward it (with a blend between neighbouring frames), so phone scroll
-  // bursts glide instead of lurching.
+  // Hero video: scroll controls the actual video timeline.
+  // If the video is unavailable, fall back to the existing frame sequence.
+  // -----------------------------------------------------------
+  // -----------------------------------------------------------
+  // Hero: lightweight frame-by-frame scroll sequence.
+  // The page never plays a video. Scroll position selects a prepared
+  // WebP frame, which keeps the interaction deterministic and fast.
   // -----------------------------------------------------------
   const FRAME_COUNT = 89;
   const ROTATION_END = 0.44;
   const canvas = document.getElementById("coatCanvas");
   const ctx = canvas.getContext("2d");
-  const mobileMQ = window.matchMedia("(max-width: 640px)");
   const frames = new Array(FRAME_COUNT).fill(null);
   const frameUrl = (i) => `assets/hero-sequence/frame_${String(i + 1).padStart(3, "0")}.webp`;
+  let target = 0, current = 0, rafId = 0, needsDraw = true, lastT = 0;
 
   function loadFrame(i){
-    const url = frameUrl(i);
-    const done = (bmp) => { frames[i] = bmp; needsDraw = true; kick(); };
-    const viaImage = () => new Promise((res) => {
-      const im = new Image();
-      im.onload = () => { done(im); res(); };
-      im.onerror = () => res();
-      im.src = url;
+    if(frames[i]) return Promise.resolve(frames[i]);
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.decoding = "async";
+      img.onload = () => { frames[i] = img; needsDraw = true; kick(); resolve(img); };
+      img.onerror = () => resolve(null);
+      img.src = frameUrl(i);
     });
-    if(window.createImageBitmap && location.protocol !== "file:"){
-      return fetch(url).then((r) => r.blob()).then((b) => createImageBitmap(b)).then(done).catch(viaImage);
-    }
-    return viaImage();
   }
-  // first frame immediately, the rest right behind it
-  loadFrame(0).then(() => { for(let i = 1; i < FRAME_COUNT; i++) loadFrame(i); });
+
+  // First frame is loaded immediately so the hero never flashes blank.
+  loadFrame(0).then(() => {
+    for(let i = 1; i < FRAME_COUNT; i++) loadFrame(i);
+  });
 
   function nearest(i){
     for(let d = 0; d < FRAME_COUNT; d++){
@@ -63,32 +62,43 @@
     return null;
   }
 
-  let target = 0, current = 0, needsDraw = true, rafId = 0, lastT = 0;
   function draw(){
     const i = Math.max(0, Math.min(FRAME_COUNT - 1, Math.floor(current)));
     const f = current - i;
     const a = nearest(i);
     if(!a) return;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.drawImage(a, 0, 0);
+    ctx.drawImage(a, 0, 0, canvas.width, canvas.height);
     const b = i + 1 < FRAME_COUNT ? frames[i + 1] : null;
-    if(b && f > 0.03){ ctx.globalAlpha = f; ctx.drawImage(b, 0, 0); ctx.globalAlpha = 1; }
+    if(b && f > 0.04){
+      ctx.globalAlpha = f;
+      ctx.drawImage(b, 0, 0, canvas.width, canvas.height);
+      ctx.globalAlpha = 1;
+    }
   }
+
   function tick(t){
     rafId = 0;
-    const dt = Math.min(64, t - (lastT || t)); lastT = t;
+    const dt = Math.min(64, t - (lastT || t));
+    lastT = t;
     const diff = target - current;
-    if(Math.abs(diff) > 0.002){ current += diff * (1 - Math.exp(-dt / 70)); needsDraw = true; }
-    else if(current !== target){ current = target; needsDraw = true; }
+    if(Math.abs(diff) > 0.0015){
+      current += diff * (1 - Math.exp(-dt / 45));
+      needsDraw = true;
+    }else{
+      current = target;
+      lastT = 0;
+    }
     if(needsDraw){ draw(); needsDraw = false; }
-    if(Math.abs(target - current) > 0.002) rafId = requestAnimationFrame(tick);
-    else lastT = 0;
+    if(Math.abs(target - current) > 0.0015) rafId = requestAnimationFrame(tick);
   }
+
   function kick(){ if(!rafId) rafId = requestAnimationFrame(tick); }
 
   function renderRotation(p){
+    if(reduced) return;
     const t = Math.max(0, Math.min(1, p / ROTATION_END));
-    target = reduced ? 0 : t * (FRAME_COUNT - 1);
+    target = t * (FRAME_COUNT - 1);
     kick();
   }
 
@@ -191,6 +201,8 @@
       nav.classList.toggle("is-on-dark", onHero);
       if(mobileNav) mobileNav.classList.toggle("is-on-dark", onHero);
       if(floatingContact) floatingContact.classList.toggle("show", !onHero);
+      const siteAssistant = document.getElementById("siteAssistant");
+      if(siteAssistant) siteAssistant.classList.toggle("show", !onHero);
     });
   }, { threshold: 0.05 });
   navObserver.observe(track);
