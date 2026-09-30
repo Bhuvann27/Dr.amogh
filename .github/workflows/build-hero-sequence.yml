@@ -1,0 +1,70 @@
+name: Build high resolution hero frame sequence
+
+on:
+  push:
+    paths:
+      - ".github/workflows/build-hero-sequence.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  build-frames:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install image tools
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install pillow opencv-python-headless
+
+      - name: Extract all source frames
+        run: |
+          python - <<'PY'
+          import cv2
+          from pathlib import Path
+          from PIL import Image
+
+          src = Path("assets/hero/dr-amogh-hero.mp4")
+          out = Path("assets/hero-sequence-hires")
+          out.mkdir(parents=True, exist_ok=True)
+
+          cap = cv2.VideoCapture(str(src))
+          total = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+          fps = cap.get(cv2.CAP_PROP_FPS)
+
+          if total < 2:
+              raise SystemExit("Hero source video could not be read.")
+
+          print(f"Source: {total} frames at {fps:.3f} fps")
+
+          i = 0
+          while True:
+              ok, frame = cap.read()
+              if not ok:
+                  break
+
+              rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+              Image.fromarray(rgb).save(
+                  out / f"frame_{i+1:04d}.webp",
+                  format="WEBP",
+                  quality=100,
+                  method=6
+              )
+              i += 1
+
+          cap.release()
+          print(f"Wrote {i} frames")
+          if i != total:
+              raise SystemExit(f"Expected {total} frames, wrote {i}.")
+          PY
+
+      - name: Commit generated frames
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets/hero-sequence-hires
+          git commit -m "Add full-resolution hero frame sequence" || exit 0
+          git push
