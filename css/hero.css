@@ -17,7 +17,7 @@
 .hero-frame-canvas{
   display:block;
   width:min(88vw,560px);
-  height:min(82vh,860px);
+  height:auto;
   max-width:88vw;
   max-height:860px;
   aspect-ratio:9 / 16;
@@ -119,7 +119,7 @@
   .coat-imgwrap{padding:0;align-items:center;justify-content:center;}
   .hero-frame-canvas{
     width:min(88vw,560px);
-    height:min(82vh,860px);
+    height:auto;
     max-width:88vw;
     max-height:860px;
   }
