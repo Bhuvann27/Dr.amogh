@@ -34,7 +34,7 @@ jobs:
           out.mkdir(parents=True, exist_ok=True)
 
           # Skip the dark opening. Start just after the first hook has cleared. Batch 1 trim.
-          START_FRAME = 40
+          START_FRAME = 32
           END_FRAME = 180
 
           cap = cv2.VideoCapture(str(src))
