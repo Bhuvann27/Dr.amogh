@@ -25,8 +25,8 @@
 
   // -----------------------------------------------------------
   // Hero: full-resolution frame-by-frame scroll sequence.
-  // The source MP4 is converted to every original frame (240 frames)
-  // so scrolling selects the exact source frame instead of seeking video.
+  // The dark opening is trimmed from the source sequence, so scrolling
+  // starts on the first bright frame after the opening hook.
   // -----------------------------------------------------------
   const heroCanvas = document.getElementById("heroCanvas");
   const ROTATION_END = 0.76;
