@@ -20,17 +20,18 @@
   display:flex; align-items:center; justify-content:flex-start;
   padding: 7vh 0 12vh;
 }
-.coat-imgwrap canvas{
+.coat-imgwrap canvas{display:none;}
+.coat-imgwrap .hero-video{
   display:block;
-  width:min(52vw, 560px);
+  width:min(52vw,560px);
   height:72vh;
   max-height:780px;
   max-width:58vw;
-  aspect-ratio:400 / 560;
+  aspect-ratio:9 / 16;
   object-fit:contain;
   object-position:left center;
 }
-.coat-imgwrap .hero-video{ display:none; }
+.coat-imgwrap .hero-video{ display:block; }
 
 /* fixed-position hook lines - one settles left, one settles right,
    so the two moments in the rotation don't feel identical */
