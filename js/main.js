@@ -30,7 +30,7 @@
   const heroAtlasSource = document.getElementById("heroAtlasSource");
   const ROTATION_END = 0.44;
   const FRAME_W = 320;
-  const FRAME_H = 553;
+  const FRAME_H = 433;
   const FRAME_COLS = 10;
   const FRAME_COUNT = 60;
   let heroFrame = 0;
