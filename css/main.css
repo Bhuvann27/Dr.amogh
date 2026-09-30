@@ -957,3 +957,142 @@ section{ position: relative; }
     height:min(350px,52dvh)!important;
   }
 }
+
+
+/* =========================================================
+   Final mobile/layout cleanup
+   ========================================================= */
+
+/* Patient stories: make each card a clean, readable tap target. */
+.story-cards-focus{
+  min-width:0;
+  width:100%;
+  overflow:visible;
+}
+.story-card-primary,.story-card-secondary{
+  min-width:0;
+  width:100%;
+  box-sizing:border-box;
+  overflow:hidden;
+}
+.story-cta{
+  align-self:flex-start;
+  padding:11px 15px;
+  border-radius:999px;
+  background:var(--orange);
+  color:#fff!important;
+  box-shadow:0 8px 18px rgba(242,84,12,.22);
+  transition:transform .25s var(--ease-out),background .2s,box-shadow .2s;
+}
+.story-cta .arrow{color:#fff!important;}
+.story-card:hover .story-cta{background:var(--orange-deep);box-shadow:0 10px 22px rgba(242,84,12,.28);}
+@media(max-width:780px){
+  .section-stories-focus .container{padding-left:20px;padding-right:20px;}
+  .stories-focus-head{margin-bottom:26px;}
+  .stories-focus-head h2{max-width:16ch;font-size:clamp(1.85rem,8vw,2.6rem);}
+  .stories-focus-head>p{font-size:.92rem;line-height:1.55;}
+  .story-cards-focus{grid-template-columns:1fr;gap:16px;}
+  .story-card-primary,.story-card-secondary{min-height:0;padding:26px 22px;}
+  .story-card-primary .quote{font-size:clamp(1.75rem,8vw,2.5rem);max-width:14ch;}
+  .story-card-secondary .quote{font-size:clamp(1.35rem,6vw,1.8rem);}
+  .story-card-primary .desc,.story-card-secondary .desc{font-size:.9rem;line-height:1.5;}
+  .stories-focus-footer{margin-top:18px;}
+  .stories-focus-footer .btn{width:100%;justify-content:center;}
+}
+
+/* Areas of care: centered, spacious hierarchy instead of cramped rows. */
+@media(max-width:780px){
+  .care-category-note{margin-bottom:20px;padding:17px 16px;}
+  .care-accordion{gap:12px;}
+  .care-item-head{
+    display:grid;
+    grid-template-columns:40px minmax(0,1fr) 34px;
+    grid-template-rows:auto auto;
+    column-gap:13px;
+    row-gap:5px;
+    align-items:center;
+    padding:18px 16px;
+  }
+  .care-item-head .n{
+    grid-column:1;
+    grid-row:1 / span 2;
+    width:40px;
+    height:40px;
+    border-radius:12px;
+    justify-self:center;
+  }
+  .care-item-head .care-item-title{
+    grid-column:2;
+    grid-row:1;
+    width:auto;
+    min-width:0;
+    font-size:1rem;
+    line-height:1.15;
+  }
+  .care-item-head .care-item-desc{
+    grid-column:2;
+    grid-row:2;
+    min-width:0;
+    font-size:.82rem;
+    line-height:1.4;
+  }
+  .care-item-head .care-item-icon{
+    grid-column:3;
+    grid-row:1 / span 2;
+    justify-self:end;
+    width:32px;
+    height:32px;
+    font-size:1.25rem;
+  }
+  .care-item-body-inner{padding:0 16px 20px 69px;}
+}
+
+/* Consultation: one obvious booking flow on phones. */
+@media(max-width:780px){
+  .consult-panel{display:flex;flex-direction:column;gap:16px;}
+  .booking-widget-wrap{
+    width:100%;
+    box-sizing:border-box;
+    padding:16px;
+    border-radius:18px;
+    order:1;
+  }
+  .booking-highlight{
+    padding:16px;
+    border-radius:14px;
+    gap:7px 12px;
+  }
+  .booking-highlight>span{font-size:.64rem;}
+  .booking-highlight>strong{font-size:1.08rem;}
+  .booking-highlight>div{font-size:.78rem;}
+  .booking-highlight-action{
+    padding:11px 14px;
+    font-size:.78rem;
+  }
+  .booking-widget{padding:16px 2px 4px;}
+  .booking-widget .field-input{min-height:48px;}
+  .consult-summary{
+    order:2;
+    width:100%;
+    box-sizing:border-box;
+    padding:18px;
+    border-radius:16px;
+  }
+  .consult-summary-row{font-size:1.05rem;margin-bottom:10px;}
+}
+
+/* Chatbot: make the uploaded Anise mark visibly fill the circular control. */
+.assistant-bot-icon img{
+  transform:scale(1.12);
+  transform-origin:center;
+}
+.assistant-toggle{
+  background:#202020!important;
+}
+@media(max-width:640px){
+  .site-assistant{right:12px;bottom:134px;}
+  .assistant-toggle{width:54px!important;height:54px!important;}
+}
+
+/* Hero first hook was intentionally hidden in the earlier pass. Bring it back. */
+#hook1{display:block;}
