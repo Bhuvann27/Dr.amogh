@@ -28,7 +28,7 @@
   // so scrolling selects the exact source frame instead of seeking video.
   // -----------------------------------------------------------
   const heroCanvas = document.getElementById("heroCanvas");
-  const ROTATION_END = 0.44;
+  const ROTATION_END = 0.58;
   const FRAME_W = 720;
   const FRAME_H = 1280;
   const FRAME_COUNT = 240;
@@ -123,11 +123,11 @@
   const HOOK2_WINDOW = [0.15, 0.27];
   const HOOK3_WINDOW = [0.33, 0.43];
   const ID_ZONES = {
-    name: [0.48, 0.55],
-    qual: [0.55, 0.61],
-    exp:  [0.61, 0.67],
-    hosp: [0.67, 0.73],
-    photo:[0.73, 0.80],
+    name: [0.50, 0.56],
+    qual: [0.56, 0.62],
+    exp:  [0.62, 0.68],
+    hosp: [0.68, 0.74],
+    photo:[0.74, 0.81],
   };
   const RELEASE_START = 0.86;
 
@@ -158,7 +158,7 @@
       onUpdate: (self) => {
         const p = self.progress;
 
-        renderRotation(Math.min(p, ID_ZONES.name[0]));
+        renderRotation(Math.min(p, ROTATION_END));
 
         hook1.style.opacity = fadeWindow(p, HOOK1_WINDOW[0], HOOK1_WINDOW[1], 0.3);
         hook2.style.opacity = fadeWindow(p, HOOK2_WINDOW[0], HOOK2_WINDOW[1], 0.3);
@@ -176,12 +176,12 @@
         idHosp.style.opacity = hospOp; idHosp.style.transform = `translateY(${(1-hospOp)*10}px)`;
         idPhoto.style.opacity = photoOp; idPhoto.style.transform = `scale(${0.7 + photoOp*0.3})`;
 
-        // phones: the coat is large, so lift and shrink it a little as the
-        // doctor's name and details appear underneath it
-        const settle = Math.max(0, Math.min(1, (p - 0.44) / 0.06));
+        // Keep the frame at the same physical size while the final source
+        // frames play. The doctor's identity enters over the closing frames,
+        // so the handoff feels continuous instead of shrinking the coat away.
         if(heroCanvas){
           heroCanvas.style.transform = mobileMQ.matches
-            ? "translateY(" + (-settle * 8) + "vh) scale(" + (1 - settle * 0.28) + ")"
+            ? "translateY(-1.5vh) scale(1)"
             : "";
         }
 
