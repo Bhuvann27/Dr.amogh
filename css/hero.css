@@ -157,3 +157,10 @@
 
 /* The cinematic sequence now begins after the dark opening frame. */
 #hook1{display:none;}
+
+
+/* Final hero correction: restore the opening hook and keep the final coat frame
+   visible until the section naturally ends. No artificial fade-to-black. */
+#hook1{display:block !important;}
+.coat-imgwrap{opacity:1 !important;}
+.identity-block{opacity:1;}
