@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Dr. Amogh G — MD General Medicine, Arogya Hospital, Mandya</title>
+<meta name="description" content="Dr. Amogh G, MBBS, MD General Medicine. 10+ years of experience. Arogya Hospital, Mandya. Patient stories, areas of care, and how to reach the clinic.">
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/main.css">
+<link rel="stylesheet" href="css/hero.css">
+</head>
+<body>
+
+<nav class="site-nav" id="siteNav">
+  <a href="index.html" class="wordmark">Dr. Amogh G<span class="dot">.</span></a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="#about">About</a></li>
+    <li><a href="#care">Care</a></li>
+    <li><a href="#stories">Patient Stories</a></li>
+    <li><a href="#insights">Insights</a></li>
+    <li><a href="#consult">Consult</a></li>
+    <li><a href="#visit">Visit</a></li>
+  </ul>
+</nav>
+<nav class="mobile-nav-row" id="mobileNav" aria-label="Section navigation">
+  <a href="index.html" aria-current="page">Home</a>
+  <a href="#about">About</a>
+  <a href="#care">Care</a>
+  <a href="#stories">Patient Stories</a>
+  <a href="#insights">Insights</a>
+  <a href="#consult">Consult</a>
+  <a href="#visit">Visit</a>
+</nav>
+
+<!-- ============================================================
+     HERO — coat rotation, two hooks, then doctor identity
+     ============================================================ -->
+<div class="coat-track" id="coatTrack">
+  <div class="coat-stage" id="coatStage">
+    <div class="coat-imgwrap" id="coatImgWrap">
+      <canvas id="coatCanvas" width="400" height="560" role="img" aria-label="Dr. Amogh's white coat"></canvas>
+    </div>
+
+    <div class="hook-line" id="hook1"><span class="eyebrow-sm">A familiar feeling</span><p>Sometimes, someone else's story <span class="hl">sounds familiar.</span></p></div>
+    <div class="hook-line" id="hook2"><span class="eyebrow-sm">It's not just you</span><p>You read it and think, <span class="hl">&ldquo;I've felt that too.&rdquo;</span></p></div>
+    <div class="hook-line" id="hook3"><span class="eyebrow-sm">A good place to start</span><p>Good care starts with <span class="hl">understanding</span> what you're going through.</p></div>
+
+    <div class="identity-block" id="identityBlock">
+      <div class="identity-photo" id="identityPhoto"><img src="assets/doctor/dr-amogh.webp" alt="Dr. Amogh G"></div>
+      <div class="identity-line identity-name" id="idName">DR. AMOGH G</div>
+      <div class="identity-line identity-qual" id="idQual">MBBS &middot; MD GENERAL MEDICINE</div>
+      <div class="identity-line" id="idExp"><span class="identity-exp">10+ YEARS OF EXPERIENCE</span></div>
+      <div class="identity-line identity-hosp" id="idHosp">AROGYA HOSPITAL &middot; MANDYA</div>
+    </div>
+
+    <div class="scroll-progress" aria-hidden="true"><i id="progressFill"></i></div>
+    <div class="scroll-cue" id="scrollCue"><span>SCROLL</span><span class="stick"></span></div>
+  </div>
+</div>
+
+<!-- ============================================================
+     REAL PHOTOGRAPH
+     ============================================================ -->
+<section class="section-pad">
+  <div class="container">
+    <div class="photo-section reveal">
+      <div class="photo-frame">
+        <img src="assets/doctor/dr-amogh.webp" alt="Dr. Amogh G, MBBS, MD General Medicine">
+      </div>
+      <div>
+        <div class="photo-id-block">DR. AMOGH G</div>
+        <div class="photo-id-line">MBBS &middot; MD GENERAL MEDICINE</div>
+        <span class="exp-badge">10+ YEARS OF EXPERIENCE</span>
+        <div class="photo-id-line" style="margin-bottom:20px;">AROGYA HOSPITAL, MANDYA</div>
+        <p class="photo-intro">Dr. Amogh G is a General Medicine doctor at Arogya Hospital, Mandya, with more than 10 years of experience.</p>
+        <p class="callout">He takes time to understand each patient's concerns and history before deciding what a problem needs.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     ABOUT
+     ============================================================ -->
+<section class="section-pad section-stone" id="about">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow">ABOUT DR. AMOGH</span>
+      <h2>General Medicine, done carefully</h2>
+    </div>
+    <div class="reveal" style="max-width:620px;">
+      <p style="font-size:1.05rem;">
+        General Medicine looks at the bigger picture of your health — from everyday symptoms to ongoing
+        health concerns that need a closer look. Dr. Amogh takes time to understand the patient's concerns,
+        medical history, and the changes they've been noticing before deciding what a problem needs.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     AREAS OF CARE
+     ============================================================ -->
+<section class="section-pad" id="care">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow">AREAS OF CARE</span>
+      <h2>Areas of care</h2>
+      <p>General Medicine covers a wide range of health concerns. Here are some of the common concerns Dr. Amogh sees.</p>
+    </div>
+    <div class="care-accordion reveal" id="careAccordion">
+
+      <div class="care-item">
+        <button class="care-item-head" type="button" aria-expanded="false">
+          <span class="n">01</span>
+          <span class="care-item-title">Fever &amp; infections</span>
+          <span class="care-item-desc">Fever, infections, feeling unwell or symptoms that don't seem to settle.</span>
+          <span class="care-item-icon">+</span>
+        </button>
+        <div class="care-item-body">
+          <div class="care-item-body-inner">
+            <ul>
+              <li>Acute febrile illnesses</li>
+              <li>Common infections</li>
+              <li>Viral illnesses</li>
+              <li>Bacterial infections</li>
+              <li>Recurrent infections</li>
+              <li>Persistent fever</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="care-item">
+        <button class="care-item-head" type="button" aria-expanded="false">
+          <span class="n">02</span>
+          <span class="care-item-title">Headache, dizziness &amp; weakness</span>
+          <span class="care-item-desc">Headaches, dizziness, tiredness, weakness and symptoms affecting everyday life.</span>
+          <span class="care-item-icon">+</span>
+        </button>
+        <div class="care-item-body">
+          <div class="care-item-body-inner">
+            <ul>
+              <li>Headache</li>
+              <li>Migraine</li>
+              <li>Dizziness / giddiness</li>
+              <li>Fatigue</li>
+              <li>General weakness</li>
+              <li>Fainting / near-fainting</li>
+              <li>Persistent unexplained symptoms</li>
+            </ul>
+            <div class="care-related">
+              <div class="label">Related patient insight</div>
+              <a href="stories.html?story=headache">&ldquo;My headaches were becoming part of my day.&rdquo; &rarr;</a>
+              <a href="stories.html?story=fatigue">&ldquo;I thought I was just tired.&rdquo; &rarr;</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="care-item">
+        <button class="care-item-head" type="button" aria-expanded="false">
+          <span class="n">03</span>
+          <span class="care-item-title">Blood sugar, blood pressure &amp; metabolic health</span>
+          <span class="care-item-desc">Concerns related to blood sugar, blood pressure, weight and metabolic health.</span>
+          <span class="care-item-icon">+</span>
+        </button>
+        <div class="care-item-body">
+          <div class="care-item-body-inner">
+            <ul>
+              <li>Diabetes mellitus</li>
+              <li>Hypertension</li>
+              <li>Dyslipidemia</li>
+              <li>Obesity</li>
+              <li>Metabolic syndrome</li>
+              <li>Ongoing diabetes and blood-pressure management</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="care-item">
+        <button class="care-item-head" type="button" aria-expanded="false">
+          <span class="n">04</span>
+          <span class="care-item-title">Digestive &amp; liver concerns</span>
+          <span class="care-item-desc">Acidity, digestive discomfort, abdominal symptoms and liver-related concerns.</span>
+          <span class="care-item-icon">+</span>
+        </button>
+        <div class="care-item-body">
+          <div class="care-item-body-inner">
+            <ul>
+              <li>Acidity / reflux</li>
+              <li>Dyspepsia / indigestion</li>
+              <li>Gastritis</li>
+              <li>Abdominal discomfort</li>
+              <li>Constipation</li>
+              <li>Diarrhoeal illnesses</li>
+              <li>Fatty liver disease</li>
+              <li>Liver-related conditions</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="care-item">
+        <button class="care-item-head" type="button" aria-expanded="false">
+          <span class="n">05</span>
+          <span class="care-item-title">Respiratory &amp; other concerns</span>
+          <span class="care-item-desc">Breathing problems, persistent cough and other health concerns that need a closer look.</span>
+          <span class="care-item-icon">+</span>
+        </button>
+        <div class="care-item-body">
+          <div class="care-item-body-inner">
+            <ul>
+              <li>Persistent cough</li>
+              <li>Shortness of breath</li>
+              <li>Asthma</li>
+              <li>COPD</li>
+              <li>Respiratory infections</li>
+              <li>Anaemia</li>
+              <li>Thyroid disorders</li>
+              <li>Nutritional deficiencies</li>
+              <li>Chronic health conditions</li>
+              <li>General health assessment</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <p class="care-footnote reveal">These are some of the common concerns seen in General Medicine — not the complete list. If you're unsure whether your concern fits, you can still get in touch.</p>
+  </div>
+</section>
+
+<!-- ============================================================
+     PATIENT STORIES
+     ============================================================ -->
+<section class="section-pad section-stone" id="stories">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow">PATIENT STORIES</span>
+      <h2>Real experiences. Different concerns. Something you may recognise.</h2>
+      <p>Every patient comes with a different story. Sometimes, reading someone else's experience can help you recognise something in your own. These stories are based on real patient experiences and are shared anonymously with appropriate consent.</p>
+    </div>
+    <div class="story-cards reveal">
+      <a class="story-card featured" href="stories.html?story=fatigue">
+        <div>
+          <span class="n">STORY 01</span>
+          <p class="quote">"I thought I was just tired."</p>
+          <p class="desc">A patient shares how feeling tired slowly started affecting everyday life.</p>
+        </div>
+        <span class="go">READ THE STORY <span class="arrow">&rarr;</span></span>
+      </a>
+      <a class="story-card" href="stories.html?story=headache">
+        <div>
+          <span class="n">STORY 02</span>
+          <p class="quote">"My headaches were becoming part of my day."</p>
+          <p class="desc">A patient shares how occasional headaches gradually became more frequent.</p>
+        </div>
+        <span class="go">READ THE STORY <span class="arrow">&rarr;</span></span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     INSIGHTS (secondary)
+     ============================================================ -->
+<section class="section-pad" id="insights">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow">FROM DR. AMOGH</span>
+      <h2>Simple answers to common health questions.</h2>
+    </div>
+    <div class="insight-grid reveal">
+      <div class="insight-card">
+        <span class="tag">Energy &amp; fatigue</span>
+        <h3>Why am I always tired?</h3>
+        <p>Sleep, stress, and everyday habits explain most of it. But fatigue that lasts for weeks, or comes with other changes, is worth getting checked rather than pushed through.</p>
+      </div>
+      <div class="insight-card">
+        <span class="tag">Headaches</span>
+        <h3>Is my headache normal?</h3>
+        <p>Most headaches are ordinary and pass on their own. A sudden, severe headache, or one that's different from your usual pattern, is a reason to get seen sooner rather than later.</p>
+      </div>
+      <div class="insight-card">
+        <span class="tag">Check-ups</span>
+        <h3>What happens at a check-up?</h3>
+        <p>A conversation about how you've been feeling, a physical examination, and any tests that make sense based on your age and history — nothing more than that's needed.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     ONLINE CONSULTATION
+     ============================================================ -->
+<section class="section-pad section-stone" id="consult">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow">ONLINE CONSULTATION</span>
+      <h2>Consult with Dr. Amogh online</h2>
+      <p>When visiting the clinic isn't convenient, you can also speak with Dr. Amogh online.</p>
+    </div>
+    <div class="consult-panel reveal">
+      <div class="consult-summary">
+        <div class="consult-summary-row">Online video consultation</div>
+        <div class="consult-summary-meta">
+          <div class="consult-meta-item"><span class="v">15 min</span><span class="l">Duration</span></div>
+          <div class="consult-meta-divider"></div>
+          <div class="consult-meta-item"><span class="v">&#8377;1,200</span><span class="l">Fee</span></div>
+        </div>
+        <p class="consult-note">This isn't for emergencies. If your symptoms are sudden or severe, seek immediate in-person medical care.</p>
+      </div>
+      <div class="booking-widget" id="bookingWidget"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     VISIT
+     ============================================================ -->
+<section class="section-pad section-stone" id="visit">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow">VISIT DR. AMOGH</span>
+    </div>
+    <div class="contact-panel reveal">
+      <div>
+        <div class="contact-detail"><div class="label">Doctor</div><div class="value">Dr. Amogh G, MBBS, MD General Medicine</div></div>
+        <div class="contact-detail"><div class="label">Experience</div><div class="value">10+ years</div></div>
+        <div class="contact-detail"><div class="label">Hospital</div><div class="value">Arogya Hospital, Mandya</div></div>
+        <div class="contact-detail"><div class="label">Phone</div><div class="value"><a href="tel:+917406886226">7406886226</a></div></div>
+        <div style="margin-top:26px; display:flex; gap:14px; flex-wrap:wrap;">
+          <a class="btn btn-primary" href="tel:+917406886226">CALL</a>
+          <a class="btn btn-outline" href="https://www.google.com/maps/search/?api=1&query=Arogya+Hospital+Mandya" target="_blank" rel="noopener">GET DIRECTIONS</a>
+        </div>
+      </div>
+      <div class="contact-map-note">
+        <p style="margin:0 0 10px; font-family:var(--font-display); font-weight:700; font-size:1.1rem;">Before you visit</p>
+        <p class="callout" style="border-left:none; padding-left:0;">
+          If your concern isn't urgent, calling ahead helps the clinic plan your visit.
+          If your symptoms are sudden or severe, seek immediate medical attention.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     FINAL
+     ============================================================ -->
+<section class="section-pad" style="text-align:center;">
+  <div class="container">
+    <p class="reveal" style="font-family:var(--font-display); font-weight:800; letter-spacing:-0.02em; font-size:clamp(1.5rem,3.6vw,2.3rem); max-width:20ch; margin:0 auto 26px;">
+      Your health deserves to be understood.
+    </p>
+    <div class="reveal">
+      <div style="font-family:var(--font-display); font-weight:800; font-size:1.3rem;">DR. AMOGH G</div>
+      <div style="color:var(--text-dim); font-weight:600; margin-top:6px;">MBBS &middot; MD GENERAL MEDICINE</div>
+      <span class="exp-badge" style="margin-top:10px;">10+ YEARS OF EXPERIENCE</span>
+      <div style="color:var(--text-dim); font-weight:600;">AROGYA HOSPITAL, MANDYA</div>
+      <div style="margin-top:10px;"><a href="tel:+917406886226" style="font-weight:700;">7406886226</a></div>
+    </div>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div><p class="foot-word">Dr. Amogh G</p><p>MBBS, MD General Medicine</p><p>Arogya Hospital, Mandya</p></div>
+      <div><h4>Explore</h4><a href="#about">About</a><a href="#care">Care</a><a href="#stories">Patient Stories</a><a href="#insights">Insights</a><a href="#consult">Consult online</a></div>
+      <div><h4>Visit</h4><a href="tel:+917406886226">7406886226</a><a href="#visit">Arogya Hospital, Mandya</a></div>
+    </div>
+    <div class="foot-bottom">
+      <span>&copy; <span id="year"></span> Dr. Amogh G. All rights reserved.</span>
+      <span>This website is informational and does not replace in-person medical advice.</span>
+    </div>
+  </div>
+</footer>
+
+<!-- floating contact — appears only once the hero has fully scrolled past -->
+<div class="floating-contact" id="floatingContact">
+  <a class="fc-whatsapp" href="https://wa.me/917406886226?text=Hello%20Dr.%20Amogh%2C%20I%20have%20a%20question." target="_blank" rel="noopener" aria-label="Message on WhatsApp">
+    <svg viewBox="0 0 32 32" width="26" height="26" fill="currentColor" aria-hidden="true">
+      <path d="M16.02 3C9.4 3 4 8.4 4 15.02c0 2.23.6 4.32 1.66 6.12L3 29l8.06-2.61a12.9 12.9 0 0 0 4.96.98h.01c6.63 0 12.02-5.4 12.02-12.02C28.05 8.4 22.65 3 16.02 3zm0 22.02h-.01a10 10 0 0 1-5.1-1.4l-.37-.22-3.79 1.23 1.24-3.7-.24-.38a9.94 9.94 0 0 1-1.53-5.33c0-5.5 4.48-9.98 10-9.98 2.67 0 5.18 1.04 7.07 2.93a9.93 9.93 0 0 1 2.93 7.06c0 5.51-4.49 9.99-10.2 9.99zm5.48-7.46c-.3-.15-1.77-.87-2.04-.97-.27-.1-.48-.15-.68.15-.2.3-.78.97-.96 1.17-.18.2-.35.22-.65.08-.3-.15-1.26-.46-2.4-1.48-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46.13-.61.14-.14.3-.35.45-.53.15-.18.2-.3.3-.5.1-.2.05-.38-.02-.53-.08-.15-.68-1.65-.94-2.26-.25-.6-.5-.5-.68-.51h-.58c-.2 0-.53.08-.8.38-.28.3-1.05 1.02-1.05 2.5s1.08 2.9 1.23 3.1c.15.2 2.12 3.24 5.14 4.54.72.31 1.28.5 1.72.64.72.23 1.38.2 1.9.12.58-.09 1.77-.72 2.02-1.42.25-.7.25-1.3.17-1.42-.07-.13-.27-.2-.57-.35z"/>
+    </svg>
+  </a>
+  <a class="fc-call" href="tel:+917406886226" aria-label="Call the clinic">
+    <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden="true"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25c1.1.37 2.3.57 3.6.57a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1C10.6 21 3 13.4 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.6a1 1 0 0 1-.25 1L6.6 10.8z"/></svg>
+  </a>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/supabase-config.js"></script>
+<script src="js/booking-db.js"></script>
+<script src="js/main.js"></script>
+<script src="js/booking-widget.js"></script>
+</body>
+</html>

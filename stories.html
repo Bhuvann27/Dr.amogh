@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Patient Stories — Dr. Amogh G, MD General Medicine</title>
+<meta name="description" content="Real patient conversations, shared with consent — from Dr. Amogh G's General Medicine practice at Arogya Hospital, Mandya.">
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/main.css">
+<link rel="stylesheet" href="css/stories.css">
+</head>
+<body>
+
+<nav class="site-nav">
+  <a href="index.html" class="wordmark">Dr. Amogh G<span class="dot">.</span></a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="index.html#about">About</a></li>
+    <li><a href="index.html#care">Care</a></li>
+    <li><a href="stories.html" aria-current="page">Patient Stories</a></li>
+    <li><a href="index.html#insights">Insights</a></li>
+    <li><a href="index.html#visit">Visit</a></li>
+  </ul>
+</nav>
+<nav class="mobile-nav-row" aria-label="Section navigation">
+  <a href="index.html">Home</a>
+  <a href="index.html#about">About</a>
+  <a href="index.html#care">Care</a>
+  <a href="stories.html" aria-current="page">Patient Stories</a>
+  <a href="index.html#insights">Insights</a>
+  <a href="index.html#visit">Visit</a>
+</nav>
+
+<header class="story-header">
+  <div class="container">
+    <a href="index.html" class="back-link reveal">&larr; Back to home</a>
+    <span class="eyebrow reveal">PATIENT STORY</span>
+    <h1 id="storyTitle" class="reveal">&nbsp;</h1>
+    <p class="subtitle reveal" style="margin-top:8px;">A patient's experience, shared anonymously.</p>
+    <p class="subtitle reveal" id="storyIntro" style="margin-top:18px; max-width:56ch;"></p>
+    <nav class="story-pills reveal" id="storyPills" aria-label="Choose a patient story"></nav>
+  </div>
+</header>
+
+<div class="conv-track" id="convTrack">
+  <div class="conv-stage" id="convStage">
+    <p class="conv-intro-line">Shared with the patient's consent. Identifying details have been removed.</p>
+    <div id="convPairs"></div>
+    <div class="conv-progress-num" id="convProgressNum">01 / 06</div>
+    <div class="conv-counter" id="convCounter"></div>
+  </div>
+</div>
+
+<section class="section-pad relate-section" id="relate">
+  <div class="container">
+    <p class="relate-intro reveal" id="relateIntro"></p>
+    <ul class="relate-list reveal" id="relateList"></ul>
+    <p class="relate-close reveal" id="relateClose"></p>
+  </div>
+</section>
+
+<section class="section-pad action-panel">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow">WHAT YOU CAN DO</span>
+      <h2>A few reasonable next steps</h2>
+    </div>
+    <ol class="action-list reveal" id="actionList"></ol>
+    <div class="urgent-note reveal" id="urgentNote">
+      <strong>WHEN TO SEEK URGENT CARE</strong>
+      <span id="urgentText"></span>
+    </div>
+  </div>
+</section>
+
+<section class="section-pad other-stories">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow">MORE STORIES</span>
+      <h2>Other conversations from this practice</h2>
+    </div>
+    <div class="other-story-grid reveal" id="otherStories"></div>
+  </div>
+</section>
+
+<section class="section-pad" style="text-align:center;">
+  <div class="container">
+    <p class="reveal" style="font-family:var(--font-display); font-weight:700; letter-spacing:-0.01em; font-size:clamp(1.15rem,2.4vw,1.4rem); max-width:36ch; margin:0 auto;">
+      If this sounds familiar, Dr. Amogh is at Arogya Hospital, Mandya.
+    </p>
+    <p class="reveal" style="margin-top:14px;"><a href="index.html#visit" style="font-weight:600; color:var(--text-dim); border-bottom:1px solid var(--line);">View clinic details &rarr;</a></p>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div><p class="foot-word">Dr. Amogh G</p><p>MBBS, MD General Medicine</p><p>Arogya Hospital, Mandya</p></div>
+      <div><h4>Explore</h4><a href="index.html#about">About</a><a href="index.html#care">Care</a><a href="stories.html">Patient Stories</a><a href="index.html#insights">Insights</a></div>
+      <div><h4>Visit</h4><a href="tel:+917406886226">7406886226</a><a href="index.html#visit">Arogya Hospital, Mandya</a></div>
+    </div>
+    <div class="foot-bottom">
+      <span>&copy; <span id="year"></span> Dr. Amogh G. All rights reserved.</span>
+      <span>This website is informational and does not replace in-person medical advice.</span>
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/supabase-config.js"></script>
+<script src="js/patient-insights-db.js"></script>
+<script src="js/stories-data.js"></script>
+<script src="js/stories.js"></script>
+</body>
+</html>
