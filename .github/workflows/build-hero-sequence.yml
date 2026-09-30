@@ -34,8 +34,8 @@ jobs:
           out.mkdir(parents=True, exist_ok=True)
 
           # Skip the dark opening. Start just after the first hook has cleared.
-          START_FRAME = 100
-          END_FRAME = 228
+          START_FRAME = 40
+          END_FRAME = 180
 
           cap = cv2.VideoCapture(str(src))
           total = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
