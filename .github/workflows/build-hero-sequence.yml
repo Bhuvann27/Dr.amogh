@@ -84,4 +84,5 @@ jobs:
           git add assets/hero-sequence-hires
           git commit -m "Add full-resolution hero frame sequence" || exit 0
           git pull --rebase origin main
-          git push
+          git push origin HEAD:main
+          git push origin HEAD:anise/dr-amogh-ai-upgrade --force
