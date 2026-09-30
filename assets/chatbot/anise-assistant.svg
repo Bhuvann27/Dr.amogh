@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Website assistant">
+<rect width="512" height="512" rx="112" fill="#202020"/>
+<g fill="none" stroke="#F0F0E0" stroke-width="34" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M256 224 C214 160 211 91 256 62 C301 91 298 160 256 224"/>
+  <path d="M224 256 C160 214 91 211 62 256 C91 301 160 298 224 256"/>
+  <path d="M288 256 C352 214 421 211 450 256 C421 301 352 298 288 256"/>
+  <path d="M256 288 C214 352 211 421 256 450 C301 421 298 352 256 288"/>
+  <path d="M231 231 C184 184 139 171 111 199 C139 227 184 240 231 231"/>
+  <path d="M281 231 C328 184 373 171 401 199 C373 227 328 240 281 231"/>
+  <path d="M231 281 C184 328 139 341 111 313 C139 285 184 272 231 281"/>
+  <path d="M281 281 C328 328 373 341 401 313 C373 285 328 272 281 281"/>
+</g>
+<circle cx="224" cy="255" r="10" fill="#202020" stroke="#202020"/>
+<circle cx="288" cy="255" r="10" fill="#202020" stroke="#202020"/>
+<path d="M229 286 Q256 309 283 286" fill="none" stroke="#E05020" stroke-width="12" stroke-linecap="round"/>
+</svg>
