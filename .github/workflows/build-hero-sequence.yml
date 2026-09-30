@@ -33,7 +33,7 @@ jobs:
           shutil.rmtree(out, ignore_errors=True)
           out.mkdir(parents=True, exist_ok=True)
 
-          # Skip the dark opening. Start just after the first hook has cleared.
+          # Skip the dark opening. Start just after the first hook has cleared. Batch 1 trim.
           START_FRAME = 40
           END_FRAME = 180
 
