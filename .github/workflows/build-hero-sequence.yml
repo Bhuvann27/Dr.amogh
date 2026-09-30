@@ -29,7 +29,13 @@ jobs:
 
           src = Path("assets/hero/dr-amogh-hero.mp4")
           out = Path("assets/hero-sequence-hires")
+          import shutil
+          shutil.rmtree(out, ignore_errors=True)
           out.mkdir(parents=True, exist_ok=True)
+
+          # Skip the dark opening. Start just after the first hook has cleared.
+          START_FRAME = 100
+          END_FRAME = 228
 
           cap = cv2.VideoCapture(str(src))
           total = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
@@ -40,25 +46,35 @@ jobs:
 
           print(f"Source: {total} frames at {fps:.3f} fps")
 
+          if START_FRAME < 1 or END_FRAME > total or START_FRAME > END_FRAME:
+              raise SystemExit(f"Invalid trim: {START_FRAME}-{END_FRAME} for {total} frames.")
+
+          # Seek through the source once and keep only the requested range.
           i = 0
+          written = 0
           while True:
               ok, frame = cap.read()
               if not ok:
                   break
-
-              rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-              Image.fromarray(rgb).save(
-                  out / f"frame_{i+1:04d}.webp",
-                  format="WEBP",
-                  lossless=True,
-                  method=6
-              )
+              source_frame = i + 1
+              if START_FRAME <= source_frame <= END_FRAME:
+                  rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                  Image.fromarray(rgb).save(
+                      out / f"frame_{written+1:04d}.webp",
+                      format="WEBP",
+                      lossless=True,
+                      method=6
+                  )
+                  written += 1
+              if source_frame >= END_FRAME:
+                  break
               i += 1
 
           cap.release()
-          print(f"Wrote {i} frames")
-          if i != total:
-              raise SystemExit(f"Expected {total} frames, wrote {i}.")
+          expected = END_FRAME - START_FRAME + 1
+          print(f"Wrote {written} trimmed frames ({START_FRAME}-{END_FRAME})")
+          if written != expected:
+              raise SystemExit(f"Expected {expected} trimmed frames, wrote {written}.")
           PY
 
       - name: Commit generated frames
