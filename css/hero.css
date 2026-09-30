@@ -1,6 +1,5 @@
 /* =========================================================
-   Hero: coat rotation (scroll-scrubbed image sequence, 60 real
-   frames) then sequential doctor-identity reveal. Warm dark
+   Hero: scroll-scrubbed cinematic coat video, then sequential doctor-identity reveal. Warm dark
    backdrop matching the brand's reference motion piece.
    ========================================================= */
 
@@ -21,12 +20,16 @@
   display:flex; align-items:center; justify-content:center;
   padding-bottom: 8vh;
 }
-.coat-imgwrap canvas{
-  height: min(64vh, 560px);
+.coat-imgwrap canvas,
+.coat-imgwrap .hero-video{
+  height: min(64vh, 720px);
   width: auto;
-  aspect-ratio: 400 / 560;
+  max-width: 92vw;
+  aspect-ratio: 9 / 16;
   display:block;
+  object-fit: contain;
 }
+.coat-imgwrap .hero-video{ display:none; }
 
 /* fixed-position hook lines - one settles left, one settles right,
    so the two moments in the rotation don't feel identical */
@@ -118,7 +121,8 @@
 @media (max-width: 640px){
   .coat-track{ height: 460vh; }
   .coat-imgwrap{ padding: max(31vh, 236px) 0 0; align-items:flex-start; }
-  .coat-imgwrap canvas{ height: min(56vh, 520px); transform-origin: 50% 0; }
+  .coat-imgwrap canvas,
+  .coat-imgwrap .hero-video{ height: min(68vh, 760px); transform-origin: 50% 0; max-width: 94vw; }
   .identity-block{ bottom: 5%; }
   .hook-line{ width: min(78vw, 340px); top: 122px; }
   #hook3{ width: min(90vw, 360px); }
