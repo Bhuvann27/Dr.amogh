@@ -29,10 +29,10 @@
   // so scrolling selects the exact source frame instead of seeking video.
   // -----------------------------------------------------------
   const heroCanvas = document.getElementById("heroCanvas");
-  const ROTATION_END = 0.70;
+  const ROTATION_END = 0.76;
   const FRAME_W = 720;
   const FRAME_H = 1280;
-  const FRAME_COUNT = 229;
+  const FRAME_COUNT = 228;
   const FRAME_DIR = "assets/hero-sequence-hires/";
   const heroFrames = new Array(FRAME_COUNT);
   let heroFrame = 0;
@@ -135,13 +135,13 @@
   const HOOK2_WINDOW = [0.15, 0.27];
   const HOOK3_WINDOW = [0.33, 0.43];
   const ID_ZONES = {
-    name: [0.62, 0.66],
-    qual: [0.64, 0.68],
-    exp:  [0.66, 0.70],
-    hosp: [0.68, 0.71],
-    photo:[0.69, 0.72],
+    name: [0.72, 0.75],
+    qual: [0.74, 0.77],
+    exp:  [0.76, 0.79],
+    hosp: [0.78, 0.80],
+    photo:[0.79, 0.81],
   };
-  const RELEASE_START = 0.82;
+  const RELEASE_START = 0.80;
 
   function fadeWindow(p, start, end, fadeFrac){
     const span = end - start;
@@ -203,8 +203,12 @@
         coatImgWrap.style.transform = `scale(${1 - release * 0.04}) translateY(${-release * 12}px)`;
         identityBlock.style.opacity = 1 - release;
 
-        const heroFinished = p >= 0.94;
+        const heroFinished = p >= 0.82;
         heroNavs.forEach(el => el.classList.toggle("hero-cinematic", !heroFinished));
+        if(identityBlock){
+          const identityProgress = Math.max(0, Math.min(1, (p - 0.72) / 0.09));
+          identityBlock.style.transform = `translateX(-50%) translateY(${(1 - identityProgress) * 34}px)`;
+        }
 
         progressFill.style.transform = `translateY(${p * (140 - 26)}px)`;
         if(scrollCue) scrollCue.style.opacity = p > 0.045 ? 0 : 1;
