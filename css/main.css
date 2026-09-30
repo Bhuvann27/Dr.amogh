@@ -436,9 +436,10 @@ section{ position: relative; }
 .map-link{display:inline-block;margin-top:10px;font-weight:700;color:var(--text-dim)}
 .site-assistant{position:fixed;right:max(18px,env(safe-area-inset-right,0px));bottom:calc(max(18px,env(safe-area-inset-bottom,0px)) + 138px);z-index:80;opacity:0;transform:translateY(14px) scale(.92);pointer-events:none;transition:opacity .35s var(--ease-out),transform .35s var(--ease-out)}
 .site-assistant.show{opacity:1;transform:none;pointer-events:auto}
-.assistant-toggle{width:50px;height:50px;padding:0;border:0;border-radius:50%;background:var(--orange);color:#fff;font:inherit;font-weight:700;box-shadow:0 8px 24px rgba(0,0,0,.2);cursor:pointer;display:grid;place-items:center}
-.assistant-bot-icon{font-size:1.45rem;line-height:1;color:#fff;display:grid;place-items:center}
-.assistant-panel{position:absolute;right:0;bottom:calc(100% + 10px);width:min(380px,calc(100vw - 28px));height:min(540px,calc(100dvh - 110px));margin:0;background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:0 18px 55px rgba(0,0,0,.18);display:flex;flex-direction:column;overflow:hidden}
+.assistant-toggle{width:56px;height:56px;padding:0;border:0;border-radius:50%;background:#202020;color:#fff;font:inherit;font-weight:700;box-shadow:0 8px 24px rgba(0,0,0,.22);cursor:pointer;display:grid;place-items:center;overflow:hidden}
+.assistant-bot-icon{width:100%;height:100%;display:grid;place-items:center}
+.assistant-bot-icon img{display:block;width:100%;height:100%;object-fit:cover}
+.assistant-panel{position:absolute;right:0;bottom:calc(100% + 12px);width:min(380px,calc(100vw - 28px));height:min(540px,calc(100dvh - 110px));margin:0;background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:0 18px 55px rgba(0,0,0,.18);display:flex;flex-direction:column;overflow:hidden}
 .assistant-panel[hidden]{display:none}
 .assistant-head{padding:15px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;flex:0 0 auto}
 .assistant-head button{border:0;background:none;font-size:1.4rem;line-height:1;padding:4px 6px;cursor:pointer}
@@ -453,6 +454,6 @@ section{ position: relative; }
 .assistant-form button{border:0;background:var(--orange);color:#fff;border-radius:9px;padding:8px 11px;font-weight:700;cursor:pointer}
 @media(max-width:640px){
   .site-assistant{right:12px;bottom:calc(12px + env(safe-area-inset-bottom) + 138px);bottom:calc(132px + env(safe-area-inset-bottom))}
-  .assistant-toggle{width:48px;height:48px}
+  .assistant-toggle{width:52px;height:52px}
   .assistant-panel{right:0;width:calc(100vw - 24px);height:min(540px,calc(100dvh - 92px));max-height:calc(100dvh - 92px)}
 }
