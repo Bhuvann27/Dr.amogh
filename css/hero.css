@@ -29,7 +29,7 @@
   display:block;
   object-fit: contain;
 }
-.coat-imgwrap .hero-video{ display:none; }
+.coat-imgwrap .hero-video{ display:block; }
 
 /* fixed-position hook lines - one settles left, one settles right,
    so the two moments in the rotation don't feel identical */
