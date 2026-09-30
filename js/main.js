@@ -9,6 +9,7 @@
   const scrollCue = document.getElementById("scrollCue");
   const nav = document.getElementById("siteNav");
   const mobileNav = document.getElementById("mobileNav");
+  const heroNavs = [nav, mobileNav].filter(Boolean);
   const mobileMQ = window.matchMedia("(max-width: 640px)");
 
   const hook1 = document.getElementById("hook1");
@@ -28,10 +29,10 @@
   // so scrolling selects the exact source frame instead of seeking video.
   // -----------------------------------------------------------
   const heroCanvas = document.getElementById("heroCanvas");
-  const ROTATION_END = 0.58;
+  const ROTATION_END = 0.70;
   const FRAME_W = 720;
   const FRAME_H = 1280;
-  const FRAME_COUNT = 240;
+  const FRAME_COUNT = 229;
   const FRAME_DIR = "assets/hero-sequence-hires/";
   const heroFrames = new Array(FRAME_COUNT);
   let heroFrame = 0;
@@ -39,7 +40,8 @@
 
   function sizeHeroCanvas(){
     if(!heroCanvas) return;
-    const rect = heroCanvas.getBoundingClientRect();
+    const stage = document.getElementById("coatStage") || heroCanvas.parentElement;
+    const rect = stage.getBoundingClientRect();
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
     const w = Math.max(1, Math.round(rect.width * dpr));
     const h = Math.max(1, Math.round(rect.height * dpr));
@@ -67,10 +69,19 @@
     }
     if(!img || !img.complete) return;
 
-    canvasCtx.clearRect(0,0,heroCanvas.width,heroCanvas.height);
+    const cw = heroCanvas.width;
+    const ch = heroCanvas.height;
+    const scale = Math.max(cw / FRAME_W, ch / FRAME_H);
+    const dw = FRAME_W * scale;
+    const dh = FRAME_H * scale;
+    const dx = (cw - dw) * 0.5;
+    const dy = (ch - dh) * 0.5;
+
+    canvasCtx.fillStyle = "#0E0E0E";
+    canvasCtx.fillRect(0,0,cw,ch);
     canvasCtx.imageSmoothingEnabled = true;
     canvasCtx.imageSmoothingQuality = "high";
-    canvasCtx.drawImage(img,0,0,FRAME_W,FRAME_H,0,0,heroCanvas.width,heroCanvas.height);
+    canvasCtx.drawImage(img,0,0,FRAME_W,FRAME_H,dx,dy,dw,dh);
   }
 
   function renderRotation(p){
@@ -114,6 +125,7 @@
     else setTimeout(pump,150);
   }
 
+  heroNavs.forEach(el => el.classList.add("hero-cinematic"));
   loadHeroFrames();
   window.addEventListener("resize", sizeHeroCanvas, {passive:true});
   // -----------------------------------------------------------
@@ -188,8 +200,11 @@
         // release: whole hero fades/scales away into the normal page
         const release = p > RELEASE_START ? (p - RELEASE_START) / (1 - RELEASE_START) : 0;
         coatImgWrap.style.opacity = 1 - release;
-        coatImgWrap.style.transform = `scale(${1 - release * 0.15}) translateY(${-release * 40}px)`;
+        coatImgWrap.style.transform = `scale(${1 - release * 0.04}) translateY(${-release * 12}px)`;
         identityBlock.style.opacity = 1 - release;
+
+        const heroFinished = p >= 0.94;
+        heroNavs.forEach(el => el.classList.toggle("hero-cinematic", !heroFinished));
 
         progressFill.style.transform = `translateY(${p * (140 - 26)}px)`;
         if(scrollCue) scrollCue.style.opacity = p > 0.045 ? 0 : 1;
@@ -206,6 +221,7 @@
     });
     idPhoto.style.opacity = 1; idPhoto.style.transform = "scale(1)";
     if(scrollCue) scrollCue.style.display = "none";
+    heroNavs.forEach(el => el.classList.remove("hero-cinematic"));
   }
 
   // nav swaps to its light-on-dark variant while the (dark) hero is on screen;
