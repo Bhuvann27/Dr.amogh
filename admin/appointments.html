@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Appointments — Admin</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="../css/main.css">
+<link rel="stylesheet" href="css/admin.css">
+</head>
+<body class="admin-body">
+
+  <div class="admin-topbar">
+    <div class="wordmark">Dr. Amogh G <span>&middot;</span> Admin</div>
+    <nav>
+      <a href="../index.html" target="_blank" rel="noopener">View site</a>
+      <button id="logoutBtn" type="button">Log out</button>
+    </nav>
+  </div>
+  <div class="admin-tabs">
+    <a href="index.html">Patient Insights</a>
+    <a href="appointments.html" class="active">Appointments</a>
+    <a href="availability.html">Consultation Availability</a>
+  </div>
+
+  <div class="admin-shell tight">
+    <div class="admin-hero">
+      <h1>Appointments</h1>
+      <p>Online consultation requests — 15 minutes, &#8377;1,200 per session.</p>
+    </div>
+
+    <div class="admin-toolbar">
+      <div class="admin-filters" id="filters">
+        <button class="admin-filter-pill active" data-filter="all">All</button>
+        <button class="admin-filter-pill" data-filter="requested">Requested</button>
+        <button class="admin-filter-pill" data-filter="confirmed">Confirmed</button>
+        <button class="admin-filter-pill" data-filter="completed">Completed</button>
+        <button class="admin-filter-pill" data-filter="cancelled">Cancelled</button>
+      </div>
+      <input class="admin-search" id="searchInput" type="search" placeholder="Search name or phone&hellip;">
+    </div>
+
+    <div id="listWrap"><p style="color:var(--text-dim);">Loading&hellip;</p></div>
+  </div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="../js/supabase-config.js"></script>
+<script src="../js/patient-insights-db.js"></script>
+<script src="../js/booking-db.js"></script>
+<script src="js/admin-auth.js"></script>
+<script src="js/appointments.js"></script>
+</body>
+</html>

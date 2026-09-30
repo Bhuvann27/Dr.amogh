@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Patient Insight Editor — Admin</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="../css/main.css">
+<link rel="stylesheet" href="css/admin.css">
+</head>
+<body class="admin-body">
+
+  <div class="admin-topbar">
+    <div class="wordmark">Dr. Amogh G <span>&middot;</span> Admin</div>
+    <nav>
+      <span class="autosave-status" id="autosaveStatus"></span>
+      <a href="index.html">Back to dashboard</a>
+      <button id="logoutBtn" type="button">Log out</button>
+    </nav>
+  </div>
+
+  <div class="admin-shell">
+
+    <!-- ===================== WIZARD (hidden during preview) ===================== -->
+    <div id="wizardView">
+      <div class="admin-hero">
+        <h1 id="editorHeading">New Patient Insight</h1>
+      </div>
+
+      <div class="wizard-intro-note">
+        Don't worry about writing this perfectly. Tell the story naturally. You can edit everything before publishing.
+      </div>
+
+      <div class="wizard-progress" id="wizardProgress"></div>
+
+      <!-- STEP 1 -->
+      <section class="wizard-step" data-step="1">
+        <div class="wizard-step-num">01 &middot; THE STORY</div>
+        <h2>Start with the patient's concern</h2>
+        <p class="step-helper">Think about the first thing the patient would say if they were explaining their problem to a friend.</p>
+
+        <div class="field-group">
+          <label for="fieldTitle">Story title</label>
+          <textarea class="field-textarea" id="fieldTitle" rows="2" placeholder="&ldquo;I thought I was just tired.&rdquo;"></textarea>
+          <p class="field-helper">Keep this short. Use normal everyday language.</p>
+          <button type="button" class="examples-toggle" data-examples="title">Need an idea? <span>&darr;</span></button>
+          <div class="examples-panel" id="examples-title">
+            <ul>
+              <li>&ldquo;I thought I was just tired.&rdquo;</li>
+              <li>&ldquo;My headaches were becoming part of my day.&rdquo;</li>
+              <li>&ldquo;My stomach has not felt the same for a while.&rdquo;</li>
+              <li>&ldquo;I kept feeling dizzy and didn't know why.&rdquo;</li>
+              <li>&ldquo;I wasn't sleeping properly anymore.&rdquo;</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label for="fieldTopic">Topic</label>
+          <select class="field-input" id="fieldTopic">
+            <option value="">Choose the closest topic&hellip;</option>
+            <option value="Tiredness">Tiredness</option>
+            <option value="Headache">Headache</option>
+            <option value="Stomach discomfort">Stomach discomfort</option>
+            <option value="Dizziness">Dizziness</option>
+            <option value="Other">Other</option>
+          </select>
+          <p class="field-helper">This just helps suggest relevant conversation questions in the next step &mdash; it isn't shown to patients as a diagnosis.</p>
+        </div>
+
+        <div class="field-group">
+          <label for="fieldSubtitle">Short label</label>
+          <input class="field-input" type="text" id="fieldSubtitle" placeholder="On fatigue that doesn't go away with rest">
+          <p class="field-helper">A short phrase shown as a tag under the title, e.g. &ldquo;On headaches that keep coming back.&rdquo;</p>
+        </div>
+
+        <div class="field-group">
+          <label for="fieldIntro">Short introduction</label>
+          <textarea class="field-textarea" id="fieldIntro" placeholder="A patient came to me after feeling unusually tired for several weeks."></textarea>
+          <p class="field-helper">Briefly explain why the patient came to you. Do not reveal identifying information. Keep this to 1&ndash;3 sentences &mdash; you don't need to explain the diagnosis or treatment here.</p>
+        </div>
+      </section>
+
+      <!-- STEP 2 -->
+      <section class="wizard-step" data-step="2">
+        <div class="wizard-step-num">02 &middot; THE PATIENT'S WORDS</div>
+        <h2>Tell it as a conversation</h2>
+        <p class="step-helper">
+          This section is a simple conversation between you and the patient. Ask questions that help another person
+          understand what the experience actually felt like. Keep the answers as close as possible to the patient's
+          own words &mdash; they don't need to sound professional.
+        </p>
+
+        <div class="suggested-questions">
+          <div class="sq-label">Suggested questions for this topic &mdash; click to add one (optional, not mandatory):</div>
+          <div class="sq-list" id="suggestedQuestions"></div>
+        </div>
+
+        <div id="qaList"></div>
+        <button type="button" class="btn-add-question" id="addCustomQBtn">+ Add my own question</button>
+
+        <div class="custom-q-guidance" id="customQGuidance" style="display:none;">
+          <strong>Ask what helps someone understand the experience.</strong>
+          "What were you most worried about?" &middot; "What was the hardest part of dealing with this?" &middot;
+          "Did it affect your sleep?" &middot; "Did it change anything about your daily routine?" &middot;
+          "Did you initially think it was something else?" &middot; "Was there something you were avoiding because of it?"
+          <br><br>Try to avoid questions that sound like an examination or medical questionnaire &mdash; and don't ask for
+          full names, addresses, phone numbers, workplace, exact age, or other identifying details.
+        </div>
+      </section>
+
+      <!-- STEP 3 -->
+      <section class="wizard-step" data-step="3">
+        <div class="wizard-step-num">03 &middot; YOU MIGHT RELATE TO THIS</div>
+        <h2>Help another patient recognise themselves</h2>
+        <p class="step-helper">Think about what someone reading this story might recognise from their own life. These should describe experiences, not diagnoses &mdash; avoid conclusions like "this proves you have&hellip;" or "you may have&hellip;".</p>
+
+        <div class="field-group">
+          <label for="fieldRelateIntro">Opening line</label>
+          <input class="field-input" type="text" id="fieldRelateIntro" placeholder="Sometimes these changes are very small and easy to ignore. You may have noticed that:">
+        </div>
+
+        <div class="field-group">
+          <label>You might relate to this if&hellip;</label>
+          <p class="field-helper" style="margin-top:0; margin-bottom:12px;">Add 2&ndash;5 short points describing what a patient might have noticed, e.g. &ldquo;You have been feeling tired for several weeks.&rdquo;</p>
+          <div class="point-list" id="relatePointsList"></div>
+          <button type="button" class="btn-add-point" data-addpoint="relate">+ Add another point</button>
+        </div>
+
+        <div class="field-group">
+          <label for="fieldRelateClose">Closing line (optional)</label>
+          <input class="field-input" type="text" id="fieldRelateClose" placeholder="Everyone feels tired sometimes. But when something keeps happening, it's worth paying attention to.">
+        </div>
+      </section>
+
+      <!-- STEP 4 -->
+      <section class="wizard-step" data-step="4">
+        <div class="wizard-step-num">04 &middot; WHAT YOU CAN DO</div>
+        <h2>Give a simple next step</h2>
+        <p class="step-helper">This should be general guidance, not a personalised diagnosis or treatment plan. Keep it practical and easy to understand &mdash; avoid making promises about outcomes.</p>
+
+        <div class="field-group">
+          <label>Practical steps</label>
+          <div class="point-list" id="actionPointsList"></div>
+          <button type="button" class="btn-add-point" data-addpoint="action">+ Add another step</button>
+        </div>
+      </section>
+
+      <!-- STEP 5 -->
+      <section class="wizard-step" data-step="5">
+        <div class="wizard-step-num">05 &middot; WHEN TO SEEK URGENT CARE</div>
+        <h2>When to seek urgent care</h2>
+        <p class="step-helper">Use this only when there are clear warning signs relevant to the topic. Keep the language direct and easy to understand. Leave this blank if there's nothing urgent-specific to add for this topic.</p>
+
+        <div class="field-group">
+          <textarea class="field-textarea tall" id="fieldUrgent" placeholder="If symptoms are severe, sudden, rapidly worsening, or accompanied by other concerning symptoms, seek urgent medical attention."></textarea>
+        </div>
+
+        <label class="check-item" id="urgentReviewedWrap">
+          <input type="checkbox" id="fieldUrgentReviewed">
+          <span>Urgent-care guidance has been reviewed by me.</span>
+        </label>
+        <p class="urgent-review-note">This story can't be published with urgent-care text unless this is checked.</p>
+      </section>
+
+      <!-- STEP 6 -->
+      <section class="wizard-step" data-step="6">
+        <div class="wizard-step-num">06 &middot; PRIVACY &amp; PUBLISHING</div>
+        <h2>Protect the patient's privacy</h2>
+        <p class="step-helper">Patient stories should never reveal unnecessary identifying information.</p>
+
+        <div class="check-list">
+          <label class="check-item"><input type="checkbox" id="chkConsent"><span>I have obtained appropriate consent to publish this patient's story.</span></label>
+          <label class="check-item"><input type="checkbox" id="chkIdentifiers"><span>I have removed unnecessary identifying information.</span></label>
+          <label class="check-item"><input type="checkbox" id="chkReviewed"><span>I have reviewed the story and confirmed that it does not reveal private information that should not be published.</span></label>
+          <label class="check-item"><input type="checkbox" id="chkNoDetails"><span>The story does not include unnecessary names, addresses, phone numbers, workplace details, or other identifying information.</span></label>
+          <label class="check-item"><input type="checkbox" id="chkMedical"><span>I have reviewed the medical information in this story for accuracy.</span></label>
+        </div>
+        <p class="privacy-disclaimer">These checkboxes don't replace your legal or professional obligations &mdash; please follow the consent, privacy, and professional requirements that apply to your practice and location.</p>
+
+        <div class="review-panel" style="margin-top:32px;">
+          <h3>Before you publish</h3>
+          <div class="check-list" id="finalReviewList" style="margin-top:14px;">
+            <div class="check-item" style="cursor:default;"><span id="rv-1">&#9675; The story is written in simple, patient-friendly language.</span></div>
+            <div class="check-item" style="cursor:default;"><span id="rv-2">&#9675; The patient's experience is represented accurately.</span></div>
+            <div class="check-item" style="cursor:default;"><span id="rv-3">&#9675; The privacy checklist above is complete.</span></div>
+            <div class="check-item" style="cursor:default;"><span id="rv-4">&#9675; Any urgent-care guidance has been reviewed.</span></div>
+          </div>
+        </div>
+      </section>
+
+      <div class="wizard-footer">
+        <div class="left-actions">
+          <button class="btn-ghost" id="prevBtn" type="button">Back</button>
+        </div>
+        <div class="right-actions">
+          <button class="btn-ghost" id="saveDraftBtn" type="button">Save draft</button>
+          <button class="btn-ghost" id="previewBtn" type="button">Preview</button>
+          <button class="btn-dark" id="nextBtn" type="button">Continue</button>
+          <button class="btn-orange" id="publishBtn" type="button" style="display:none;">Publish story</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== PREVIEW ===================== -->
+    <div id="previewView" style="display:none;">
+      <div class="wizard-footer" style="border-top:none; margin-top:0; padding-top:0; margin-bottom:24px;">
+        <button class="btn-ghost" id="backToEditBtn" type="button">&larr; Back to editing</button>
+        <button class="btn-orange" id="publishFromPreviewBtn" type="button">Publish</button>
+      </div>
+      <div class="preview-shell" id="previewShell"></div>
+    </div>
+
+  </div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="../js/supabase-config.js"></script>
+<script src="../js/patient-insights-db.js"></script>
+<script src="js/admin-auth.js"></script>
+<script src="js/editor.js"></script>
+</body>
+</html>

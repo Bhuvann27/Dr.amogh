@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sign in — Dr. Amogh G Admin</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="../css/main.css">
+<link rel="stylesheet" href="css/admin.css">
+<style>
+  body{ display:flex; align-items:center; justify-content:center; min-height:100vh; background: var(--paper-dim); }
+  .login-card{ width: min(92vw, 400px); background: var(--paper); border:1px solid var(--line); border-radius: 20px; padding: 40px 32px; }
+  .login-card h1{ font-size: 1.4rem; margin-bottom: 6px; }
+  .login-card p{ color: var(--text-dim); font-size: 0.92rem; margin-bottom: 26px; }
+  .login-card .field-group{ margin-bottom: 18px; }
+  .login-error{ display:none; background:#FFF3EE; border:1px solid #F5C9B4; color:#B23A13; font-size:0.86rem; padding:12px 14px; border-radius:10px; margin-bottom:18px; }
+  .login-error.show{ display:block; }
+</style>
+</head>
+<body class="admin-body">
+
+  <div class="login-card">
+    <h1>Dr. Amogh G — Admin</h1>
+    <p>Sign in to manage Patient Insights.</p>
+
+    <div class="login-error" id="loginError"></div>
+
+    <form id="loginForm">
+      <div class="field-group">
+        <label for="email">Email</label>
+        <input class="field-input" type="email" id="email" name="email" autocomplete="username" required>
+      </div>
+      <div class="field-group">
+        <label for="password">Password</label>
+        <input class="field-input" type="password" id="password" name="password" autocomplete="current-password" required>
+      </div>
+      <button type="submit" class="btn-orange" id="loginBtn" style="width:100%;">Sign in</button>
+    </form>
+  </div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="../js/supabase-config.js"></script>
+<script src="../js/patient-insights-db.js"></script>
+<script>
+(function(){
+  "use strict";
+  const form = document.getElementById("loginForm");
+  const errBox = document.getElementById("loginError");
+  const btn = document.getElementById("loginBtn");
+
+  if(!window.isSupabaseConfigured || !window.isSupabaseConfigured()){
+    errBox.textContent = "Not connected to Supabase yet — add your project details to js/supabase-config.js first.";
+    errBox.classList.add("show");
+  }
+
+  // already signed in? skip straight to the dashboard
+  (async () => {
+    if(!window.isSupabaseConfigured()) return;
+    const session = await window.PatientInsightsDB.getSession();
+    if(session) window.location.href = "index.html";
+  })();
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    errBox.classList.remove("show");
+    btn.disabled = true;
+    btn.textContent = "Signing in…";
+    try {
+      await window.PatientInsightsDB.signIn(
+        document.getElementById("email").value.trim(),
+        document.getElementById("password").value
+      );
+      window.location.href = "index.html";
+    } catch(err){
+      errBox.textContent = err.message || "Couldn't sign in. Check your email and password.";
+      errBox.classList.add("show");
+      btn.disabled = false;
+      btn.textContent = "Sign in";
+    }
+  });
+})();
+</script>
+</body>
+</html>

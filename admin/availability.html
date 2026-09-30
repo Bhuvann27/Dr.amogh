@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Consultation Availability — Admin</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="../css/main.css">
+<link rel="stylesheet" href="css/admin.css">
+</head>
+<body class="admin-body">
+
+  <div class="admin-topbar">
+    <div class="wordmark">Dr. Amogh G <span>&middot;</span> Admin</div>
+    <nav>
+      <a href="../index.html" target="_blank" rel="noopener">View site</a>
+      <button id="logoutBtn" type="button">Log out</button>
+    </nav>
+  </div>
+  <div class="admin-tabs">
+    <a href="index.html">Patient Insights</a>
+    <a href="appointments.html">Appointments</a>
+    <a href="availability.html" class="active">Consultation Availability</a>
+  </div>
+
+  <div class="admin-shell">
+    <div class="admin-hero">
+      <h1>Consultation Availability</h1>
+      <p>Controls which 15-minute slots patients can request online. Changes apply immediately on the website.</p>
+    </div>
+
+    <div class="review-panel">
+      <h3>Weekly schedule</h3>
+      <p style="color:var(--text-dim); font-size:0.9rem; margin-bottom:18px;">Turn a day off entirely, or set the hours consultations are offered on that day.</p>
+      <div id="weeklyList"></div>
+      <button class="btn-dark" id="saveWeeklyBtn" type="button" style="margin-top:16px;">Save weekly schedule</button>
+      <span class="autosave-status" id="weeklyStatus"></span>
+    </div>
+
+    <div class="review-panel">
+      <h3>Block a date or time</h3>
+      <p style="color:var(--text-dim); font-size:0.9rem; margin-bottom:18px;">Leave both times blank to block the entire date (e.g. a day off).</p>
+      <div class="field-group">
+        <label for="blockDate">Date</label>
+        <input class="field-input" type="date" id="blockDate">
+      </div>
+      <div style="display:flex; gap:12px; flex-wrap:wrap;">
+        <div class="field-group" style="flex:1; min-width:140px;">
+          <label for="blockStart">From (optional)</label>
+          <input class="field-input" type="time" id="blockStart">
+        </div>
+        <div class="field-group" style="flex:1; min-width:140px;">
+          <label for="blockEnd">To (optional)</label>
+          <input class="field-input" type="time" id="blockEnd">
+        </div>
+      </div>
+      <div class="field-group">
+        <label for="blockReason">Reason <span style="font-weight:400; color:var(--text-dim);">(optional, for your own reference)</span></label>
+        <input class="field-input" type="text" id="blockReason" placeholder="e.g. Out of clinic, conference">
+      </div>
+      <button class="btn-orange" id="addBlockBtn" type="button">+ Add block</button>
+    </div>
+
+    <div class="review-panel">
+      <h3>Upcoming blocks</h3>
+      <div id="blocksList" style="margin-top:14px;"></div>
+    </div>
+  </div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="../js/supabase-config.js"></script>
+<script src="../js/patient-insights-db.js"></script>
+<script src="../js/booking-db.js"></script>
+<script src="js/admin-auth.js"></script>
+<script src="js/availability.js"></script>
+</body>
+</html>
