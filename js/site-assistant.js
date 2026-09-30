@@ -32,13 +32,13 @@
       return "You can use the Online Consultation section or call 7406886226 for clinic information.";
     }
     if(/where|location|hospital|address|mandya/.test(x)){
-      return "The website lists Dr. Amogh at Pragati Hospital, Mandya. Use the Visit section for directions.";
+      return "The website lists Dr. Amogh at Pragati Hospital, Mandya. Use the Visit section for directions to Pragati Hospital on G.H. Road, Ashok Nagar, Mandya.";
     }
     if(/treat|care|condition|disease|special/.test(x)){
       return "The website lists common General Medicine concerns including infections, headaches and dizziness, diabetes, blood pressure, digestive and liver concerns, respiratory problems and chronic health conditions. It also notes that this is not a complete list.";
     }
     if(/about|qualification|degree|experience/.test(x)){
-      return "The website currently lists Dr. Amogh G as MBBS, MD General Medicine, with 12+ years of experience, at Arogya Hospital, Mandya.";
+      return "The website currently lists Dr. Amogh G as MBBS, MD General Medicine, with 12+ years of experience, at Pragati Hospital, Mandya.";
     }
     if(/story|insight|article/.test(x)){
       return "Patient Stories and Insights contain patient-friendly information published through the website.";
