@@ -157,7 +157,14 @@ section[id]{ scroll-margin-top: 84px; }
 }
 
 
-.site-nav.hero-cinematic,.mobile-nav-row.hero-cinematic{
+.site-nav.hero-cinematic{
+  opacity:1;
+  visibility:visible;
+  pointer-events:auto;
+  transform:none;
+}
+.site-nav.hero-cinematic .nav-links{display:none;}
+.mobile-nav-row.hero-cinematic{
   opacity:0;
   visibility:hidden;
   pointer-events:none;
