@@ -2,7 +2,7 @@
    Hero: full-resolution 240-frame scroll sequence
    ========================================================= */
 
-.coat-track{position:relative;height:460vh;background:#0E0E0E;}
+.coat-track{position:relative;height:360vh;background:#0E0E0E;}
 .coat-stage{
   position:sticky;top:0;height:100vh;height:100svh;width:100%;
   overflow:hidden;
@@ -16,12 +16,12 @@
 }
 .hero-frame-canvas{
   display:block;
-  width:min(94vw,560px);
+  width:100%;
   height:auto;
-  max-width:94vw;
-  max-height:calc(100svh - 72px);
-  aspect-ratio:9 / 16;
-  object-fit:contain;
+  max-width:none;
+  max-height:none;
+  aspect-ratio:auto;
+  object-fit:fill;
   object-position:center;
   transform-origin:50% 50%;
   image-rendering:auto;
@@ -118,10 +118,10 @@
   .coat-track{height:460vh;}
   .coat-imgwrap{padding:0;align-items:center;justify-content:center;}
   .hero-frame-canvas{
-    width:min(94vw,560px);
+    width:100%;
     height:auto;
-    max-width:94vw;
-    max-height:calc(100svh - 72px);
+    max-width:none;
+    max-height:none;
   }
   .identity-block{bottom:8%;width:92vw;}
   .hook-line{top:17%;width:min(82vw,390px);}
