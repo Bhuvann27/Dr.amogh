@@ -14,15 +14,14 @@
   display:flex; align-items:center; justify-content:center;
   padding:6vh 0 10vh;
 }
-.hero-atlas-source{display:none;}
-.hook-line{display:none;}
+ .hero-atlas-source{display:none;}
 .hero-frame-canvas{
   display:block;
   width:min(44vw,560px);
   max-width:88vw;
   height:auto;
   max-height:82vh;
-  aspect-ratio:320 / 553;
+  aspect-ratio:320 / 433;
   object-fit:contain;
   object-position:center;
   transform-origin:50% 50%;
