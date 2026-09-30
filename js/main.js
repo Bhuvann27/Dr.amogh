@@ -32,7 +32,7 @@
   const ROTATION_END = 0.76;
   const FRAME_W = 720;
   const FRAME_H = 1280;
-  const FRAME_COUNT = 228;
+  const FRAME_COUNT = 129;
   const FRAME_DIR = "assets/hero-sequence-hires/";
   const heroFrames = new Array(FRAME_COUNT);
   let heroFrame = 0;
@@ -131,17 +131,16 @@
   // -----------------------------------------------------------
   // Timeline zones (fixed positions, no randomization)
   // -----------------------------------------------------------
-  const HOOK1_WINDOW = [0.01, 0.09];
-  const HOOK2_WINDOW = [0.15, 0.27];
-  const HOOK3_WINDOW = [0.33, 0.43];
+  const HOOK2_WINDOW = [0.10, 0.22];
+  const HOOK3_WINDOW = [0.28, 0.40];
   const ID_ZONES = {
-    name: [0.72, 0.75],
-    qual: [0.74, 0.77],
-    exp:  [0.76, 0.79],
-    hosp: [0.78, 0.80],
-    photo:[0.79, 0.81],
+    name: [0.70, 0.73],
+    qual: [0.72, 0.75],
+    exp:  [0.74, 0.77],
+    hosp: [0.76, 0.80],
+    photo:[0.78, 0.82],
   };
-  const RELEASE_START = 0.80;
+  const RELEASE_START = 0.90;
 
   function fadeWindow(p, start, end, fadeFrac){
     const span = end - start;
@@ -172,7 +171,7 @@
 
         renderRotation(Math.min(p, ROTATION_END));
 
-        hook1.style.opacity = fadeWindow(p, HOOK1_WINDOW[0], HOOK1_WINDOW[1], 0.3);
+        if(hook1) hook1.style.opacity = 0;
         hook2.style.opacity = fadeWindow(p, HOOK2_WINDOW[0], HOOK2_WINDOW[1], 0.3);
         if(hook3) hook3.style.opacity = fadeWindow(p, HOOK3_WINDOW[0], HOOK3_WINDOW[1], 0.3);
 
@@ -203,10 +202,10 @@
         coatImgWrap.style.transform = `scale(${1 - release * 0.04}) translateY(${-release * 12}px)`;
         identityBlock.style.opacity = 1 - release;
 
-        const heroFinished = p >= 0.82;
+        const heroFinished = p >= 0.86;
         heroNavs.forEach(el => el.classList.toggle("hero-cinematic", !heroFinished));
         if(identityBlock){
-          const identityProgress = Math.max(0, Math.min(1, (p - 0.72) / 0.09));
+          const identityProgress = Math.max(0, Math.min(1, (p - 0.70) / 0.12));
           identityBlock.style.transform = `translateX(-50%) translateY(${(1 - identityProgress) * 34}px)`;
         }
 
