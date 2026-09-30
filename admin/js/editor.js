@@ -522,6 +522,7 @@
       }
     }
     populateForm();
+    fillAiSourceFromStory();
     const step = params.get("step");
     goToStep(step === "preview" ? TOTAL_STEPS : 1);
     if(step === "preview") showPreview();
