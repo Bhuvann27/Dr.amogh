@@ -29,10 +29,10 @@
   // starts on the first bright frame after the opening hook.
   // -----------------------------------------------------------
   const heroCanvas = document.getElementById("heroCanvas");
-  const ROTATION_END = 0.76;
+  const ROTATION_END = 0.70;
   const FRAME_W = 720;
   const FRAME_H = 1280;
-  const FRAME_COUNT = 129;
+  const FRAME_COUNT = 141;
   const FRAME_DIR = "assets/hero-sequence-hires/";
   const heroFrames = new Array(FRAME_COUNT);
   let heroFrame = 0;
@@ -131,8 +131,8 @@
   // -----------------------------------------------------------
   // Timeline zones (fixed positions, no randomization)
   // -----------------------------------------------------------
-  const HOOK2_WINDOW = [0.10, 0.22];
-  const HOOK3_WINDOW = [0.28, 0.40];
+  const HOOK2_WINDOW = [0.12, 0.25];
+  const HOOK3_WINDOW = [0.30, 0.45];
   const ID_ZONES = {
     name: [0.70, 0.73],
     qual: [0.72, 0.75],
@@ -140,7 +140,7 @@
     hosp: [0.76, 0.80],
     photo:[0.78, 0.82],
   };
-  const RELEASE_START = 0.90;
+  const RELEASE_START = 0.84;
 
   function fadeWindow(p, start, end, fadeFrac){
     const span = end - start;
@@ -202,10 +202,10 @@
         coatImgWrap.style.transform = `scale(${1 - release * 0.04}) translateY(${-release * 12}px)`;
         identityBlock.style.opacity = 1 - release;
 
-        const heroFinished = p >= 0.86;
+        const heroFinished = p >= 0.82;
         heroNavs.forEach(el => el.classList.toggle("hero-cinematic", !heroFinished));
         if(identityBlock){
-          const identityProgress = Math.max(0, Math.min(1, (p - 0.70) / 0.12));
+          const identityProgress = Math.max(0, Math.min(1, (p - 0.67) / 0.13));
           identityBlock.style.transform = `translateX(-50%) translateY(${(1 - identityProgress) * 34}px)`;
         }
 
@@ -244,7 +244,7 @@
   navObserver.observe(track);
 
   // Areas of Care accordion — collapsed by default, one or many open at once
-  document.querySelectorAll(".care-item-head").forEach((btn) => {
+  document.addEventListener("click", (event) => {\n    const focusBtn = event.target.closest("#focusBookingDate");\n    if(focusBtn){\n      const dateInput = document.getElementById("bookDateInput");\n      if(dateInput){\n        dateInput.scrollIntoView({behavior:"smooth",block:"center"});\n        setTimeout(() => dateInput.focus(), 320);\n      }\n    }\n  });\n\n  document.querySelectorAll(".care-item-head").forEach((btn) => {
     btn.addEventListener("click", () => {
       const item = btn.closest(".care-item");
       const isOpen = item.classList.toggle("open");
