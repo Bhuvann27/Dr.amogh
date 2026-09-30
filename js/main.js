@@ -29,10 +29,10 @@
   // starts on the first bright frame after the opening hook.
   // -----------------------------------------------------------
   const heroCanvas = document.getElementById("heroCanvas");
-  const ROTATION_END = 0.70;
+  const ROTATION_END = 0.92;
   const FRAME_W = 720;
   const FRAME_H = 1280;
-  const FRAME_COUNT = 141;
+  const FRAME_COUNT = 149;
   const FRAME_DIR = "assets/hero-sequence-hires/";
   const heroFrames = new Array(FRAME_COUNT);
   let heroFrame = 0;
@@ -131,16 +131,17 @@
   // -----------------------------------------------------------
   // Timeline zones (fixed positions, no randomization)
   // -----------------------------------------------------------
-  const HOOK2_WINDOW = [0.12, 0.25];
-  const HOOK3_WINDOW = [0.30, 0.45];
+  const HOOK1_WINDOW = [0.04, 0.16];
+  const HOOK2_WINDOW = [0.18, 0.32];
+  const HOOK3_WINDOW = [0.36, 0.54];
   const ID_ZONES = {
-    name: [0.70, 0.73],
-    qual: [0.72, 0.75],
-    exp:  [0.74, 0.77],
-    hosp: [0.76, 0.80],
-    photo:[0.78, 0.82],
+    name: [0.70, 0.75],
+    qual: [0.73, 0.78],
+    exp:  [0.76, 0.81],
+    hosp: [0.79, 0.84],
+    photo:[0.82, 0.88],
   };
-  const RELEASE_START = 0.84;
+  const RELEASE_START = 1.01;
 
   function fadeWindow(p, start, end, fadeFrac){
     const span = end - start;
@@ -171,7 +172,7 @@
 
         renderRotation(Math.min(p, ROTATION_END));
 
-        if(hook1) hook1.style.opacity = 0;
+        if(hook1) hook1.style.opacity = fadeWindow(p, HOOK1_WINDOW[0], HOOK1_WINDOW[1], 0.28);
         hook2.style.opacity = fadeWindow(p, HOOK2_WINDOW[0], HOOK2_WINDOW[1], 0.3);
         if(hook3) hook3.style.opacity = fadeWindow(p, HOOK3_WINDOW[0], HOOK3_WINDOW[1], 0.3);
 
@@ -197,12 +198,12 @@
         }
 
         // release: whole hero fades/scales away into the normal page
-        const release = p > RELEASE_START ? (p - RELEASE_START) / (1 - RELEASE_START) : 0;
-        coatImgWrap.style.opacity = 1 - release;
-        coatImgWrap.style.transform = `scale(${1 - release * 0.04}) translateY(${-release * 12}px)`;
-        identityBlock.style.opacity = 1 - release;
+        const release = 0;
+        coatImgWrap.style.opacity = 1;
+        coatImgWrap.style.transform = "none";
+        identityBlock.style.opacity = 1;
 
-        const heroFinished = p >= 0.82;
+        const heroFinished = p >= 0.92;
         heroNavs.forEach(el => el.classList.toggle("hero-cinematic", !heroFinished));
         if(identityBlock){
           const identityProgress = Math.max(0, Math.min(1, (p - 0.67) / 0.13));
