@@ -1,27 +1,26 @@
 /* =========================================================
-   Hero: deterministic scroll-controlled frame atlas
+   Hero: full-resolution 240-frame scroll sequence
    ========================================================= */
 
-.coat-track{ position: relative; height: 460vh; background: #0E0E0E; }
+.coat-track{position:relative;height:460vh;background:#0E0E0E;}
 .coat-stage{
-  position: sticky; top: 0; height: 100vh; height: 100svh; width: 100%;
-  overflow: hidden;
-  background: radial-gradient(120% 90% at 50% 32%, #2E2C27 0%, #1A1916 55%, #0E0E0E 100%);
-  --hero-text:#FCF8F0; --hero-text-dim:#CDC5B5; --hero-accent:#E0A24E; --hero-shadow:rgba(16,11,6,0.75);
+  position:sticky;top:0;height:100vh;height:100svh;width:100%;
+  overflow:hidden;
+  background:radial-gradient(120% 90% at 50% 32%,#2E2C27 0%,#1A1916 55%,#0E0E0E 100%);
+  --hero-text:#FCF8F0;--hero-text-dim:#CDC5B5;--hero-accent:#E0A24E;--hero-shadow:rgba(16,11,6,0.75);
 }
 .coat-imgwrap{
-  position:absolute; inset:0;
-  display:flex; align-items:center; justify-content:center;
-  padding:6vh 0 10vh;
+  position:absolute;inset:0;
+  display:flex;align-items:center;justify-content:center;
+  padding:0;
 }
- .hero-atlas-source{display:none;}
 .hero-frame-canvas{
   display:block;
-  width:min(44vw,560px);
+  width:min(88vw,560px);
+  height:min(82vh,860px);
   max-width:88vw;
-  height:auto;
-  max-height:82vh;
-  aspect-ratio:320 / 433;
+  max-height:860px;
+  aspect-ratio:9 / 16;
   object-fit:contain;
   object-position:center;
   transform-origin:50% 50%;
@@ -118,7 +117,12 @@
 @media (max-width:640px){
   .coat-track{height:460vh;}
   .coat-imgwrap{padding:0;align-items:center;justify-content:center;}
-  .hero-frame-canvas{width:min(88vw,560px);max-width:88vw;max-height:82vh;height:auto;}
+  .hero-frame-canvas{
+    width:min(88vw,560px);
+    height:min(82vh,860px);
+    max-width:88vw;
+    max-height:860px;
+  }
   .identity-block{bottom:8%;width:92vw;}
   .hook-line{top:17%;width:min(82vw,390px);}
   #hook1{left:7%;}
