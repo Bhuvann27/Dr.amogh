@@ -22,14 +22,10 @@
   const coatImgWrap = document.getElementById("coatImgWrap");
 
   // -----------------------------------------------------------
-  // Rotation sequence: 89 real frames covering one full 360 turn
-  // (front -> 3/4 -> side -> back -> side -> 3/4 -> front), taken from the
-  // reference motion piece and pre-aligned so the coat never drifts or
-  // changes size between frames. Frames are decoded once up front and
-  // painted on a canvas; scroll sets a target position and the coat eases
-  // toward it (with a blend between neighbouring frames), so phone scroll
-  // bursts glide instead of lurching.
+  // Hero video: scroll controls the actual video timeline.
+  // If the video is unavailable, fall back to the existing frame sequence.
   // -----------------------------------------------------------
+  const heroVideo = document.getElementById("heroVideo");
   const FRAME_COUNT = 89;
   const ROTATION_END = 0.44;
   const canvas = document.getElementById("coatCanvas");
@@ -37,6 +33,26 @@
   const mobileMQ = window.matchMedia("(max-width: 640px)");
   const frames = new Array(FRAME_COUNT).fill(null);
   const frameUrl = (i) => `assets/hero-sequence/frame_${String(i + 1).padStart(3, "0")}.webp`;
+  let videoReady = false;
+
+  if(heroVideo){
+    heroVideo.src = "assets/hero/dr-amogh-hero.mp4";
+    heroVideo.load();
+    heroVideo.addEventListener("loadedmetadata", () => {
+      videoReady = Number.isFinite(heroVideo.duration) && heroVideo.duration > 0;
+      if(videoReady){
+        canvas.style.display = "none";
+        heroVideo.style.display = "block";
+        heroVideo.currentTime = 0;
+      }
+    });
+    heroVideo.addEventListener("error", () => {
+      videoReady = false;
+      heroVideo.style.display = "none";
+      canvas.style.display = "block";
+      loadFallbackFrames();
+    });
+  }
 
   function loadFrame(i){
     const url = frameUrl(i);
@@ -52,15 +68,12 @@
     }
     return viaImage();
   }
-  // first frame immediately, the rest right behind it
-  loadFrame(0).then(() => { for(let i = 1; i < FRAME_COUNT; i++) loadFrame(i); });
 
-  function nearest(i){
-    for(let d = 0; d < FRAME_COUNT; d++){
-      if(frames[i - d]) return frames[i - d];
-      if(frames[i + d]) return frames[i + d];
-    }
-    return null;
+  function loadFallbackFrames(){
+    if(frames[0]) return;
+    loadFrame(0).then(() => {
+      for(let i = 1; i < FRAME_COUNT; i++) loadFrame(i);
+    });
   }
 
   let target = 0, current = 0, needsDraw = true, rafId = 0, lastT = 0;
@@ -74,6 +87,15 @@
     const b = i + 1 < FRAME_COUNT ? frames[i + 1] : null;
     if(b && f > 0.03){ ctx.globalAlpha = f; ctx.drawImage(b, 0, 0); ctx.globalAlpha = 1; }
   }
+
+  function nearest(i){
+    for(let d = 0; d < FRAME_COUNT; d++){
+      if(frames[i - d]) return frames[i - d];
+      if(frames[i + d]) return frames[i + d];
+    }
+    return null;
+  }
+
   function tick(t){
     rafId = 0;
     const dt = Math.min(64, t - (lastT || t)); lastT = t;
@@ -88,9 +110,23 @@
 
   function renderRotation(p){
     const t = Math.max(0, Math.min(1, p / ROTATION_END));
-    target = reduced ? 0 : t * (FRAME_COUNT - 1);
+    if(reduced) return;
+    if(videoReady && heroVideo){
+      const duration = heroVideo.duration || 0;
+      if(duration){
+        const nextTime = t * Math.max(0, duration - 0.001);
+        if(Math.abs(heroVideo.currentTime - nextTime) > 0.018){
+          try { heroVideo.currentTime = nextTime; } catch(e) {}
+        }
+      }
+      return;
+    }
+    target = t * (FRAME_COUNT - 1);
     kick();
   }
+
+  // Start fallback loading only when the video cannot be used.
+  if(!heroVideo) loadFallbackFrames();
 
   // -----------------------------------------------------------
   // Timeline zones (fixed positions, no randomization)
