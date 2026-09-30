@@ -2,7 +2,7 @@
    Hero: full-resolution source-frame scroll sequence
    ========================================================= */
 
-.coat-track{position:relative;height:360vh;background:#0E0E0E;}
+.coat-track{position:relative;height:300vh;background:#0E0E0E;}
 .coat-stage{
   position:sticky;top:0;height:100vh;height:100dvh;width:100%;
   overflow:hidden;
