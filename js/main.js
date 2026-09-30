@@ -244,7 +244,18 @@
   navObserver.observe(track);
 
   // Areas of Care accordion — collapsed by default, one or many open at once
-  document.addEventListener("click", (event) => {\n    const focusBtn = event.target.closest("#focusBookingDate");\n    if(focusBtn){\n      const dateInput = document.getElementById("bookDateInput");\n      if(dateInput){\n        dateInput.scrollIntoView({behavior:"smooth",block:"center"});\n        setTimeout(() => dateInput.focus(), 320);\n      }\n    }\n  });\n\n  document.querySelectorAll(".care-item-head").forEach((btn) => {
+  document.addEventListener("click", (event) => {
+    const focusBtn = event.target.closest("#focusBookingDate");
+    if(focusBtn){
+      const dateInput = document.getElementById("bookDateInput");
+      if(dateInput){
+        dateInput.scrollIntoView({behavior:"smooth",block:"center"});
+        setTimeout(() => dateInput.focus(), 320);
+      }
+    }
+  });
+
+  document.querySelectorAll(".care-item-head").forEach((btn) => {
     btn.addEventListener("click", () => {
       const item = btn.closest(".care-item");
       const isOpen = item.classList.toggle("open");
