@@ -32,13 +32,13 @@
       return "You can use the Online Consultation section or call 7406886226 for clinic information.";
     }
     if(/where|location|hospital|address|mandya/.test(x)){
-      return "The website lists Dr. Amogh at Arogya Hospital, Mandya. Use the Visit section for directions.";
+      return "The website lists Dr. Amogh at Pragati Hospital, Mandya. Use the Visit section for directions.";
     }
     if(/treat|care|condition|disease|special/.test(x)){
       return "The website lists common General Medicine concerns including infections, headaches and dizziness, diabetes, blood pressure, digestive and liver concerns, respiratory problems and chronic health conditions. It also notes that this is not a complete list.";
     }
     if(/about|qualification|degree|experience/.test(x)){
-      return "The website currently lists Dr. Amogh G as MBBS, MD General Medicine, with 10+ years of experience, at Arogya Hospital, Mandya.";
+      return "The website currently lists Dr. Amogh G as MBBS, MD General Medicine, with 12+ years of experience, at Arogya Hospital, Mandya.";
     }
     if(/story|insight|article/.test(x)){
       return "Patient Stories and Insights contain patient-friendly information published through the website.";
@@ -77,17 +77,32 @@
     messages.scrollTop = messages.scrollHeight;
   }
 
+  let closeTimer = null;
+
+  function openAssistant(){
+    clearTimeout(closeTimer);
+    panel.hidden = false;
+    toggle.setAttribute("aria-expanded", "true");
+    requestAnimationFrame(() => {
+      document.getElementById("siteAssistant")?.classList.add("is-open", "chat-open");
+      input.focus();
+    });
+  }
+
+  function closeAssistant(){
+    const root = document.getElementById("siteAssistant");
+    root?.classList.remove("is-open", "chat-open");
+    toggle.setAttribute("aria-expanded", "false");
+    clearTimeout(closeTimer);
+    closeTimer = setTimeout(() => { panel.hidden = true; }, 240);
+  }
+
   toggle.addEventListener("click", () => {
-    const open = panel.hidden;
-    panel.hidden = !open;
-    toggle.setAttribute("aria-expanded", String(open));
-    if(open) input.focus();
+    if(panel.hidden) openAssistant();
+    else closeAssistant();
   });
 
-  close.addEventListener("click", () => {
-    panel.hidden = true;
-    toggle.setAttribute("aria-expanded", "false");
-  });
+  close.addEventListener("click", closeAssistant);
 
   form.addEventListener("submit", (e) => {
     e.preventDefault();
