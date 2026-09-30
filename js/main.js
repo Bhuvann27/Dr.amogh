@@ -34,6 +34,8 @@
   const frames = new Array(FRAME_COUNT).fill(null);
   const frameUrl = (i) => `assets/hero-sequence/frame_${String(i + 1).padStart(3, "0")}.webp`;
   let videoReady = false;
+  let targetVideoTime = 0;
+  let videoRaf = 0;
 
   // The reference interaction uses a true scroll-scrubbed frame sequence.
   // Keep the uploaded MP4 in the repo, but use the prepared frames for immediate,
