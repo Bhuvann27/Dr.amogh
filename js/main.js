@@ -30,76 +30,41 @@
   // The page never plays a video. Scroll position selects a prepared
   // WebP frame, which keeps the interaction deterministic and fast.
   // -----------------------------------------------------------
-  const FRAME_COUNT = 89;
+  const heroVideo = document.getElementById("heroVideo");
   const ROTATION_END = 0.44;
-  const canvas = document.getElementById("coatCanvas");
-  const ctx = canvas.getContext("2d");
-  const frames = new Array(FRAME_COUNT).fill(null);
-  const frameUrl = (i) => `assets/hero-sequence/frame_${String(i + 1).padStart(3, "0")}.webp`;
-  let target = 0, current = 0, rafId = 0, needsDraw = true, lastT = 0;
+  let videoDuration = 0;
+  let lastVideoTime = -1;
 
-  function loadFrame(i){
-    if(frames[i]) return Promise.resolve(frames[i]);
-    return new Promise((resolve) => {
-      const img = new Image();
-      img.decoding = "async";
-      img.onload = () => { frames[i] = img; needsDraw = true; kick(); resolve(img); };
-      img.onerror = () => resolve(null);
-      img.src = frameUrl(i);
-    });
+  // True scroll-scrubbed hero. The video never plays by itself.
+  if(heroVideo){
+    heroVideo.autoplay = false;
+    heroVideo.loop = false;
+    heroVideo.muted = true;
+    heroVideo.playsInline = true;
+    heroVideo.controls = false;
+    heroVideo.pause();
+
+    const ready = () => {
+      if(Number.isFinite(heroVideo.duration) && heroVideo.duration > 0){
+        videoDuration = heroVideo.duration;
+        heroVideo.currentTime = 0;
+        lastVideoTime = 0;
+      }
+    };
+    heroVideo.addEventListener("loadedmetadata", ready);
+    heroVideo.addEventListener("loadeddata", ready);
+    heroVideo.load();
   }
-
-  // First frame is loaded immediately so the hero never flashes blank.
-  loadFrame(0).then(() => {
-    for(let i = 1; i < FRAME_COUNT; i++) loadFrame(i);
-  });
-
-  function nearest(i){
-    for(let d = 0; d < FRAME_COUNT; d++){
-      if(frames[i - d]) return frames[i - d];
-      if(frames[i + d]) return frames[i + d];
-    }
-    return null;
-  }
-
-  function draw(){
-    const i = Math.max(0, Math.min(FRAME_COUNT - 1, Math.floor(current)));
-    const f = current - i;
-    const a = nearest(i);
-    if(!a) return;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.drawImage(a, 0, 0, canvas.width, canvas.height);
-    const b = i + 1 < FRAME_COUNT ? frames[i + 1] : null;
-    if(b && f > 0.04){
-      ctx.globalAlpha = f;
-      ctx.drawImage(b, 0, 0, canvas.width, canvas.height);
-      ctx.globalAlpha = 1;
-    }
-  }
-
-  function tick(t){
-    rafId = 0;
-    const dt = Math.min(64, t - (lastT || t));
-    lastT = t;
-    const diff = target - current;
-    if(Math.abs(diff) > 0.0015){
-      current += diff * (1 - Math.exp(-dt / 45));
-      needsDraw = true;
-    }else{
-      current = target;
-      lastT = 0;
-    }
-    if(needsDraw){ draw(); needsDraw = false; }
-    if(Math.abs(target - current) > 0.0015) rafId = requestAnimationFrame(tick);
-  }
-
-  function kick(){ if(!rafId) rafId = requestAnimationFrame(tick); }
 
   function renderRotation(p){
-    if(reduced) return;
+    if(reduced || !heroVideo || !videoDuration) return;
     const t = Math.max(0, Math.min(1, p / ROTATION_END));
-    target = t * (FRAME_COUNT - 1);
-    kick();
+    const next = t * videoDuration;
+    if(Math.abs(next - lastVideoTime) > 0.001){
+      lastVideoTime = next;
+      heroVideo.currentTime = next;
+      heroVideo.pause();
+    }
   }
 
   // -----------------------------------------------------------
