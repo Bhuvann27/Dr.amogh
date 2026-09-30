@@ -15,6 +15,7 @@
   padding:6vh 0 10vh;
 }
 .hero-atlas-source{display:none;}
+.hook-line{display:none;}
 .hero-frame-canvas{
   display:block;
   width:min(44vw,560px);
