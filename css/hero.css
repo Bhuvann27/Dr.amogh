@@ -20,8 +20,14 @@
   display:flex; align-items:center; justify-content:center;
   padding-bottom: 0;
 }
-.coat-imgwrap canvas,
-.coat-imgwrap .hero-video{ display:none; }
+.coat-imgwrap canvas{
+  display:block;
+  width:auto;
+  height:min(72vh, 780px);
+  max-width:92vw;
+  aspect-ratio:400 / 560;
+  object-fit:contain;
+}
 .coat-imgwrap .hero-video{ display:none; }
 
 /* fixed-position hook lines - one settles left, one settles right,
