@@ -1,6 +1,5 @@
 /* =========================================================
-   Hero: scroll-scrubbed cinematic coat video, then sequential doctor-identity reveal. Warm dark
-   backdrop matching the brand's reference motion piece.
+   Hero: deterministic scroll-controlled frame atlas
    ========================================================= */
 
 .coat-track{ position: relative; height: 460vh; background: #0E0E0E; }
@@ -8,30 +7,26 @@
   position: sticky; top: 0; height: 100vh; height: 100svh; width: 100%;
   overflow: hidden;
   background: radial-gradient(120% 90% at 50% 32%, #2E2C27 0%, #1A1916 55%, #0E0E0E 100%);
-
-  --hero-text:      #FCF8F0;
-  --hero-text-dim:  #CDC5B5;
-  --hero-accent:    #E0A24E;
-  --hero-shadow:    rgba(16,11,6,0.75);
+  --hero-text:#FCF8F0; --hero-text-dim:#CDC5B5; --hero-accent:#E0A24E; --hero-shadow:rgba(16,11,6,0.75);
 }
-
 .coat-imgwrap{
   position:absolute; inset:0;
-  display:flex; align-items:center; justify-content:flex-start;
-  padding: 7vh 0 12vh;
+  display:flex; align-items:center; justify-content:center;
+  padding:6vh 0 10vh;
 }
-.coat-imgwrap canvas{display:none;}
-.coat-imgwrap .hero-video{
+.hero-atlas-source{display:none;}
+.hero-frame-canvas{
   display:block;
-  width:min(52vw,560px);
-  height:72vh;
-  max-height:780px;
-  max-width:58vw;
-  aspect-ratio:9 / 16;
+  width:min(44vw,560px);
+  max-width:88vw;
+  height:auto;
+  max-height:82vh;
+  aspect-ratio:320 / 553;
   object-fit:contain;
-  object-position:left center;
+  object-position:center;
+  transform-origin:50% 50%;
+  image-rendering:auto;
 }
-.coat-imgwrap .hero-video{ display:block; }
 
 /* fixed-position hook lines - one settles left, one settles right,
    so the two moments in the rotation don't feel identical */
@@ -120,17 +115,16 @@
 }
 @media (prefers-reduced-motion: reduce){ .scroll-cue .stick{ animation: none; } }
 
-@media (max-width: 640px){
-  .coat-track{ height: 460vh; }
-  .coat-imgwrap{ padding: 0 0 4vh; align-items:center; justify-content:center; }
-  .coat-imgwrap canvas,
-  .coat-imgwrap .hero-video{ height: min(68vh, 760px); transform-origin: 50% 0; max-width: 94vw; }
-  .identity-block{ bottom: 5%; }
-  .hook-line{ width: min(78vw, 340px); top: 122px; }
-  #hook3{ width: min(90vw, 360px); }
-  #hook1{ left: 5%; }
-  #hook2{ right: 5%; }
-  #hook3{ left: 50%; }
+@media (max-width:640px){
+  .coat-track{height:460vh;}
+  .coat-imgwrap{padding:0;align-items:center;justify-content:center;}
+  .hero-frame-canvas{width:min(88vw,560px);max-width:88vw;max-height:82vh;height:auto;}
+  .identity-block{bottom:8%;width:92vw;}
+  .hook-line{top:17%;width:min(82vw,390px);}
+  #hook1{left:7%;}
+  #hook2{right:7%;}
+  #hook3{left:50%;}
+  .scroll-cue{bottom:4%;}
 }
 
 /* graceful fallback if the GSAP CDN doesn't load: a plain static hero
