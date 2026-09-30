@@ -44,6 +44,17 @@
         canvas.style.display = "none";
         heroVideo.style.display = "block";
         heroVideo.currentTime = 0;
+        heroVideo.autoplay = true;
+        heroVideo.loop = false;
+        heroVideo.muted = true;
+        const startPlayback = () => {
+          const p = heroVideo.play();
+          if(p && typeof p.catch === "function") p.catch(() => {});
+        };
+        startPlayback();
+        heroVideo.addEventListener("ended", () => {
+          heroVideo.pause();
+        }, {once:true});
       }
     });
     heroVideo.addEventListener("error", () => {
@@ -112,13 +123,9 @@
     const t = Math.max(0, Math.min(1, p / ROTATION_END));
     if(reduced) return;
     if(videoReady && heroVideo){
-      const duration = heroVideo.duration || 0;
-      if(duration){
-        const nextTime = t * Math.max(0, duration - 0.001);
-        if(Math.abs(heroVideo.currentTime - nextTime) > 0.018){
-          try { heroVideo.currentTime = nextTime; } catch(e) {}
-        }
-      }
+      // The cinematic video plays continuously. Scrolling now controls the
+      // hero reveal/identity timing instead of forcing the browser to seek
+      // through an MP4 on every scroll event.
       return;
     }
     target = t * (FRAME_COUNT - 1);
@@ -170,7 +177,7 @@
       onUpdate: (self) => {
         const p = self.progress;
 
-        renderRotation(Math.min(p, ID_ZONES.name[0]));
+        renderRotation(p);
 
         hook1.style.opacity = fadeWindow(p, HOOK1_WINDOW[0], HOOK1_WINDOW[1], 0.3);
         hook2.style.opacity = fadeWindow(p, HOOK2_WINDOW[0], HOOK2_WINDOW[1], 0.3);
@@ -227,6 +234,8 @@
       nav.classList.toggle("is-on-dark", onHero);
       if(mobileNav) mobileNav.classList.toggle("is-on-dark", onHero);
       if(floatingContact) floatingContact.classList.toggle("show", !onHero);
+      const siteAssistant = document.getElementById("siteAssistant");
+      if(siteAssistant) siteAssistant.classList.toggle("show", !onHero);
     });
   }, { threshold: 0.05 });
   navObserver.observe(track);
