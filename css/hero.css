@@ -21,15 +21,8 @@
   padding-bottom: 0;
 }
 .coat-imgwrap canvas,
-.coat-imgwrap .hero-video{
-  height: min(72vh, 780px);
-  width: auto;
-  max-width: 92vw;
-  aspect-ratio: 9 / 16;
-  display:block;
-  object-fit: contain;
-}
-.coat-imgwrap .hero-video{ display:block; }
+.coat-imgwrap .hero-video{ display:none; }
+.coat-imgwrap .hero-video{ display:none; }
 
 /* fixed-position hook lines - one settles left, one settles right,
    so the two moments in the rotation don't feel identical */
