@@ -23,51 +23,60 @@
   const coatImgWrap = document.getElementById("coatImgWrap");
 
   // -----------------------------------------------------------
-  // Hero video: scroll controls the actual video timeline.
-  // If the video is unavailable, fall back to the existing frame sequence.
+  // Hero: deterministic frame-by-frame scroll sequence.
+  // Scroll selects a prepared frame, so the browser never has to seek an MP4.
   // -----------------------------------------------------------
-  // -----------------------------------------------------------
-  // Hero: lightweight frame-by-frame scroll sequence.
-  // The page never plays a video. Scroll position selects a prepared
-  // WebP frame, which keeps the interaction deterministic and fast.
-  // -----------------------------------------------------------
-  const heroVideo = document.getElementById("heroVideo");
+  const heroCanvas = document.getElementById("heroCanvas");
+  const heroAtlasSource = document.getElementById("heroAtlasSource");
   const ROTATION_END = 0.44;
-  let videoDuration = 0;
-  let lastVideoTime = -1;
+  const FRAME_W = 320;
+  const FRAME_H = 553;
+  const FRAME_COLS = 10;
+  const FRAME_COUNT = 60;
+  let heroFrame = 0;
+  let heroAtlasReady = false;
 
-  // True scroll-scrubbed hero. The video never plays by itself.
-  if(heroVideo){
-    heroVideo.autoplay = false;
-    heroVideo.loop = false;
-    heroVideo.muted = true;
-    heroVideo.playsInline = true;
-    heroVideo.controls = false;
-    heroVideo.pause();
+  function sizeHeroCanvas(){
+    if(!heroCanvas) return;
+    const rect = heroCanvas.getBoundingClientRect();
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const w = Math.max(1, Math.round(rect.width * dpr));
+    const h = Math.max(1, Math.round(rect.height * dpr));
+    if(heroCanvas.width !== w || heroCanvas.height !== h){
+      heroCanvas.width = w; heroCanvas.height = h;
+    }
+    drawHeroFrame(heroFrame);
+  }
 
-    const ready = () => {
-      if(Number.isFinite(heroVideo.duration) && heroVideo.duration > 0){
-        videoDuration = heroVideo.duration;
-        heroVideo.currentTime = 0;
-        lastVideoTime = 0;
-      }
-    };
-    heroVideo.addEventListener("loadedmetadata", ready);
-    heroVideo.addEventListener("loadeddata", ready);
-    heroVideo.load();
+  function drawHeroFrame(index){
+    if(!heroCanvas || !heroAtlasReady) return;
+    heroFrame = Math.max(0, Math.min(FRAME_COUNT - 1, index));
+    const ctx = heroCanvas.getContext("2d");
+    const sx = (heroFrame % FRAME_COLS) * FRAME_W;
+    const sy = Math.floor(heroFrame / FRAME_COLS) * FRAME_H;
+    ctx.clearRect(0, 0, heroCanvas.width, heroCanvas.height);
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = "high";
+    ctx.drawImage(heroAtlasSource, sx, sy, FRAME_W, FRAME_H, 0, 0, heroCanvas.width, heroCanvas.height);
   }
 
   function renderRotation(p){
-    if(reduced || !heroVideo || !videoDuration) return;
+    if(reduced || !heroCanvas || !heroAtlasReady) return;
     const t = Math.max(0, Math.min(1, p / ROTATION_END));
-    const next = t * videoDuration;
-    if(Math.abs(next - lastVideoTime) > 0.001){
-      lastVideoTime = next;
-      heroVideo.currentTime = next;
-      heroVideo.pause();
-    }
+    drawHeroFrame(Math.round(t * (FRAME_COUNT - 1)));
   }
 
+  if(heroAtlasSource){
+    heroAtlasSource.addEventListener("load", () => {
+      heroAtlasReady = true;
+      sizeHeroCanvas();
+    }, {once:true});
+    if(heroAtlasSource.complete){
+      heroAtlasReady = true;
+      sizeHeroCanvas();
+    }
+  }
+  window.addEventListener("resize", sizeHeroCanvas, {passive:true});
   // -----------------------------------------------------------
   // Timeline zones (fixed positions, no randomization)
   // -----------------------------------------------------------
@@ -131,9 +140,10 @@
         // phones: the coat is large, so lift and shrink it a little as the
         // doctor's name and details appear underneath it
         const settle = Math.max(0, Math.min(1, (p - 0.44) / 0.06));
-        if(heroVideo){
-          heroVideo.style.transform = mobileMQ.matches
-            ? `translateY(${-settle * 8}vh) scale(${1 - settle * 0.28})` : "";
+        if(heroCanvas){
+          heroCanvas.style.transform = mobileMQ.matches
+            ? "translateY(" + (-settle * 8) + "vh) scale(" + (1 - settle * 0.28) + ")"
+            : "";
         }
 
         // release: whole hero fades/scales away into the normal page
