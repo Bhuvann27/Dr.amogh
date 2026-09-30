@@ -9,6 +9,7 @@
   const scrollCue = document.getElementById("scrollCue");
   const nav = document.getElementById("siteNav");
   const mobileNav = document.getElementById("mobileNav");
+  const mobileMQ = window.matchMedia("(max-width: 640px)");
 
   const hook1 = document.getElementById("hook1");
   const hook2 = document.getElementById("hook2");
@@ -130,8 +131,10 @@
         // phones: the coat is large, so lift and shrink it a little as the
         // doctor's name and details appear underneath it
         const settle = Math.max(0, Math.min(1, (p - 0.44) / 0.06));
-        canvas.style.transform = mobileMQ.matches
-          ? `translateY(${-settle * 8}vh) scale(${1 - settle * 0.28})` : "";
+        if(heroVideo){
+          heroVideo.style.transform = mobileMQ.matches
+            ? `translateY(${-settle * 8}vh) scale(${1 - settle * 0.28})` : "";
+        }
 
         // release: whole hero fades/scales away into the normal page
         const release = p > RELEASE_START ? (p - RELEASE_START) / (1 - RELEASE_START) : 0;
@@ -148,7 +151,7 @@
     // the doctor's identity immediately, so the essential information
     // is never hidden behind a script dependency.
     track.classList.add("no-js");
-    target = current = 0; needsDraw = true; kick();
+    // Keep the static hero visible when GSAP is unavailable.
     [idName, idQual, idExp, idHosp].forEach((el) => {
       el.style.opacity = 1; el.style.transform = "none";
     });
