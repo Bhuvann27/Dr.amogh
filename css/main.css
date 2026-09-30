@@ -434,7 +434,7 @@ section{ position: relative; }
 /* Clinic map + website assistant */
 .clinic-map{width:100%;min-height:280px;border-radius:14px;overflow:hidden;border:1px solid var(--line)}
 .map-link{display:inline-block;margin-top:10px;font-weight:700;color:var(--text-dim)}
-.site-assistant{position:fixed;right:max(18px,env(safe-area-inset-right,0px));bottom:calc(max(18px,env(safe-area-inset-bottom,0px)) + 114px);z-index:80;opacity:0;transform:translateY(14px) scale(.92);pointer-events:none;transition:opacity .35s var(--ease-out),transform .35s var(--ease-out)}
+.site-assistant{position:fixed;right:max(18px,env(safe-area-inset-right,0px));bottom:calc(max(18px,env(safe-area-inset-bottom,0px)) + 138px);z-index:80;opacity:0;transform:translateY(14px) scale(.92);pointer-events:none;transition:opacity .35s var(--ease-out),transform .35s var(--ease-out)}
 .site-assistant.show{opacity:1;transform:none;pointer-events:auto}
 .assistant-toggle{width:50px;height:50px;padding:0;border:0;border-radius:50%;background:var(--orange);color:#fff;font:inherit;font-weight:700;box-shadow:0 8px 24px rgba(0,0,0,.2);cursor:pointer;display:grid;place-items:center}
 .assistant-bot-icon{font-size:1.45rem;line-height:1;color:#fff;display:grid;place-items:center}
@@ -452,7 +452,7 @@ section{ position: relative; }
 .assistant-form input{min-width:0;flex:1;border:0;outline:0;padding:9px;font:inherit}
 .assistant-form button{border:0;background:var(--orange);color:#fff;border-radius:9px;padding:8px 11px;font-weight:700;cursor:pointer}
 @media(max-width:640px){
-  .site-assistant{right:12px;bottom:calc(12px + env(safe-area-inset-bottom) + 110px);bottom:calc(132px + env(safe-area-inset-bottom))}
+  .site-assistant{right:12px;bottom:calc(12px + env(safe-area-inset-bottom) + 138px);bottom:calc(132px + env(safe-area-inset-bottom))}
   .assistant-toggle{width:48px;height:48px}
   .assistant-panel{right:0;width:calc(100vw - 24px);height:min(540px,calc(100dvh - 92px));max-height:calc(100dvh - 92px)}
 }
