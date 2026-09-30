@@ -35,35 +35,16 @@
   const frameUrl = (i) => `assets/hero-sequence/frame_${String(i + 1).padStart(3, "0")}.webp`;
   let videoReady = false;
 
+  // The reference interaction uses a true scroll-scrubbed frame sequence.
+  // Keep the uploaded MP4 in the repo, but use the prepared frames for immediate,
+  // deterministic mobile scrubbing with no delayed video seeks.
   if(heroVideo){
-    heroVideo.src = "assets/hero/dr-amogh-hero.mp4";
-    heroVideo.load();
-    heroVideo.addEventListener("loadedmetadata", () => {
-      videoReady = Number.isFinite(heroVideo.duration) && heroVideo.duration > 0;
-      if(videoReady){
-        canvas.style.display = "none";
-        heroVideo.style.display = "block";
-        heroVideo.currentTime = 0;
-        heroVideo.autoplay = true;
-        heroVideo.loop = false;
-        heroVideo.muted = true;
-        const startPlayback = () => {
-          const p = heroVideo.play();
-          if(p && typeof p.catch === "function") p.catch(() => {});
-        };
-        startPlayback();
-        heroVideo.addEventListener("ended", () => {
-          heroVideo.pause();
-        }, {once:true});
-      }
-    });
-    heroVideo.addEventListener("error", () => {
-      videoReady = false;
-      heroVideo.style.display = "none";
-      canvas.style.display = "block";
-      loadFallbackFrames();
-    });
+    heroVideo.pause();
+    heroVideo.removeAttribute("src");
+    heroVideo.style.display = "none";
+    canvas.style.display = "block";
   }
+  loadFallbackFrames();
 
   function loadFrame(i){
     const url = frameUrl(i);
@@ -122,18 +103,13 @@
   function renderRotation(p){
     const t = Math.max(0, Math.min(1, p / ROTATION_END));
     if(reduced) return;
-    if(videoReady && heroVideo){
-      // The cinematic video plays continuously. Scrolling now controls the
-      // hero reveal/identity timing instead of forcing the browser to seek
-      // through an MP4 on every scroll event.
-      return;
-    }
     target = t * (FRAME_COUNT - 1);
     kick();
   }
 
-  // Start fallback loading only when the video cannot be used.
-  if(!heroVideo) loadFallbackFrames();
+  // Frames are the primary scroll source so every scroll position has an
+  // immediately renderable visual state. The MP4 remains available as the
+  // source asset but is not used as an autoplaying element.
 
   // -----------------------------------------------------------
   // Timeline zones (fixed positions, no randomization)
@@ -177,7 +153,7 @@
       onUpdate: (self) => {
         const p = self.progress;
 
-        renderRotation(p);
+        renderRotation(Math.min(p, ID_ZONES.name[0]));
 
         hook1.style.opacity = fadeWindow(p, HOOK1_WINDOW[0], HOOK1_WINDOW[1], 0.3);
         hook2.style.opacity = fadeWindow(p, HOOK2_WINDOW[0], HOOK2_WINDOW[1], 0.3);
