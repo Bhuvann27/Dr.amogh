@@ -135,13 +135,13 @@
   const HOOK2_WINDOW = [0.15, 0.27];
   const HOOK3_WINDOW = [0.33, 0.43];
   const ID_ZONES = {
-    name: [0.50, 0.56],
-    qual: [0.56, 0.62],
-    exp:  [0.62, 0.68],
-    hosp: [0.68, 0.74],
-    photo:[0.74, 0.81],
+    name: [0.62, 0.66],
+    qual: [0.64, 0.68],
+    exp:  [0.66, 0.70],
+    hosp: [0.68, 0.71],
+    photo:[0.69, 0.72],
   };
-  const RELEASE_START = 0.86;
+  const RELEASE_START = 0.82;
 
   function fadeWindow(p, start, end, fadeFrac){
     const span = end - start;
