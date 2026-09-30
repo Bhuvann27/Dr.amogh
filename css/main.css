@@ -156,6 +156,16 @@ section[id]{ scroll-margin-top: 84px; }
   .site-nav .nav-links{ display:none; }
 }
 
+
+.site-nav.hero-cinematic,.mobile-nav-row.hero-cinematic{
+  opacity:0;
+  visibility:hidden;
+  pointer-events:none;
+  transform:translateY(-10px);
+}
+.site-nav,.mobile-nav-row{
+  transition:opacity .28s ease,visibility .28s ease,transform .28s ease,background-color .3s,border-color .3s;
+}
 /* =========================================================
    Mobile nav row — horizontal swipeable, no hamburger
    ========================================================= */
