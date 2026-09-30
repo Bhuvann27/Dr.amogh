@@ -26,92 +26,49 @@
   // If the video is unavailable, fall back to the existing frame sequence.
   // -----------------------------------------------------------
   const heroVideo = document.getElementById("heroVideo");
-  const FRAME_COUNT = 89;
   const ROTATION_END = 0.44;
-  const canvas = document.getElementById("coatCanvas");
-  const ctx = canvas.getContext("2d");
-  const mobileMQ = window.matchMedia("(max-width: 640px)");
-  const frames = new Array(FRAME_COUNT).fill(null);
-  const frameUrl = (i) => `assets/hero-sequence/frame_${String(i + 1).padStart(3, "0")}.webp`;
-  let videoReady = false;
-  let targetVideoTime = 0;
-  let videoRaf = 0;
 
-  // The reference interaction uses a true scroll-scrubbed frame sequence.
-  // Keep the uploaded MP4 in the repo, but use the prepared frames for immediate,
-  // deterministic mobile scrubbing with no delayed video seeks.
+  // The MP4 is the actual cinematic hero asset. It is deliberately paused:
+  // scroll position controls currentTime, so the page never behaves like a
+  // normal autoplaying video.
+  let videoDuration = 0;
+  let lastVideoTime = -1;
+
   if(heroVideo){
     heroVideo.pause();
-    heroVideo.removeAttribute("src");
-    heroVideo.style.display = "none";
-    canvas.style.display = "block";
-  }
-  loadFallbackFrames();
+    heroVideo.autoplay = false;
+    heroVideo.loop = false;
+    heroVideo.muted = true;
+    heroVideo.playsInline = true;
+    heroVideo.controls = false;
+    heroVideo.preload = "auto";
+    heroVideo.style.display = "block";
 
-  function loadFrame(i){
-    const url = frameUrl(i);
-    const done = (bmp) => { frames[i] = bmp; needsDraw = true; kick(); };
-    const viaImage = () => new Promise((res) => {
-      const im = new Image();
-      im.onload = () => { done(im); res(); };
-      im.onerror = () => res();
-      im.src = url;
-    });
-    if(window.createImageBitmap && location.protocol !== "file:"){
-      return fetch(url).then((r) => r.blob()).then((b) => createImageBitmap(b)).then(done).catch(viaImage);
-    }
-    return viaImage();
-  }
+    const syncDuration = () => {
+      if(Number.isFinite(heroVideo.duration) && heroVideo.duration > 0){
+        videoDuration = heroVideo.duration;
+        heroVideo.currentTime = 0;
+      }
+    };
 
-  function loadFallbackFrames(){
-    if(frames[0]) return;
-    loadFrame(0).then(() => {
-      for(let i = 1; i < FRAME_COUNT; i++) loadFrame(i);
-    });
+    heroVideo.addEventListener("loadedmetadata", syncDuration, {once:true});
+    heroVideo.addEventListener("loadeddata", syncDuration, {once:true});
+    heroVideo.load();
   }
-
-  let target = 0, current = 0, needsDraw = true, rafId = 0, lastT = 0;
-  function draw(){
-    const i = Math.max(0, Math.min(FRAME_COUNT - 1, Math.floor(current)));
-    const f = current - i;
-    const a = nearest(i);
-    if(!a) return;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.drawImage(a, 0, 0);
-    const b = i + 1 < FRAME_COUNT ? frames[i + 1] : null;
-    if(b && f > 0.03){ ctx.globalAlpha = f; ctx.drawImage(b, 0, 0); ctx.globalAlpha = 1; }
-  }
-
-  function nearest(i){
-    for(let d = 0; d < FRAME_COUNT; d++){
-      if(frames[i - d]) return frames[i - d];
-      if(frames[i + d]) return frames[i + d];
-    }
-    return null;
-  }
-
-  function tick(t){
-    rafId = 0;
-    const dt = Math.min(64, t - (lastT || t)); lastT = t;
-    const diff = target - current;
-    if(Math.abs(diff) > 0.002){ current += diff * (1 - Math.exp(-dt / 70)); needsDraw = true; }
-    else if(current !== target){ current = target; needsDraw = true; }
-    if(needsDraw){ draw(); needsDraw = false; }
-    if(Math.abs(target - current) > 0.002) rafId = requestAnimationFrame(tick);
-    else lastT = 0;
-  }
-  function kick(){ if(!rafId) rafId = requestAnimationFrame(tick); }
 
   function renderRotation(p){
-    const t = Math.max(0, Math.min(1, p / ROTATION_END));
-    if(reduced) return;
-    target = t * (FRAME_COUNT - 1);
-    kick();
-  }
+    if(reduced || !heroVideo || !videoDuration) return;
 
-  // Frames are the primary scroll source so every scroll position has an
-  // immediately renderable visual state. The MP4 remains available as the
-  // source asset but is not used as an autoplaying element.
+    const t = Math.max(0, Math.min(1, p / ROTATION_END));
+    const nextTime = t * videoDuration;
+
+    // Keep the video exactly where the user's scroll position says it should be.
+    // No autoplay and no smoothing that would make the frame lag behind scrolling.
+    if(Math.abs(nextTime - lastVideoTime) > 0.001){
+      lastVideoTime = nextTime;
+      try { heroVideo.currentTime = nextTime; } catch(e) {}
+    }
+  }
 
   // -----------------------------------------------------------
   // Timeline zones (fixed positions, no randomization)
