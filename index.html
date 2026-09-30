@@ -11,6 +11,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/main.css">
 <link rel="stylesheet" href="css/hero.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <style>
 .about-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(300px,.75fr);gap:48px;align-items:start}
 .about-credentials{display:grid;gap:12px}
@@ -365,8 +366,10 @@
         </div>
       </div>
       <div class="contact-map-note">
-        <p style="margin:0 0 10px; font-family:var(--font-display); font-weight:700; font-size:1.1rem;">Before you visit</p>
-        <p class="callout" style="border-left:none; padding-left:0;">
+        <p style="margin:0 0 10px; font-family:var(--font-display); font-weight:700; font-size:1.1rem;">Find the hospital</p>
+        <div id="clinicMap" class="clinic-map" aria-label="Map showing Arogya Hospital, Mandya"></div>
+        <a class="map-link" href="https://www.google.com/maps/search/?api=1&query=Arogya+Hospital+Mandya" target="_blank" rel="noopener">Open in Google Maps &rarr;</a>
+        <p class="callout" style="border-left:none; padding-left:0; margin-top:18px;">
           If your concern isn't urgent, calling ahead helps the clinic plan your visit.
           If your symptoms are sudden or severe, seek immediate medical attention.
         </p>
@@ -407,6 +410,21 @@
   </div>
 </footer>
 
+<!-- website assistant -->
+<div class="site-assistant" id="siteAssistant">
+  <button class="assistant-toggle" id="assistantToggle" type="button" aria-expanded="false" aria-controls="assistantPanel">Ask about the practice</button>
+  <div class="assistant-panel" id="assistantPanel" hidden>
+    <div class="assistant-head"><strong>Dr. Amogh's website assistant</strong><button id="assistantClose" type="button" aria-label="Close">&times;</button></div>
+    <div class="assistant-messages" id="assistantMessages">
+      <div class="assistant-msg bot">I can help you find information about Dr. Amogh, areas of care, patient insights, appointments and the hospital. I can't diagnose symptoms.</div>
+    </div>
+    <div class="assistant-suggestions" id="assistantSuggestions">
+      <button type="button">What does Dr. Amogh treat?</button><button type="button">How do I book?</button><button type="button">Where is the hospital?</button>
+    </div>
+    <form class="assistant-form" id="assistantForm"><input id="assistantInput" autocomplete="off" placeholder="Ask a question…"><button type="submit">Send</button></form>
+  </div>
+</div>
+
 <!-- floating contact — appears only once the hero has fully scrolled past -->
 <div class="floating-contact" id="floatingContact">
   <a class="fc-whatsapp" href="https://wa.me/917406886226?text=Hello%20Dr.%20Amogh%2C%20I%20have%20a%20question." target="_blank" rel="noopener" aria-label="Message on WhatsApp">
@@ -422,6 +440,9 @@
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="js/site-assistant.js"></script>
+<script src="js/clinic-map.js"></script>
 <script src="js/supabase-config.js"></script>
 <script src="js/booking-db.js"></script>
 <script src="js/main.js"></script>
