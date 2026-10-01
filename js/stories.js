@@ -133,6 +133,7 @@
 
     if(window.gsap && window.ScrollTrigger){
       gsap.registerPlugin(ScrollTrigger);
+      ScrollTrigger.config({ignoreMobileResize:true});
       const n = pairEls.length;
       const step = 1 / n;
 
@@ -140,41 +141,45 @@
       // The previous question can only fade toward the next one, so it can
       // never disappear and then reappear later in the sequence.
       function renderConversation(progress){
-        // Six dialogue frames produce five transitions. Mapping to n-1 keeps
-        // the final frame at 100% progress instead of snapping back to frame 06.
+        // The scroll position maps directly to the story sequence. Each
+        // question stays completely readable, then crossfades only around
+        // the exact handoff point. No delayed scrub and no jumpy replacement.
         const position = Math.max(0, Math.min(n - 1, progress * (n - 1)));
-        const active = Math.min(n - 1, Math.floor(position));
-        const local = position - active;
-        const fadeStart = 0.62;
-        const blendT = Math.max(0, Math.min(1, (local - fadeStart) / (1 - fadeStart)));
-        const blend = blendT * blendT * (3 - 2 * blendT);
+        const transition = 0.28;
+        const nearest = Math.round(position);
+        const distance = Math.abs(position - nearest);
 
         pairEls.forEach((el,i) => {
-          let opacity = 0;
-          let y = 8;
-
-          if(i === active){
-            opacity = 1 - blend;
-            y = -8 * blend;
-          }else if(i === active + 1 && active < n - 1){
-            opacity = blend;
-            y = 8 * (1 - blend);
-          }
-
-          el.style.opacity = opacity;
-          el.style.transform = "translate(-50%, calc(-50% + " + y + "px))";
-          el.style.pointerEvents = opacity > 0.5 ? "auto" : "none";
+          el.style.opacity = "0";
+          el.style.transform = "translate(-50%, -50%)";
+          el.style.pointerEvents = "none";
         });
 
+        if(distance < transition / 2 && nearest > 0 && nearest < n - 1){
+          if(position < nearest){
+            const t = (position - (nearest - transition / 2)) / (transition / 2);
+            pairEls[nearest - 1].style.opacity = String(1 - t);
+            pairEls[nearest].style.opacity = String(t);
+          }else{
+            const t = (position - nearest) / (transition / 2);
+            pairEls[nearest].style.opacity = String(1 - t);
+            pairEls[nearest + 1].style.opacity = String(t);
+          }
+        }else{
+          const active = Math.max(0, Math.min(n - 1, nearest));
+          pairEls[active].style.opacity = "1";
+          pairEls[active].style.pointerEvents = "auto";
+        }
+
+        const active = Math.max(0, Math.min(n - 1, nearest));
         dots.forEach((d,i) => d.classList.toggle("active", i === active));
         if(progressNum) progressNum.textContent = String(active + 1).padStart(2,"0") + " / " + totalStr;
       }
-
       ScrollTrigger.create({
         trigger: track,
         start: "top top",
         end: "bottom bottom",
-        scrub: 0.22,
+        scrub: true,
         onUpdate: self => renderConversation(self.progress),
         onRefresh: self => renderConversation(self.progress)
       });
