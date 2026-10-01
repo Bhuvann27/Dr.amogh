@@ -47,10 +47,13 @@
 
   const STEP_RENDERERS = {
     date: () => `
-      <div class="booking-step">
+      <div class="booking-step booking-date-step">
         <div class="booking-step-label">STEP 1 &middot; CHOOSE A DATE</div>
-        <input type="date" class="field-input" id="bookDateInput" min="${todayISO()}" max="${maxDateISO()}" value="${esc(state.dateISO)}">
-        <button type="button" class="btn btn-primary" id="bookDateNext" style="margin-top:16px;" ${state.dateISO ? "" : "disabled"}>See available times</button>
+        <label class="date-picker-field" for="bookDateInput">
+          <span class="date-picker-text">${state.dateISO ? esc(formatDateHuman(state.dateISO)) : "Click here to choose a date"}</span>
+          <input type="date" id="bookDateInput" min="${todayISO()}" max="${maxDateISO()}" value="${esc(state.dateISO)}" aria-label="Choose consultation date">
+        </label>
+        <p class="date-picker-hint">Select a date to see available consultation times.</p>
       </div>`,
 
     slot: () => `
@@ -129,9 +132,6 @@
       const input = document.getElementById("bookDateInput");
       input.addEventListener("change", () => {
         state.dateISO = input.value;
-        document.getElementById("bookDateNext").disabled = !state.dateISO;
-      });
-      document.getElementById("bookDateNext").addEventListener("click", () => {
         if(!state.dateISO) return;
         state.step = "slot";
         render();
