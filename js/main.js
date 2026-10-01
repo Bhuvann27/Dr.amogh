@@ -29,10 +29,10 @@
   // starts on the first bright frame after the opening hook.
   // -----------------------------------------------------------
   const heroCanvas = document.getElementById("heroCanvas");
-  const ROTATION_END = 0.92;
+  const ROTATION_END = 0.96;
   const FRAME_W = 720;
   const FRAME_H = 1280;
-  const FRAME_COUNT = 149;
+  const FRAME_COUNT = 193;
   const FRAME_DIR = "assets/hero-sequence-hires/";
   const heroFrames = new Array(FRAME_COUNT);
   let heroFrame = 0;
@@ -135,11 +135,11 @@
   const HOOK2_WINDOW = [0.18, 0.32];
   const HOOK3_WINDOW = [0.36, 0.54];
   const ID_ZONES = {
-    name: [0.70, 0.75],
-    qual: [0.73, 0.78],
-    exp:  [0.76, 0.81],
-    hosp: [0.79, 0.84],
-    photo:[0.82, 0.88],
+    name: [0.64, 0.69],
+    qual: [0.67, 0.72],
+    exp:  [0.70, 0.75],
+    hosp: [0.73, 0.78],
+    photo:[0.76, 0.81],
   };
   const RELEASE_START = 1.01;
 
@@ -152,11 +152,18 @@
     if(p > fadeOut) return 1 - (p - fadeOut) / (end - fadeOut);
     return 1;
   }
-  // identity lines fade in and STAY visible once shown (no fade-out until release)
-  function holdFadeIn(p, start, end){
-    if(p < start) return 0;
-    if(p > end) return 1;
-    return (p - start) / (end - start);
+  // Identity appears over the closing coat, then clears before the coat lifts away.
+  // This keeps the final source motion itself as the visual payoff.
+  function identityFade(p, start, end, fadeOutStart=0.82, fadeOutEnd=0.88){
+    let op = 0;
+    if(p >= start){
+      op = p >= end ? 1 : (p - start) / (end - start);
+    }
+    if(p > fadeOutStart){
+      const out = Math.max(0, Math.min(1, (p - fadeOutStart) / (fadeOutEnd - fadeOutStart)));
+      op *= 1 - out;
+    }
+    return op;
   }
 
   if(window.gsap && window.ScrollTrigger){
@@ -176,11 +183,11 @@
         hook2.style.opacity = fadeWindow(p, HOOK2_WINDOW[0], HOOK2_WINDOW[1], 0.3);
         if(hook3) hook3.style.opacity = fadeWindow(p, HOOK3_WINDOW[0], HOOK3_WINDOW[1], 0.3);
 
-        const nameOp = holdFadeIn(p, ID_ZONES.name[0], ID_ZONES.name[1]);
-        const qualOp = holdFadeIn(p, ID_ZONES.qual[0], ID_ZONES.qual[1]);
-        const expOp  = holdFadeIn(p, ID_ZONES.exp[0], ID_ZONES.exp[1]);
-        const hospOp = holdFadeIn(p, ID_ZONES.hosp[0], ID_ZONES.hosp[1]);
-        const photoOp = holdFadeIn(p, ID_ZONES.photo[0], ID_ZONES.photo[1]);
+        const nameOp = identityFade(p, ID_ZONES.name[0], ID_ZONES.name[1]);
+        const qualOp = identityFade(p, ID_ZONES.qual[0], ID_ZONES.qual[1]);
+        const expOp  = identityFade(p, ID_ZONES.exp[0], ID_ZONES.exp[1]);
+        const hospOp = identityFade(p, ID_ZONES.hosp[0], ID_ZONES.hosp[1]);
+        const photoOp = identityFade(p, ID_ZONES.photo[0], ID_ZONES.photo[1]);
 
         idName.style.opacity = nameOp; idName.style.transform = `translateY(${(1-nameOp)*10}px)`;
         idQual.style.opacity = qualOp; idQual.style.transform = `translateY(${(1-qualOp)*10}px)`;
@@ -201,9 +208,10 @@
         const release = 0;
         coatImgWrap.style.opacity = 1;
         coatImgWrap.style.transform = "none";
-        identityBlock.style.opacity = 1;
+        const identityVisible = Math.max(nameOp, qualOp, expOp, hospOp, photoOp);
+        identityBlock.style.opacity = identityVisible;
 
-        const heroFinished = p >= 0.92;
+        const heroFinished = p >= 0.96;
         heroNavs.forEach(el => el.classList.toggle("hero-cinematic", !heroFinished));
         if(identityBlock){
           const identityProgress = Math.max(0, Math.min(1, (p - 0.67) / 0.13));
