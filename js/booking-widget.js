@@ -15,8 +15,18 @@
     error: "",
   };
 
-  function todayISO(){ const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0,10); }
-  function maxDateISO(){ const d = new Date(); d.setDate(d.getDate() + 90); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0,10); }
+  // Booking dates use the clinic timezone, Asia/Kolkata.
+  function indiaDateParts(){
+    const parts=new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Kolkata",year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",hourCycle:"h23"}).formatToParts(new Date());
+    return Object.fromEntries(parts.filter(p=>p.type!=="literal").map(p=>[p.type,p.value]));
+  }
+  function todayISO(){const p=indiaDateParts();return `${p.year}-${p.month}-${p.day}`;}
+  function addDaysISO(iso,days){const d=new Date(iso+"T00:00:00Z");d.setUTCDate(d.getUTCDate()+days);return d.toISOString().slice(0,10);}
+  function maxDateISO(){return addDaysISO(todayISO(),90);}
+  function isValidBookingDate(iso){
+    if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(iso))return false;
+    return iso>=todayISO()&&iso<=maxDateISO();
+  }
   function formatDateHuman(iso){
     const d = new Date(iso + "T00:00:00");
     return d.toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long" });
@@ -131,9 +141,16 @@
     if(state.step === "date"){
       const input = document.getElementById("bookDateInput");
       input.addEventListener("change", () => {
-        state.dateISO = input.value;
-        if(!state.dateISO) return;
-        state.step = "slot";
+        state.dateISO=input.value;
+        if(!state.dateISO)return;
+        if(!isValidBookingDate(state.dateISO)){
+          state.dateISO="";
+          state.error="Please choose a date from today onward.";
+          render();
+          return;
+        }
+        state.error="";
+        state.step="slot";
         render();
         loadSlots();
       });
@@ -180,6 +197,14 @@
   async function submitBooking(){
     const btn = document.getElementById("bookSubmit");
     btn.disabled = true; btn.textContent = "Sending\u2026";
+
+    if(!isValidBookingDate(state.dateISO)){
+      state.error="That date is no longer valid. Please choose today or a future date.";
+      state.step="date";
+      render();
+      return;
+    }
+
     try {
       await window.BookingDB.requestAppointment({
         name: state.name.trim(), phone: state.phone.trim(), email: state.email.trim(),
