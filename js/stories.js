@@ -42,6 +42,7 @@
   document.getElementById("storyIntro").textContent = story.intro;
 
   const pillsWrap = document.getElementById("storyPills");
+  pillsWrap.innerHTML = "";
   stories.forEach((s, storyIndex) => {
     const a = document.createElement("a");
     a.href = `stories.html?story=${s.slug}`;
@@ -52,7 +53,9 @@
   });
 
   const pairsWrap = document.getElementById("convPairs");
+  pairsWrap.innerHTML = "";
   const counterWrap = document.getElementById("convCounter");
+  counterWrap.innerHTML = "";
   const pairEls = [];
   const OFFSETS = [
     { top: "42%", left: "50%" }, { top: "46%", left: "50%" },
