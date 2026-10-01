@@ -128,7 +128,9 @@
     }
 
     const track = document.getElementById("convTrack");
-    const vhPerPair = 110;
+    // Keep each exchange readable, but don't make the visitor scroll through
+    // a huge pinned track just to move past one conversation card.
+    const vhPerPair = 68;
     track.style.height = Math.max(vhPerPair * pairEls.length, 320) + "vh";
 
     if(window.gsap && window.ScrollTrigger){
