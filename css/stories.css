@@ -245,3 +245,41 @@
 #convPairs .conv-pair:first-child{
   opacity:1;
 }
+
+/* =========================================================
+   Hard fallback: stories page must never render as a blank canvas.
+   ========================================================= */
+.patient-stories-page .reveal{
+  opacity:1!important;
+  transform:none!important;
+  visibility:visible!important;
+}
+.patient-stories-page #convPairs .conv-fallback-pair{
+  opacity:1!important;
+  visibility:visible!important;
+}
+.patient-stories-page .conv-fallback-pair .q,
+.patient-stories-page .conv-fallback-pair .a{
+  display:block;
+}
+
+/* Both homepage patient-story cards intentionally use the same dark,
+   high-contrast treatment so they read as one clickable story collection. */
+.section-stories-focus .story-card,
+.section-stories-focus .story-card-primary,
+.section-stories-focus .story-card-secondary{
+  background:var(--ink)!important;
+  color:var(--paper)!important;
+  border-color:rgba(251,249,244,.12)!important;
+}
+.section-stories-focus .story-card .quote,
+.section-stories-focus .story-card .desc,
+.section-stories-focus .story-card .story-kicker,
+.section-stories-focus .story-card .story-cta{
+  color:var(--paper)!important;
+}
+.section-stories-focus .story-card:hover{
+  background:#211C18!important;
+  border-color:var(--orange)!important;
+  transform:translateY(-4px);
+}
