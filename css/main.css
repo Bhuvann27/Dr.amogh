@@ -1944,3 +1944,86 @@ section{ position: relative; }
   .review-line{grid-template-columns:86px minmax(0,1fr);font-size:.88rem;}
   .review-line strong{text-align:right;}
 }
+
+
+/* Consultation form text visibility and mobile layout correction */
+#consult .booking-widget,
+#consult .booking-widget .booking-step,
+#consult .booking-widget label,
+#consult .booking-widget .field-group label,
+#consult .booking-widget .booking-step-context,
+#consult .booking-widget .review-line,
+#consult .booking-widget .review-line strong,
+#consult .booking-widget .review-card{
+  color:var(--ink);
+}
+#consult .booking-widget .field-input{
+  color:var(--ink);
+  background:var(--paper);
+  -webkit-text-fill-color:var(--ink);
+}
+#consult .booking-widget .field-input::placeholder{
+  color:var(--text-dim);
+  opacity:1;
+}
+#consult .booking-widget .booking-selection strong{
+  color:var(--ink);
+}
+#consult .booking-widget .review-card-label,
+#consult .booking-widget .booking-selection-label{
+  color:var(--orange-deep);
+}
+#consult .booking-widget .review-line span{
+  color:var(--text-dim);
+}
+#consult .booking-widget .review-note{
+  color:var(--ink);
+}
+#consult .booking-widget .review-note p{
+  color:var(--text-dim);
+}
+#consult .booking-widget .optional-label{
+  color:var(--text-dim);
+}
+#consult .booking-widget .booking-error,
+#consult .booking-widget .booking-error-text{
+  color:#8f2f24;
+}
+#consult .booking-highlight{
+  display:grid;
+  grid-template-columns:1fr auto;
+  grid-template-areas:
+    "kicker meta"
+    "title meta";
+  align-items:center;
+  gap:4px 18px;
+}
+#consult .booking-highlight>span{grid-area:kicker;}
+#consult .booking-highlight>strong{
+  grid-area:title;
+  margin:0;
+  color:var(--ink);
+}
+#consult .booking-highlight>div{
+  grid-area:meta;
+  margin:0;
+  align-self:center;
+}
+@media(max-width:780px){
+  #consult .booking-highlight{
+    grid-template-columns:1fr;
+    grid-template-areas:
+      "kicker"
+      "title"
+      "meta";
+    gap:5px;
+  }
+  #consult .booking-highlight>div{
+    justify-self:start;
+  }
+  #consult .booking-widget .field-group label{
+    display:block;
+    color:var(--ink);
+    margin-bottom:7px;
+  }
+}
