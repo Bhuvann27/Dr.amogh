@@ -37,14 +37,20 @@
 <header class="story-header">
   <div class="container">
     <a href="index.html" class="back-link reveal">&larr; Back to home</a>
-    <span class="eyebrow reveal">PATIENT STORY</span>
-    <h1 id="storyTitle">“I thought I was just tired.”</h1>
-    <p class="subtitle reveal" style="margin-top:8px;">A patient's experience, shared anonymously.</p>
-    <p class="subtitle" id="storyIntro" style="margin-top:18px; max-width:56ch;">A patient came in after feeling more tired than usual for a few weeks.</p>
-    <nav class="story-pills" id="storyPills" aria-label="Choose a patient story"><a class="story-pill" href="stories.html?story=fatigue" aria-current="true">STORY 01 · On fatigue that doesn’t go away with rest</a><a class="story-pill" href="stories.html?story=headache">STORY 02 · On headaches that keep coming back</a></nav>
+    <span class="eyebrow reveal">PATIENT STORIES</span>
+    <h1 class="reveal">Choose a patient story</h1>
+    <p class="subtitle reveal" style="max-width:56ch;">Two separate patient experiences. Choose one to read the full conversation and what came after it.</p>
+    <nav class="story-pills reveal" id="storyPills" aria-label="Choose a patient story"></nav>
   </div>
 </header>
 
+<section class="selected-story-heading">
+  <div class="container">
+    <span class="eyebrow" id="selectedStoryLabel">PATIENT STORY 01</span>
+    <h2 id="storyTitle">I thought I was just tired.</h2>
+    <p class="subtitle" id="storyIntro">A patient came in after feeling more tired than usual for a few weeks.</p>
+  </div>
+</section>
 <div class="conv-track" id="convTrack">
   <div class="conv-stage" id="convStage">
     <p class="conv-intro-line">Shared with the patient's consent. Identifying details have been removed.</p>
