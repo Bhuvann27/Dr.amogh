@@ -114,12 +114,7 @@
   font-size:.65rem;font-weight:800;letter-spacing:.13em;color:var(--orange-deep);
   margin-bottom:28px;
 }
-.other-story-card::after{
-  content:"READ THIS STORY  ↗";
-  display:inline-flex;align-self:flex-start;margin-top:24px;
-  padding:10px 14px;border-radius:999px;background:var(--orange);color:#fff;
-  font-size:.72rem;font-weight:800;letter-spacing:.04em;
-}
+
 .other-story-card .quote{font-size:clamp(1.45rem,3vw,2.15rem);max-width:22ch;line-height:1.08;margin:0;}
 .other-story-card .meta{margin-top:12px;font-size:.75rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--text-dim);}
 
@@ -409,4 +404,28 @@
   .story-choice{min-height:78px;padding:15px;}
   .selected-story-heading{padding:48px 0 58px;}
   .conv-stage::after{right:16px;bottom:18px;}
+}
+
+
+/* Final collection rule: both homepage patient-story cards stay dark. */
+.section-stories-focus .story-card-primary,
+.section-stories-focus .story-card-secondary{
+  background:var(--ink)!important;
+  color:var(--paper)!important;
+  border-color:rgba(251,249,244,.12)!important;
+}
+.section-stories-focus .story-card-primary .quote,
+.section-stories-focus .story-card-primary .desc,
+.section-stories-focus .story-card-secondary .quote,
+.section-stories-focus .story-card-secondary .desc,
+.section-stories-focus .story-card-primary .story-kicker,
+.section-stories-focus .story-card-secondary .story-kicker,
+.section-stories-focus .story-card-primary .story-cta,
+.section-stories-focus .story-card-secondary .story-cta{
+  color:var(--paper)!important;
+}
+.section-stories-focus .story-card-primary .story-cta,
+.section-stories-focus .story-card-secondary .story-cta{
+  background:var(--orange)!important;
+  color:#fff!important;
 }
