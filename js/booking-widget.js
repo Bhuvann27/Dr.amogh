@@ -64,16 +64,8 @@
 
   function render(){
     root.innerHTML = STEP_RENDERERS[state.step]();
-    const highlightTitle = root.parentElement && root.parentElement.querySelector(".booking-highlight > strong");
-    if(highlightTitle){
-      highlightTitle.textContent = ({
-        date:"Choose a date",
-        slot:"Choose a time",
-        details:"Enter your details",
-        review:"Review your request",
-        success:"Request sent"
-      })[state.step] || "Online consultation";
-    }
+    // Keep the consultation header static. The active step below it already
+    // explains where the patient is, so the header should not duplicate it.
     attachHandlers();
   }
 
@@ -133,7 +125,6 @@
     review: () => `
       <div class="booking-step">
         <div class="booking-step-label">STEP 4 &middot; REVIEW YOUR REQUEST</div>
-        ${appointmentSummary()}
         <div class="booking-progress" aria-label="Booking progress">
           <span class="is-done">1</span><i></i><span class="is-done">2</span><i></i><span class="is-done">3</span><i></i><span class="is-active">4</span>
         </div>
