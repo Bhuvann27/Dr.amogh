@@ -105,20 +105,6 @@
     });
     document.getElementById("urgentText").textContent = story.urgent;
 
-    const otherWrap = document.getElementById("otherStories");
-    otherWrap.innerHTML = "";
-    stories.filter(s => s.slug !== story.slug).forEach((s) => {
-      const a = document.createElement("a");
-      a.href = "stories.html?story=" + encodeURIComponent(s.slug);
-      a.className = "other-story-card";
-      a.innerHTML =
-        '<span class="other-story-number">PATIENT STORY ' + String(stories.indexOf(s)+1).padStart(2,"0") + '</span>' +
-        '<p class="quote">' + esc(s.title) + '</p>' +
-        '<p class="meta">' + esc(s.subtitle) + '</p>' +
-        '<span class="other-story-read">READ THIS STORY ↗</span>';
-      otherWrap.appendChild(a);
-    });
-
     const track = document.getElementById("convTrack");
     const vhPerPair = 110;
     track.style.height = Math.max(vhPerPair * pairEls.length, 320) + "vh";
