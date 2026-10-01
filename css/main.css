@@ -2032,3 +2032,45 @@ section{ position: relative; }
     margin-bottom:7px;
   }
 }
+
+
+/* Final mobile consultation spacing and text containment */
+#consult .booking-highlight{
+  min-width:0;
+}
+#consult .booking-highlight>strong{
+  min-width:0;
+}
+#consult .booking-highlight>div{
+  min-width:max-content;
+}
+#consult .booking-widget .date-picker-hint{
+  max-width:100%;
+  padding-right:0;
+  white-space:normal;
+  overflow-wrap:anywhere;
+  line-height:1.45;
+}
+@media(max-width:780px){
+  #consult .booking-widget-wrap{
+    overflow:visible;
+  }
+  #consult .booking-highlight{
+    width:100%;
+    box-sizing:border-box;
+  }
+  #consult .booking-highlight>strong{
+    font-size:1.12rem;
+    line-height:1.15;
+  }
+  #consult .booking-highlight>div{
+    justify-self:end;
+    white-space:nowrap;
+  }
+  #consult .booking-widget .date-picker-hint{
+    width:100%;
+    max-width:100%;
+    font-size:.76rem;
+    padding-right:0;
+  }
+}
