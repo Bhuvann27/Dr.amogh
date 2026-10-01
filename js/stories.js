@@ -114,18 +114,34 @@
       const n = pairEls.length;
       const step = 1 / n;
 
-      // Exactly one dialogue owns each scroll interval. This prevents a
-      // previous question from fading back in after it has already left.
+      // Crossfade between adjacent questions instead of hard-switching.
+      // The previous question can only fade toward the next one, so it can
+      // never disappear and then reappear later in the sequence.
       function renderConversation(progress){
-        const active = Math.min(n - 1, Math.floor(progress * n));
+        const position = Math.min(n - 1, Math.max(0, progress * n));
+        const active = Math.min(n - 1, Math.floor(position));
+        const local = position - active;
+        const fadeStart = 0.58;
+        const blendT = Math.max(0, Math.min(1, (local - fadeStart) / (1 - fadeStart)));
+        const blend = blendT * blendT * (3 - 2 * blendT);
+
         pairEls.forEach((el,i) => {
-          const isActive = i === active;
-          el.style.opacity = isActive ? "1" : "0";
-          el.style.transform = isActive
-            ? "translate(-50%, -50%)"
-            : "translate(-50%, calc(-50% + 10px))";
-          el.style.pointerEvents = isActive ? "auto" : "none";
+          let opacity = 0;
+          let y = 10;
+
+          if(i === active){
+            opacity = 1 - blend;
+            y = -10 * blend;
+          }else if(i === active + 1 && active < n - 1){
+            opacity = blend;
+            y = 10 * (1 - blend);
+          }
+
+          el.style.opacity = opacity;
+          el.style.transform = "translate(-50%, calc(-50% + " + y + "px))";
+          el.style.pointerEvents = opacity > 0.5 ? "auto" : "none";
         });
+
         dots.forEach((d,i) => d.classList.toggle("active", i === active));
         if(progressNum) progressNum.textContent = String(active + 1).padStart(2,"0") + " / " + totalStr;
       }
