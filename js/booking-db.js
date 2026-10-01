@@ -61,43 +61,29 @@ window.BookingDB = (function(){
   }
 
   // Returns an array of "HH:MM" strings the patient can pick for dateISO.
+  // Availability is calculated server-side so the public booking flow does not
+  // depend on direct reads of appointment data or client-side timing assumptions.
   async function getAvailableSlots(dateISO){
-    const [weekly, blocks, taken] = await Promise.all([
-      getWeeklyAvailability(), getBlocksForDate(dateISO), getTakenSlots(dateISO),
-    ]);
     if(!isBookingDateInWindow(dateISO)) return [];
 
-    const date=new Date(dateISO+"T00:00:00Z");
-    const dow=date.getUTCDay();
-    const day=weekly.find((w)=>w.day_of_week===dow);
-    if(!day || !day.is_open) return [];
+    const c = getClient();
+    if(!c) throw new Error("Not connected to Supabase.");
 
-    const takenSet = new Set(taken);
-    const fullDayBlocked = blocks.some((b) => !b.start_time && !b.end_time);
-    if(fullDayBlocked) return [];
+    const { data, error } = await c.rpc("get_available_consultation_slots", {
+      p_date: dateISO,
+    });
+    if(error) throw error;
 
-    const start = toMinutes(day.start_time.slice(0,5));
-    const end = toMinutes(day.end_time.slice(0,5));
-    const nowParts=indiaNowParts();
-    const indiaToday=`${nowParts.year}-${nowParts.month}-${nowParts.day}`;
-    const isToday=indiaToday===dateISO;
-    const nowMins=Number(nowParts.hour)*60+Number(nowParts.minute);
+    const slots = (data || []).map((row) => String(row.start_time).slice(0,5));
 
-    const slots = [];
-    for(let m = start; m + SLOT_MINUTES <= end; m += SLOT_MINUTES){
-      const hhmm = toHHMM(m);
-      if(isToday && m <= nowMins) continue;
-      if(takenSet.has(hhmm)) continue;
-      const blockedByRange = blocks.some((b) => {
-        if(!b.start_time || !b.end_time) return false;
-        const bs = toMinutes(b.start_time.slice(0,5)), be = toMinutes(b.end_time.slice(0,5));
-        return m >= bs && m < be;
-      });
-      if(blockedByRange) continue;
-      slots.push(hhmm);
-    }
-    return slots;
+    const nowParts = indiaNowParts();
+    const indiaToday = `${nowParts.year}-${nowParts.month}-${nowParts.day}`;
+    if(indiaToday !== dateISO) return slots;
+
+    const nowMins = Number(nowParts.hour) * 60 + Number(nowParts.minute);
+    return slots.filter((hhmm) => toMinutes(hhmm) > nowMins);
   }
+
 
   // ---- public: create a booking ------------------------------------
   // Throws { slotTaken: true } if the slot was booked in the split
