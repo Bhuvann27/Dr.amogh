@@ -127,7 +127,24 @@
 
   heroNavs.forEach(el => el.classList.add("hero-cinematic"));
   loadHeroFrames();
-  window.addEventListener("resize", sizeHeroCanvas, {passive:true});
+  // Mobile browser chrome can fire resize events while the user is simply
+  // scrolling. Do not resize/redraw the hero for those toolbar changes.
+  // A real width change (rotation/device resize) still gets handled.
+  let lastHeroWidth = window.innerWidth;
+  const handleHeroResize = () => {
+    const width = window.innerWidth;
+    if(!mobileMQ.matches || Math.abs(width - lastHeroWidth) > 1){
+      lastHeroWidth = width;
+      sizeHeroCanvas();
+    }
+  };
+  window.addEventListener("resize", handleHeroResize, {passive:true});
+  if(mobileMQ.addEventListener){
+    mobileMQ.addEventListener("change", () => {
+      lastHeroWidth = window.innerWidth;
+      sizeHeroCanvas();
+    });
+  }
   // -----------------------------------------------------------
   // Timeline zones (fixed positions, no randomization)
   // -----------------------------------------------------------
@@ -162,6 +179,14 @@
 
   if(window.gsap && window.ScrollTrigger){
     gsap.registerPlugin(ScrollTrigger);
+
+    // On touch phones, the browser address bar changing height during the
+    // first scroll can fire a large vertical resize. Recalculating a
+    // scrubbed trigger at that moment causes the exact jump we want to avoid.
+    // Keep the trigger's measured geometry stable during those toolbar moves.
+    if(mobileMQ.matches){
+      ScrollTrigger.config({ignoreMobileResize:true});
+    }
 
     ScrollTrigger.create({
       trigger: track,
