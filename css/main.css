@@ -2211,3 +2211,69 @@ section{ position: relative; }
     max-width:100%;
   }
 }
+
+
+/* Final consultation card composition */
+#consult .booking-highlight{
+  display:flex !important;
+  flex-direction:row !important;
+  align-items:center !important;
+  justify-content:flex-start !important;
+  width:100% !important;
+  min-height:0 !important;
+  box-sizing:border-box !important;
+  padding:0 0 15px !important;
+  margin:0 0 18px !important;
+  border-bottom:1px solid var(--line);
+}
+#consult .booking-highlight>strong{
+  display:flex !important;
+  align-items:center !important;
+  gap:0 !important;
+  margin:0 !important;
+  color:var(--ink) !important;
+  font-family:var(--font-display);
+  font-size:1rem !important;
+  line-height:1.2 !important;
+  font-weight:800 !important;
+}
+#consult .booking-highlight>strong span{
+  color:var(--ink);
+  white-space:nowrap;
+}
+#consult .booking-highlight>strong i{
+  display:block;
+  width:1px;
+  height:18px;
+  margin:0 11px;
+  background:var(--line);
+}
+#consult .booking-widget .booking-date-step{
+  padding-top:0;
+}
+#consult .consult-summary{
+  min-width:0;
+}
+@media(max-width:780px){
+  #consult .booking-highlight{
+    padding:0 0 14px !important;
+    margin:0 0 18px !important;
+  }
+  #consult .booking-highlight>strong{
+    font-size:1rem !important;
+  }
+  #consult .booking-highlight>strong i{
+    height:17px;
+    margin:0 10px;
+  }
+  #consult .consult-summary{
+    padding:22px 82px 22px 22px !important;
+    box-sizing:border-box;
+  }
+  #consult .consult-summary-row{
+    margin-bottom:12px;
+  }
+  #consult .consult-note{
+    max-width:100%;
+  }
+}
