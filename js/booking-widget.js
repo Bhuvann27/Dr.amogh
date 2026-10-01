@@ -64,6 +64,16 @@
 
   function render(){
     root.innerHTML = STEP_RENDERERS[state.step]();
+    const highlightTitle = root.parentElement && root.parentElement.querySelector(".booking-highlight > strong");
+    if(highlightTitle){
+      highlightTitle.textContent = ({
+        date:"Choose a date",
+        slot:"Choose a time",
+        details:"Enter your details",
+        review:"Review your request",
+        success:"Request sent"
+      })[state.step] || "Online consultation";
+    }
     attachHandlers();
   }
 
