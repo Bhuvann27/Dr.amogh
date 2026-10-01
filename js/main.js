@@ -258,6 +258,62 @@
   }, { threshold: 0.05 });
   navObserver.observe(track);
 
+  // Active section navigation. Separate from the hero timeline.
+  const navSections = [
+    {id:"stories",href:"#stories"},{id:"about",href:"#about"},{id:"care",href:"#care"},
+    {id:"consult",href:"#consult"},{id:"insights",href:"#insights"},{id:"visit",href:"#visit"}
+  ];
+  const navItems=[...document.querySelectorAll(".site-nav .nav-links a, .mobile-nav-row a")];
+
+  function setActiveNav(href){
+    navItems.forEach((link)=>{
+      const active=link.getAttribute("href")===href;
+      link.classList.toggle("active",active);
+      if(active) link.setAttribute("aria-current","page");
+      else link.removeAttribute("aria-current");
+    });
+  }
+
+  function updateActiveNav(){
+    const homePoint=window.innerHeight*0.18;
+    const homeRect=track?track.getBoundingClientRect():null;
+    if(homeRect&&homeRect.top<=homePoint&&homeRect.bottom>homePoint){
+      setActiveNav("index.html");
+      return;
+    }
+    const point=window.innerHeight*0.30;
+    let active=null,best=Infinity;
+    navSections.forEach(({id,href})=>{
+      const section=document.getElementById(id);
+      if(!section)return;
+      const rect=section.getBoundingClientRect();
+      if(rect.top<=point&&rect.bottom>=point){
+        const distance=Math.abs(rect.top-point);
+        if(distance<best){best=distance;active=href;}
+      }
+    });
+    if(!active){
+      navSections.forEach(({id,href})=>{
+        const section=document.getElementById(id);
+        if(!section)return;
+        const rect=section.getBoundingClientRect();
+        const distance=rect.bottom<point?point-rect.bottom:rect.top-point;
+        if(distance<best){best=distance;active=href;}
+      });
+    }
+    setActiveNav(active||"index.html");
+  }
+
+  let navUpdateQueued=false;
+  function queueNavUpdate(){
+    if(navUpdateQueued)return;
+    navUpdateQueued=true;
+    requestAnimationFrame(()=>{navUpdateQueued=false;updateActiveNav();});
+  }
+  window.addEventListener("scroll",queueNavUpdate,{passive:true});
+  window.addEventListener("resize",queueNavUpdate,{passive:true});
+  updateActiveNav();
+
   // Areas of Care accordion — collapsed by default, one or many open at once
   document.addEventListener("click", (event) => {
     const focusBtn = event.target.closest("#focusBookingDate");
