@@ -2336,3 +2336,134 @@ section{ position: relative; }
     padding-top:0;
   }
 }
+
+
+/* =========================================================
+   DESKTOP REFINEMENT — desktop branch only
+   Mobile rules above remain the source of truth below 880px.
+   ========================================================= */
+@media (min-width:881px){
+  :root{
+    --max-w:1240px;
+    --pad:clamp(40px,5vw,88px);
+  }
+
+  .site-nav{
+    padding-top:22px;
+    padding-bottom:22px;
+  }
+  .site-nav .wordmark{font-size:1.08rem;}
+  .site-nav .nav-links{gap:clamp(22px,2.8vw,38px);}
+  .site-nav .nav-links a{font-size:.9rem;}
+
+  .section-pad{
+    padding-top:clamp(92px,8vw,132px);
+    padding-bottom:clamp(92px,8vw,132px);
+  }
+  .section-head{max-width:760px;}
+  .section-head h2{font-size:clamp(2.15rem,3.5vw,3.25rem);}
+  .section-head p{font-size:1.05rem;}
+
+  .photo-section{
+    grid-template-columns:minmax(360px,.82fr) minmax(0,1.18fr);
+    gap:clamp(52px,7vw,96px);
+  }
+  .photo-frame{border-radius:24px;}
+  .photo-id-block{font-size:clamp(2rem,3vw,2.7rem);}
+
+  .stories-focus-head{
+    grid-template-columns:minmax(0,1.15fr) minmax(360px,.7fr);
+    gap:clamp(60px,8vw,120px);
+  }
+  .story-cards{
+    grid-template-columns:minmax(0,1.2fr) minmax(320px,.8fr);
+    gap:28px;
+  }
+  .story-card{min-height:330px;padding:42px 38px;}
+  .story-card.featured .quote{font-size:clamp(1.7rem,2.5vw,2.35rem);}
+
+  .about-grid{
+    grid-template-columns:minmax(0,1.05fr) minmax(360px,.95fr);
+    gap:clamp(56px,8vw,110px);
+    align-items:start;
+  }
+
+  .care-accordion{max-width:1120px;}
+  .care-item-head{padding:28px 6px;}
+  .care-item-head .care-item-title{width:min(320px,30%);}
+  .care-item-head .care-item-desc{font-size:1rem;}
+  .care-item-body-inner{padding-bottom:34px;}
+
+  #consult .container{max-width:1240px;}
+  #consult .section-head{max-width:700px;}
+  #consult .consult-panel{
+    grid-template-columns:minmax(0,1.18fr) minmax(300px,.82fr);
+    gap:clamp(34px,5vw,72px);
+    align-items:start;
+  }
+  #consult .booking-widget-wrap{
+    min-width:0;
+    padding:32px 36px 36px;
+    border-radius:24px;
+  }
+  #consult .booking-meta{
+    font-size:1rem;
+    padding-bottom:18px;
+    margin-bottom:28px;
+  }
+  #consult .booking-widget{
+    padding:0;
+    border:0;
+    border-radius:0;
+    background:transparent;
+  }
+  #consult .booking-widget .booking-step{
+    max-width:100%;
+  }
+  #consult .date-picker-field{
+    min-height:70px;
+  }
+  #consult .date-picker-text{
+    font-size:1rem;
+  }
+  #consult .slot-grid{
+    grid-template-columns:repeat(4,minmax(100px,1fr));
+  }
+  #consult .consult-summary{
+    position:sticky;
+    top:110px;
+    padding:32px;
+    border-radius:22px;
+  }
+  #consult .consult-summary-row{font-size:1.3rem;}
+  #consult .consult-note{font-size:.9rem;}
+
+  .insight-grid{
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:24px;
+  }
+  .insight-card{min-height:250px;}
+
+  .contact-panel{
+    grid-template-columns:minmax(0,1.15fr) minmax(360px,.85fr);
+    gap:clamp(56px,7vw,100px);
+  }
+  .contact-map-note{padding:32px;border-radius:22px;}
+
+  .footer-grid{
+    grid-template-columns:1.4fr .8fr .8fr;
+    gap:70px;
+  }
+
+  .floating-contact{
+    right:max(28px,env(safe-area-inset-right,0px));
+    bottom:max(28px,env(safe-area-inset-bottom,0px));
+  }
+  .floating-contact a{width:56px;height:56px;}
+
+  /* Keep the assistant comfortably inside a desktop content edge. */
+  .site-assistant .assistant-panel{
+    right:0;
+    width:min(390px,calc(100vw - 48px));
+  }
+}
