@@ -37,14 +37,16 @@
   document.title = story.title.replace(/[\u201c\u201d]/g, "") + " — Dr. Amogh G";
 
   document.getElementById("storyTitle").textContent = story.title;
+  const storyEyebrow = document.querySelector(".story-header .eyebrow");
+  if(storyEyebrow) storyEyebrow.textContent = `PATIENT STORY ${String(stories.indexOf(story) + 1).padStart(2,"0")}`;
   document.getElementById("storyIntro").textContent = story.intro;
 
   const pillsWrap = document.getElementById("storyPills");
-  stories.forEach((s) => {
+  stories.forEach((s, storyIndex) => {
     const a = document.createElement("a");
     a.href = `stories.html?story=${s.slug}`;
     a.className = "story-pill";
-    a.textContent = s.subtitle;
+    a.textContent = `STORY ${String(storyIndex + 1).padStart(2,"0")} · ${s.subtitle}`;
     if(s.slug === story.slug) a.setAttribute("aria-current", "true");
     pillsWrap.appendChild(a);
   });
@@ -101,7 +103,7 @@
   const progressNum = document.getElementById("convProgressNum");
   const totalStr = String(pairEls.length).padStart(2, "0");
   if(progressNum) progressNum.textContent = `01 / ${totalStr}`;
-  const vhPerPair = 110;
+  // Keep the first conversation visible on the untouched opening frame.\n  pairEls.forEach((el, i) => {\n    el.style.opacity = i === 0 ? "1" : "0";\n    el.style.transform = "translate(-50%, -50%)";\n  });\n\n  const vhPerPair = 110;
   track.style.height = `${Math.max(vhPerPair * pairEls.length, 320)}vh`;
 
   function fadeWindow(p, start, end, fadeFrac){
