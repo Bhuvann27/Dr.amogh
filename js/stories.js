@@ -133,39 +133,35 @@
 
     if(window.gsap && window.ScrollTrigger){
       gsap.registerPlugin(ScrollTrigger);
-      ScrollTrigger.config({ignoreMobileResize:true});
       const n = pairEls.length;
       const step = 1 / n;
 
-      // Restore the original full, diffuse reading rhythm: each line gets
-      // a generous reading window and the handoff is a soft overlap rather
-      // than a hard replacement. Scroll remains directly responsive.
-      function smoothstep(t){
-        t = Math.max(0, Math.min(1, t));
-        return t * t * (3 - 2 * t);
+      function fadeWindow(p, start, end, fadeFrac){
+        const span = end - start;
+        const fadeIn = start + span * fadeFrac;
+        const fadeOut = end - span * fadeFrac;
+        if(p < start || p > end) return 0;
+        if(p < fadeIn) return (p - start) / (fadeIn - start);
+        if(p > fadeOut) return 1 - (p - fadeOut) / (end - fadeOut);
+        return 1;
       }
 
-      function renderConversation(progress){
-        const p = Math.max(0, Math.min(1, progress));
-        const position = p * (n - 1);
-        const active = Math.max(0, Math.min(n - 1, Math.round(position)));
-        const transition = 0.34;
-        const half = transition / 2;
-
-        pairEls.forEach((el,i) => {
-          el.style.opacity = "0";
-          el.style.transform = "translate(-50%, calc(-50% + 10px))";
-          el.style.filter = "blur(4px)";
-          el.style.pointerEvents = "none";
-        });
-
-        if(active === 0){
-          if(position < half){
-            const t = smoothstep(position / half);
-            pairEls[0].style.opacity = "1";
-            pairEls[0].style.transform = "translate(-50%, calc(-50% + " + ((1 - t) * 8) + "px))";
-            pairEls[0].style.filter = "blur(" + ((1 - t) * 4) + "px)";
-          }else{
+      ScrollTrigger.create({
+        trigger: track, start: "top top", end: "bottom bottom", scrub: true,
+        onUpdate: (self) => {
+          const p = self.progress;
+          pairEls.forEach((el, i) => {
+            const s = i * step, e = (i + 1) * step;
+            const op = fadeWindow(p, s, e, 0.3);
+            el.style.opacity = op;
+            el.style.transform = `translate(-50%, calc(-50% + ${(1 - op) * 16}px))`;
+          });
+          const active = Math.min(n - 1, Math.floor(p * n));
+          dots.forEach((d, i) => d.classList.toggle("active", i === active));
+          if(progressNum) progressNum.textContent = `${String(active+1).padStart(2,"0")} / ${totalStr}`;
+        },
+      });
+    }else{
             const t = smoothstep((position - half) / (1 - half));
             pairEls[0].style.opacity = "1";
             pairEls[0].style.transform = "translate(-50%, calc(-50% + " + ((1 - t) * 2) + "px))";
