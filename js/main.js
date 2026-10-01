@@ -29,7 +29,7 @@
   // starts on the first bright frame after the opening hook.
   // -----------------------------------------------------------
   const heroCanvas = document.getElementById("heroCanvas");
-  const ROTATION_END = 0.96;
+  const ROTATION_END = 0.89;
   const FRAME_W = 720;
   const FRAME_H = 1280;
   const FRAME_COUNT = 197;
@@ -71,11 +71,13 @@
 
     const cw = heroCanvas.width;
     const ch = heroCanvas.height;
-    const scale = Math.max(cw / FRAME_W, ch / FRAME_H);
+    // Preserve the source frame's 720×1280 composition. Never stretch or
+    // crop it differently just because the viewport is wider or taller.
+    const scale = Math.min(cw / FRAME_W, ch / FRAME_H);
     const dw = FRAME_W * scale;
     const dh = FRAME_H * scale;
-    const dx = (cw - dw) * 0.5;
-    const dy = (ch - dh) * 0.5;
+    const dx = Math.round((cw - dw) * 0.5);
+    const dy = Math.round((ch - dh) * 0.5);
 
     canvasCtx.fillStyle = "#0E0E0E";
     canvasCtx.fillRect(0,0,cw,ch);
@@ -152,11 +154,11 @@
   const HOOK2_WINDOW = [0.18, 0.32];
   const HOOK3_WINDOW = [0.36, 0.54];
   const ID_ZONES = {
-    name: [0.64, 0.69],
-    qual: [0.67, 0.72],
-    exp:  [0.70, 0.75],
-    hosp: [0.73, 0.78],
-    photo:[0.76, 0.81],
+    name: [0.79, 0.83],
+    qual: [0.81, 0.85],
+    exp:  [0.83, 0.87],
+    hosp: [0.85, 0.89],
+    photo:[0.87, 0.91],
   };
 
   function fadeWindow(p, start, end, fadeFrac){
@@ -230,10 +232,10 @@
         const identityVisible = Math.max(nameOp, qualOp, expOp, hospOp, photoOp);
         identityBlock.style.opacity = identityVisible;
 
-        const heroFinished = p >= 0.96;
+        const heroFinished = p >= 0.985;
         heroNavs.forEach(el => el.classList.toggle("hero-cinematic", !heroFinished));
         if(identityBlock){
-          const identityProgress = Math.max(0, Math.min(1, (p - 0.67) / 0.13));
+          const identityProgress = Math.max(0, Math.min(1, (p - 0.79) / 0.12));
           identityBlock.style.transform = `translateX(-50%) translateY(${(1 - identityProgress) * 34}px)`;
         }
 
