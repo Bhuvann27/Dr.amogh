@@ -141,7 +141,6 @@
     hosp: [0.73, 0.78],
     photo:[0.76, 0.81],
   };
-  const RELEASE_START = 1.01;
 
   function fadeWindow(p, start, end, fadeFrac){
     const span = end - start;
@@ -152,18 +151,13 @@
     if(p > fadeOut) return 1 - (p - fadeOut) / (end - fadeOut);
     return 1;
   }
-  // Identity appears over the closing coat, then clears before the coat lifts away.
-  // This keeps the final source motion itself as the visual payoff.
-  function identityFade(p, start, end, fadeOutStart=0.82, fadeOutEnd=0.88){
-    let op = 0;
-    if(p >= start){
-      op = p >= end ? 1 : (p - start) / (end - start);
-    }
-    if(p > fadeOutStart){
-      const out = Math.max(0, Math.min(1, (p - fadeOutStart) / (fadeOutEnd - fadeOutStart)));
-      op *= 1 - out;
-    }
-    return op;
+
+  // The doctor's identity fades in line-by-line, then stays fully visible
+  // while the final coat lift-off frames play and until the hero itself exits.
+  function identityFade(p, start, end){
+    if(p < start) return 0;
+    if(p >= end) return 1;
+    return (p - start) / (end - start);
   }
 
   if(window.gsap && window.ScrollTrigger){
@@ -204,8 +198,8 @@
             : "";
         }
 
-        // release: whole hero fades/scales away into the normal page
-        const release = 0;
+        // Keep the source ending intact. The identity now remains visible
+        // through the entire hero exit instead of fading out early.
         coatImgWrap.style.opacity = 1;
         coatImgWrap.style.transform = "none";
         const identityVisible = Math.max(nameOp, qualOp, expOp, hospOp, photoOp);
