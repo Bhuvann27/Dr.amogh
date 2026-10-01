@@ -167,9 +167,6 @@
 .story-pill[aria-current="true"]::before{background:var(--paper);}
 
 /* Opening frame: show the first conversation immediately. */
-.conv-pair:first-child{
-  opacity:1;
-}
 .conv-stage{
   align-items:flex-start;
 }
@@ -237,9 +234,6 @@
 }
 
 /* Final fallback: the first conversation is never hidden before JS runs. */
-#convPairs .conv-pair:first-child{
-  opacity:1;
-}
 
 /* =========================================================
    Hard fallback: stories page must never render as a blank canvas.
