@@ -34,6 +34,7 @@ jobs:
           out.mkdir(parents=True, exist_ok=True)
 
           # Start just before the first hook and keep the full coat lift-off payoff. Stop before the source fades to black.
+          # Regenerate the full source range so the coat lift-off ending is present in the committed frame set.
           START_FRAME = 32
           END_FRAME = 228
 
