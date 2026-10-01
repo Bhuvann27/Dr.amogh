@@ -2135,3 +2135,79 @@ section{ position: relative; }
     text-align:left;
   }
 }
+
+
+/* Consultation mobile composition: one compact header, contained copy, no overlap */
+#consult .booking-highlight{
+  display:flex !important;
+  flex-direction:column !important;
+  align-items:flex-start !important;
+  justify-content:flex-start !important;
+  gap:7px !important;
+  width:100% !important;
+  box-sizing:border-box !important;
+  padding:2px 0 16px !important;
+  margin:0 !important;
+}
+#consult .booking-highlight>span{
+  order:1 !important;
+  margin:0 !important;
+}
+#consult .booking-highlight>strong{
+  order:2 !important;
+  margin:0 !important;
+  color:var(--ink) !important;
+  font-family:var(--font-display);
+  font-size:1rem !important;
+  line-height:1.2 !important;
+  font-weight:800 !important;
+}
+#consult .booking-highlight>strong i{
+  display:inline-block;
+  width:1px;
+  height:.85em;
+  margin:0 9px;
+  vertical-align:-.08em;
+  background:var(--line);
+}
+#consult .booking-widget{
+  width:100%;
+  min-width:0;
+}
+#consult .booking-widget .booking-step{
+  width:100%;
+  min-width:0;
+  box-sizing:border-box;
+}
+#consult .booking-widget .date-picker-hint{
+  display:block;
+  width:100%;
+  max-width:100%;
+  box-sizing:border-box;
+  margin:9px 0 0;
+  padding:0 !important;
+  white-space:normal !important;
+  overflow:visible !important;
+  overflow-wrap:anywhere !important;
+  word-break:normal !important;
+  line-height:1.45;
+}
+#consult .booking-widget .date-picker-field{
+  width:100%;
+  max-width:100%;
+  box-sizing:border-box;
+}
+@media(max-width:780px){
+  #consult .booking-widget-wrap{
+    overflow:hidden !important;
+    padding:18px 18px 20px !important;
+    box-sizing:border-box;
+  }
+  #consult .booking-highlight{
+    padding:0 0 16px !important;
+  }
+  #consult .booking-widget .date-picker-hint{
+    font-size:.76rem;
+    max-width:100%;
+  }
+}
