@@ -137,44 +137,84 @@
       const n = pairEls.length;
       const step = 1 / n;
 
-      // Crossfade between adjacent questions instead of hard-switching.
-      // The previous question can only fade toward the next one, so it can
-      // never disappear and then reappear later in the sequence.
+      // Restore the original full, diffuse reading rhythm: each line gets
+      // a generous reading window and the handoff is a soft overlap rather
+      // than a hard replacement. Scroll remains directly responsive.
+      function smoothstep(t){
+        t = Math.max(0, Math.min(1, t));
+        return t * t * (3 - 2 * t);
+      }
+
       function renderConversation(progress){
-        // The scroll position maps directly to the story sequence. Each
-        // question stays completely readable, then crossfades only around
-        // the exact handoff point. No delayed scrub and no jumpy replacement.
-        const position = Math.max(0, Math.min(n - 1, progress * (n - 1)));
-        const transition = 0.28;
-        const nearest = Math.round(position);
-        const distance = Math.abs(position - nearest);
+        const p = Math.max(0, Math.min(1, progress));
+        const position = p * (n - 1);
+        const active = Math.max(0, Math.min(n - 1, Math.round(position)));
+        const transition = 0.34;
+        const half = transition / 2;
 
         pairEls.forEach((el,i) => {
           el.style.opacity = "0";
-          el.style.transform = "translate(-50%, -50%)";
+          el.style.transform = "translate(-50%, calc(-50% + 10px))";
+          el.style.filter = "blur(4px)";
           el.style.pointerEvents = "none";
         });
 
-        if(distance < transition / 2 && nearest > 0 && nearest < n - 1){
-          if(position < nearest){
-            const t = (position - (nearest - transition / 2)) / (transition / 2);
-            pairEls[nearest - 1].style.opacity = String(1 - t);
-            pairEls[nearest].style.opacity = String(t);
+        if(active === 0){
+          if(position < half){
+            const t = smoothstep(position / half);
+            pairEls[0].style.opacity = "1";
+            pairEls[0].style.transform = "translate(-50%, calc(-50% + " + ((1 - t) * 8) + "px))";
+            pairEls[0].style.filter = "blur(" + ((1 - t) * 4) + "px)";
           }else{
-            const t = (position - nearest) / (transition / 2);
-            pairEls[nearest].style.opacity = String(1 - t);
-            pairEls[nearest + 1].style.opacity = String(t);
+            const t = smoothstep((position - half) / (1 - half));
+            pairEls[0].style.opacity = "1";
+            pairEls[0].style.transform = "translate(-50%, calc(-50% + " + ((1 - t) * 2) + "px))";
+            pairEls[0].style.filter = "blur(" + ((1 - t) * 2) + "px)";
+          }
+        }else if(active === n - 1){
+          if(position > n - 1 - half){
+            const t = smoothstep((position - (n - 1 - half)) / half);
+            pairEls[n - 1].style.opacity = "1";
+            pairEls[n - 1].style.transform = "translate(-50%, calc(-50% + " + (t * 2) + "px))";
+            pairEls[n - 1].style.filter = "blur(" + ((1 - t) * 2) + "px)";
+          }else{
+            pairEls[n - 1].style.opacity = "1";
+            pairEls[n - 1].style.transform = "translate(-50%, -50%)";
+            pairEls[n - 1].style.filter = "blur(0px)";
           }
         }else{
-          const active = Math.max(0, Math.min(n - 1, nearest));
-          pairEls[active].style.opacity = "1";
-          pairEls[active].style.pointerEvents = "auto";
+          const distance = position - active;
+
+          if(Math.abs(distance) <= half){
+            if(distance < 0){
+              const t = smoothstep((distance + half) / (2 * half));
+              pairEls[active - 1].style.opacity = String(1 - t);
+              pairEls[active - 1].style.transform = "translate(-50%, calc(-50% + " + (t * -4 + 4) + "px))";
+              pairEls[active - 1].style.filter = "blur(" + (t * 4) + "px)";
+              pairEls[active].style.opacity = String(t);
+              pairEls[active].style.transform = "translate(-50%, calc(-50% + " + ((1 - t) * 4) + "px))";
+              pairEls[active].style.filter = "blur(" + ((1 - t) * 4) + "px)";
+            }else{
+              const t = smoothstep((distance + half) / (2 * half));
+              pairEls[active].style.opacity = String(1 - t);
+              pairEls[active].style.transform = "translate(-50%, calc(-50% + " + (t * -4) + "px))";
+              pairEls[active].style.filter = "blur(" + (t * 4) + "px)";
+              pairEls[active + 1].style.opacity = String(t);
+              pairEls[active + 1].style.transform = "translate(-50%, calc(-50% + " + ((1 - t) * 4) + "px))";
+              pairEls[active + 1].style.filter = "blur(" + ((1 - t) * 4) + "px)";
+            }
+          }else{
+            pairEls[active].style.opacity = "1";
+            pairEls[active].style.transform = "translate(-50%, -50%)";
+            pairEls[active].style.filter = "blur(0px)";
+            pairEls[active].style.pointerEvents = "auto";
+          }
         }
 
-        const active = Math.max(0, Math.min(n - 1, nearest));
         dots.forEach((d,i) => d.classList.toggle("active", i === active));
         if(progressNum) progressNum.textContent = String(active + 1).padStart(2,"0") + " / " + totalStr;
       }
+
       ScrollTrigger.create({
         trigger: track,
         start: "top top",
