@@ -498,6 +498,7 @@ section{ position: relative; }
   font-size:clamp(2rem,5vw,3.35rem);
   line-height:.98;
   letter-spacing:-.04em;
+  color:rgba(23,19,15,.94)!important;
 }
 .stories-focus-head>p{
   margin:0;
