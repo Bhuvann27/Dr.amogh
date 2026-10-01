@@ -72,7 +72,7 @@
     counterWrap.appendChild(document.createElement("i"));
   });
   const dots = Array.from(counterWrap.children);
-
+\n  // Make the first conversation visible immediately. The animation is an enhancement,\n  // not a requirement for the page to have content.\n  if(pairEls[0]){\n    pairEls[0].style.opacity = "1";\n    pairEls[0].style.transform = "translate(-50%, -50%)";\n  }\n  dots.forEach((d, i) => d.classList.toggle("active", i === 0));\n
   document.getElementById("relateIntro").textContent = story.relateIntro;
   document.getElementById("relateClose").textContent = story.relateClose;
   const relateList = document.getElementById("relateList");
