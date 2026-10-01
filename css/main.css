@@ -1096,3 +1096,158 @@ section{ position: relative; }
 
 /* Hero first hook was intentionally hidden in the earlier pass. Bring it back. */
 #hook1{display:block;}
+
+
+/* =========================================================
+   Final mobile layout correction — Batch 2
+   ========================================================= */
+
+/* Keep story cards and their decorative backplates inside their own box. */
+.story-card{isolation:isolate;z-index:0;}
+.story-card::after{z-index:-1;}
+
+/* On phone-sized layouts, the story introduction must stack before the cards.
+   The previous two-column layout let the large headline physically run into
+   the explanatory copy. Humans do not enjoy reading two paragraphs at once. */
+@media(max-width:900px){
+  .stories-focus-head{
+    display:block;
+    margin-bottom:30px;
+  }
+  .stories-focus-head>div{
+    margin-bottom:20px;
+    min-width:0;
+  }
+  .stories-focus-head h2{
+    max-width:14ch;
+    margin:0;
+  }
+  .stories-focus-head>p{
+    max-width:48ch;
+    margin:0;
+  }
+  .story-cards-focus{
+    margin-top:0;
+  }
+
+  /* Care rows: number, text, and action get dedicated columns. */
+  .care-item-head{
+    display:grid;
+    grid-template-columns:42px minmax(0,1fr) 36px;
+    grid-template-rows:auto auto;
+    column-gap:14px;
+    row-gap:6px;
+    align-items:center;
+    padding:18px 16px;
+  }
+  .care-item-head .n{
+    grid-column:1;
+    grid-row:1 / span 2;
+    width:42px;
+    height:42px;
+    justify-self:start;
+    align-self:center;
+  }
+  .care-item-head .care-item-title{
+    grid-column:2;
+    grid-row:1;
+    width:auto;
+    min-width:0;
+    font-size:1rem;
+    line-height:1.18;
+    overflow-wrap:anywhere;
+  }
+  .care-item-head .care-item-desc{
+    grid-column:2;
+    grid-row:2;
+    width:auto;
+    min-width:0;
+    margin:0;
+    font-size:.82rem;
+    line-height:1.42;
+    overflow-wrap:anywhere;
+  }
+  .care-item-head .care-item-icon{
+    grid-column:3;
+    grid-row:1 / span 2;
+    width:34px;
+    height:34px;
+    margin:0;
+    justify-self:end;
+  }
+  .care-item.open .care-item-head{
+    background:var(--orange-soft);
+    border-bottom:1px solid rgba(242,84,12,.18);
+  }
+  .care-item-body{
+    background:var(--paper);
+  }
+  .care-item-body-inner{
+    padding:18px 16px 22px 72px;
+  }
+  .care-related{
+    background:var(--paper-dim);
+    border:1px solid var(--line);
+    border-left:3px solid var(--orange);
+  }
+
+  /* Consultation: never let the action button share a row with price/meta. */
+  .booking-highlight{
+    display:flex;
+    flex-direction:column;
+    align-items:stretch;
+    gap:9px;
+  }
+  .booking-highlight>span,
+  .booking-highlight>strong,
+  .booking-highlight>div,
+  .booking-highlight-action{
+    width:100%;
+    margin:0;
+  }
+  .booking-highlight>strong{
+    font-size:1.12rem;
+  }
+  .booking-highlight>div{
+    justify-content:flex-start;
+    min-height:24px;
+  }
+  .booking-highlight-action{
+    margin-top:3px;
+    min-height:46px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+
+  /* General long text safety on narrow screens. */
+  .section-head h2,
+  .section-head p,
+  .photo-intro,
+  .callout,
+  .care-footnote,
+  .consult-note,
+  .insight-card p,
+  .contact-detail .value{
+    overflow-wrap:anywhere;
+  }
+}
+
+/* The assistant uses the supplied circular Anise mark directly. */
+.assistant-toggle{
+  padding:0!important;
+}
+.assistant-bot-icon{
+  width:100%;
+  height:100%;
+  display:grid;
+  place-items:center;
+}
+.assistant-bot-icon img{
+  width:100%!important;
+  height:100%!important;
+  object-fit:cover!important;
+  object-position:center!important;
+  transform:none!important;
+  border-radius:50%;
+}
