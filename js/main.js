@@ -71,8 +71,6 @@
 
     const cw = heroCanvas.width;
     const ch = heroCanvas.height;
-    // Mobile keeps the established cover framing. Desktop uses contain so
-    // the complete portrait source frame remains visible without distortion.
     const desktop = window.innerWidth >= 881;
     const scale = desktop
       ? Math.min(cw / FRAME_W, ch / FRAME_H)
@@ -82,10 +80,37 @@
     const dx = (cw - dw) * 0.5;
     const dy = (ch - dh) * 0.5;
 
-    canvasCtx.fillStyle = "#0E0E0E";
-    canvasCtx.fillRect(0,0,cw,ch);
     canvasCtx.imageSmoothingEnabled = true;
     canvasCtx.imageSmoothingQuality = "high";
+
+    // Desktop: create a live extension from the same frame instead of leaving
+    // empty portrait-side bars. The enlarged background is softened and darkened
+    // so the real portrait frame stays the visual focus. Mobile is unchanged.
+    if(desktop){
+      const bgScale = Math.max(cw / FRAME_W, ch / FRAME_H) * 1.08;
+      const bgW = FRAME_W * bgScale;
+      const bgH = FRAME_H * bgScale;
+      const bgX = (cw - bgW) * 0.5;
+      const bgY = (ch - bgH) * 0.5;
+
+      canvasCtx.save();
+      canvasCtx.filter = "blur(22px) brightness(0.52) saturate(0.78)";
+      canvasCtx.drawImage(img,0,0,FRAME_W,FRAME_H,bgX,bgY,bgW,bgH);
+      canvasCtx.restore();
+
+      const shade = canvasCtx.createLinearGradient(0,0,cw,0);
+      shade.addColorStop(0,"rgba(8,8,8,.34)");
+      shade.addColorStop(.24,"rgba(8,8,8,.12)");
+      shade.addColorStop(.5,"rgba(8,8,8,.05)");
+      shade.addColorStop(.76,"rgba(8,8,8,.12)");
+      shade.addColorStop(1,"rgba(8,8,8,.34)");
+      canvasCtx.fillStyle = shade;
+      canvasCtx.fillRect(0,0,cw,ch);
+    }else{
+      canvasCtx.fillStyle = "#0E0E0E";
+      canvasCtx.fillRect(0,0,cw,ch);
+    }
+
     canvasCtx.drawImage(img,0,0,FRAME_W,FRAME_H,dx,dy,dw,dh);
   }
 
