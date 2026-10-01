@@ -27,7 +27,7 @@ window.BookingDB = (function(){
   }
   function indiaTodayISO(){const p=indiaNowParts();return `${p.year}-${p.month}-${p.day}`;}
   function isBookingDateInWindow(dateISO){
-    if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(dateISO))return false;
+    if(!/^\d{4}-\\d{2}-\\d{2}$/.test(dateISO))return false;
     const today=indiaTodayISO();
     const limit=new Date(today+"T00:00:00Z");
     limit.setUTCDate(limit.getUTCDate()+90);
