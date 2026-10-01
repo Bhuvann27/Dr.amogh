@@ -146,69 +146,22 @@
         return 1;
       }
 
-      ScrollTrigger.create({
-        trigger: track, start: "top top", end: "bottom bottom", scrub: true,
-        onUpdate: (self) => {
-          const p = self.progress;
-          pairEls.forEach((el, i) => {
-            const s = i * step, e = (i + 1) * step;
-            const op = fadeWindow(p, s, e, 0.3);
-            el.style.opacity = op;
-            el.style.transform = `translate(-50%, calc(-50% + ${(1 - op) * 16}px))`;
-          });
-          const active = Math.min(n - 1, Math.floor(p * n));
-          dots.forEach((d, i) => d.classList.toggle("active", i === active));
-          if(progressNum) progressNum.textContent = `${String(active+1).padStart(2,"0")} / ${totalStr}`;
-        },
-      });
-    }else{
-            const t = smoothstep((position - half) / (1 - half));
-            pairEls[0].style.opacity = "1";
-            pairEls[0].style.transform = "translate(-50%, calc(-50% + " + ((1 - t) * 2) + "px))";
-            pairEls[0].style.filter = "blur(" + ((1 - t) * 2) + "px)";
-          }
-        }else if(active === n - 1){
-          if(position > n - 1 - half){
-            const t = smoothstep((position - (n - 1 - half)) / half);
-            pairEls[n - 1].style.opacity = "1";
-            pairEls[n - 1].style.transform = "translate(-50%, calc(-50% + " + (t * 2) + "px))";
-            pairEls[n - 1].style.filter = "blur(" + ((1 - t) * 2) + "px)";
-          }else{
-            pairEls[n - 1].style.opacity = "1";
-            pairEls[n - 1].style.transform = "translate(-50%, -50%)";
-            pairEls[n - 1].style.filter = "blur(0px)";
-          }
-        }else{
-          const distance = position - active;
+      function renderConversation(progress){
+        const p = Math.max(0, Math.min(1, progress));
+        pairEls.forEach((el, i) => {
+          const s = i * step;
+          const e = (i + 1) * step;
+          const op = fadeWindow(p, s, e, 0.3);
+          el.style.opacity = String(op);
+          el.style.transform = `translate(-50%, calc(-50% + ${(1 - op) * 16}px))`;
+        });
 
-          if(Math.abs(distance) <= half){
-            if(distance < 0){
-              const t = smoothstep((distance + half) / (2 * half));
-              pairEls[active - 1].style.opacity = String(1 - t);
-              pairEls[active - 1].style.transform = "translate(-50%, calc(-50% + " + (t * -4 + 4) + "px))";
-              pairEls[active - 1].style.filter = "blur(" + (t * 4) + "px)";
-              pairEls[active].style.opacity = String(t);
-              pairEls[active].style.transform = "translate(-50%, calc(-50% + " + ((1 - t) * 4) + "px))";
-              pairEls[active].style.filter = "blur(" + ((1 - t) * 4) + "px)";
-            }else{
-              const t = smoothstep((distance + half) / (2 * half));
-              pairEls[active].style.opacity = String(1 - t);
-              pairEls[active].style.transform = "translate(-50%, calc(-50% + " + (t * -4) + "px))";
-              pairEls[active].style.filter = "blur(" + (t * 4) + "px)";
-              pairEls[active + 1].style.opacity = String(t);
-              pairEls[active + 1].style.transform = "translate(-50%, calc(-50% + " + ((1 - t) * 4) + "px))";
-              pairEls[active + 1].style.filter = "blur(" + ((1 - t) * 4) + "px)";
-            }
-          }else{
-            pairEls[active].style.opacity = "1";
-            pairEls[active].style.transform = "translate(-50%, -50%)";
-            pairEls[active].style.filter = "blur(0px)";
-            pairEls[active].style.pointerEvents = "auto";
-          }
+        const active = Math.min(n - 1, Math.floor(p * n));
+        dots.forEach((d, i) => d.classList.toggle("active", i === active));
+        if(progressNum){
+          progressNum.textContent =
+            String(active + 1).padStart(2,"0") + " / " + totalStr;
         }
-
-        dots.forEach((d,i) => d.classList.toggle("active", i === active));
-        if(progressNum) progressNum.textContent = String(active + 1).padStart(2,"0") + " / " + totalStr;
       }
 
       ScrollTrigger.create({
@@ -219,6 +172,7 @@
         onUpdate: self => renderConversation(self.progress),
         onRefresh: self => renderConversation(self.progress)
       });
+
       renderConversation(0);
     }else{
       track.classList.add("no-js");
