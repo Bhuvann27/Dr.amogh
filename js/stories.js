@@ -105,6 +105,28 @@
     });
     document.getElementById("urgentText").textContent = story.urgent;
 
+    // The bottom section is a single "next story" card, never a second
+    // copy of the currently selected story.
+    const otherWrap = document.getElementById("otherStories");
+    if(otherWrap){
+      otherWrap.innerHTML = "";
+      const otherStory = stories.find(s => s.slug !== story.slug);
+      if(otherStory){
+        const otherIndex = stories.indexOf(otherStory);
+        const a = document.createElement("a");
+        a.href = "stories.html?story=" + encodeURIComponent(otherStory.slug);
+        a.className = "other-story-card";
+        a.innerHTML =
+          '<span class="other-story-number">PATIENT STORY ' + String(otherIndex + 1).padStart(2,"0") + '</span>' +
+          '<p class="quote">' + esc(otherStory.title) + '</p>' +
+          '<p class="meta">' + esc(otherStory.subtitle) + '</p>' +
+          '<span class="other-story-read">READ THIS STORY ↗</span>';
+        otherWrap.appendChild(a);
+      }else{
+        otherWrap.parentElement.parentElement.style.display = "none";
+      }
+    }
+
     const track = document.getElementById("convTrack");
     const vhPerPair = 110;
     track.style.height = Math.max(vhPerPair * pairEls.length, 320) + "vh";
@@ -118,23 +140,25 @@
       // The previous question can only fade toward the next one, so it can
       // never disappear and then reappear later in the sequence.
       function renderConversation(progress){
-        const position = Math.min(n - 1, Math.max(0, progress * n));
+        // Six dialogue frames produce five transitions. Mapping to n-1 keeps
+        // the final frame at 100% progress instead of snapping back to frame 06.
+        const position = Math.max(0, Math.min(n - 1, progress * (n - 1)));
         const active = Math.min(n - 1, Math.floor(position));
         const local = position - active;
-        const fadeStart = 0.58;
+        const fadeStart = 0.62;
         const blendT = Math.max(0, Math.min(1, (local - fadeStart) / (1 - fadeStart)));
         const blend = blendT * blendT * (3 - 2 * blendT);
 
         pairEls.forEach((el,i) => {
           let opacity = 0;
-          let y = 10;
+          let y = 8;
 
           if(i === active){
             opacity = 1 - blend;
-            y = -10 * blend;
+            y = -8 * blend;
           }else if(i === active + 1 && active < n - 1){
             opacity = blend;
-            y = 10 * (1 - blend);
+            y = 8 * (1 - blend);
           }
 
           el.style.opacity = opacity;
@@ -150,7 +174,7 @@
         trigger: track,
         start: "top top",
         end: "bottom bottom",
-        scrub: true,
+        scrub: 0.22,
         onUpdate: self => renderConversation(self.progress),
         onRefresh: self => renderConversation(self.progress)
       });
