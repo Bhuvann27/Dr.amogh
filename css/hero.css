@@ -4,7 +4,7 @@
 
 .coat-track{position:relative;height:260vh;background:#0E0E0E;}
 .coat-stage{
-  position:sticky;top:0;height:100vh;height:100dvh;width:100%;
+  position:sticky;top:0;height:100vh;width:100%;
   overflow:hidden;
   background:radial-gradient(120% 90% at 50% 32%,#2E2C27 0%,#1A1916 55%,#0E0E0E 100%);
   --hero-text:#FCF8F0;--hero-text-dim:#CDC5B5;--hero-accent:#E0A24E;--hero-shadow:rgba(16,11,6,0.75);
