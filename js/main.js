@@ -29,7 +29,7 @@
   // starts on the first bright frame after the opening hook.
   // -----------------------------------------------------------
   const heroCanvas = document.getElementById("heroCanvas");
-  const ROTATION_END = 0.965;
+  const ROTATION_END = 0.96;
   const FRAME_W = 720;
   const FRAME_H = 1280;
   const FRAME_COUNT = 197;
@@ -71,13 +71,11 @@
 
     const cw = heroCanvas.width;
     const ch = heroCanvas.height;
-    // Preserve the source frame's 720×1280 composition. Never stretch or
-    // crop it differently just because the viewport is wider or taller.
-    const scale = Math.min(cw / FRAME_W, ch / FRAME_H);
+    const scale = Math.max(cw / FRAME_W, ch / FRAME_H);
     const dw = FRAME_W * scale;
     const dh = FRAME_H * scale;
-    const dx = Math.round((cw - dw) * 0.5);
-    const dy = Math.round((ch - dh) * 0.5);
+    const dx = (cw - dw) * 0.5;
+    const dy = (ch - dh) * 0.5;
 
     canvasCtx.fillStyle = "#0E0E0E";
     canvasCtx.fillRect(0,0,cw,ch);
@@ -109,8 +107,8 @@
       img.onerror = () => console.warn("Hero frame failed to load:", i+1);
     };
 
-    // Start every real frame request immediately. Lazy/idle loading caused
-    // fast scrolls to outrun the sequence and reuse distant frames.
+    // Request the complete real sequence immediately so fast scrolling
+    // cannot outrun the frame loader.
     for(let i=0;i<FRAME_COUNT;i++) loadOne(i);
   }
 
@@ -141,11 +139,11 @@
   const HOOK2_WINDOW = [0.18, 0.32];
   const HOOK3_WINDOW = [0.36, 0.54];
   const ID_ZONES = {
-    name: [0.91, 0.93],
-    qual: [0.92, 0.94],
-    exp:  [0.93, 0.95],
-    hosp: [0.94, 0.96],
-    photo:[0.945, 0.965],
+    name: [0.64, 0.69],
+    qual: [0.67, 0.72],
+    exp:  [0.70, 0.75],
+    hosp: [0.73, 0.78],
+    photo:[0.76, 0.81],
   };
 
   function fadeWindow(p, start, end, fadeFrac){
@@ -219,10 +217,10 @@
         const identityVisible = Math.max(nameOp, qualOp, expOp, hospOp, photoOp);
         identityBlock.style.opacity = identityVisible;
 
-        const heroFinished = p >= 0.99;
+        const heroFinished = p >= 0.96;
         heroNavs.forEach(el => el.classList.toggle("hero-cinematic", !heroFinished));
         if(identityBlock){
-          const identityProgress = Math.max(0, Math.min(1, (p - 0.91) / 0.055));
+          const identityProgress = Math.max(0, Math.min(1, (p - 0.67) / 0.13));
           identityBlock.style.transform = `translateX(-50%) translateY(${(1 - identityProgress) * 34}px)`;
         }
 
