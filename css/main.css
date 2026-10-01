@@ -418,13 +418,13 @@ section{ position: relative; }
 .story-card::after{
   content:"";
   position:absolute;
-  inset: 8px -6px -6px 8px;
+  inset:0;
   z-index:-1;
-  background: var(--stone);
-  border: 1px solid var(--line);
-  border-radius: 20px;
-  transition: transform .35s var(--ease-out), opacity .35s;
-  opacity: 0.9;
+  background:transparent;
+  border:0;
+  border-radius:inherit;
+  opacity:0;
+  pointer-events:none;
 }
 .story-card:hover{ transform: translateY(-8px); border-color: var(--orange); box-shadow: 0 26px 48px rgba(23,19,15,0.14); }
 .story-card:hover::after{ transform: translate(4px, 4px); }
@@ -1687,4 +1687,35 @@ section{ position: relative; }
 @media(prefers-reduced-motion:reduce){
   .stories-scroll-arrow,
   .story-list-divider-arrow{animation:none;}
+}
+
+/* Final Patient Stories card treatment: both cards share one dark surface.
+   The old offset backplate made the second card look physically displaced. */
+.section-stories-focus .story-card-primary,
+.section-stories-focus .story-card-secondary{
+  background:#211d18!important;
+  color:var(--paper)!important;
+  border:1px solid rgba(251,249,244,.16)!important;
+  box-shadow:none!important;
+}
+.section-stories-focus .story-card-primary .quote,
+.section-stories-focus .story-card-secondary .quote,
+.section-stories-focus .story-card-primary .desc,
+.section-stories-focus .story-card-secondary .desc,
+.section-stories-focus .story-card-primary .story-kicker,
+.section-stories-focus .story-card-secondary .story-kicker{
+  color:var(--paper)!important;
+}
+.section-stories-focus .story-card-primary .desc,
+.section-stories-focus .story-card-secondary .desc{
+  color:rgba(251,249,244,.68)!important;
+}
+.section-stories-focus .story-card-primary .story-cta,
+.section-stories-focus .story-card-secondary .story-cta{
+  background:var(--orange)!important;
+  color:#fff!important;
+}
+.section-stories-focus .story-card-primary::after,
+.section-stories-focus .story-card-secondary::after{
+  display:none!important;
 }
