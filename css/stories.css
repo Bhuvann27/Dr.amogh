@@ -240,3 +240,8 @@
   .story-pill{min-height:52px;}
   .conv-stage::after{right:18px;bottom:20px;}
 }
+
+/* Final fallback: the first conversation is never hidden before JS runs. */
+#convPairs .conv-pair:first-child{
+  opacity:1;
+}
