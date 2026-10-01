@@ -1251,3 +1251,70 @@ section{ position: relative; }
   transform:none!important;
   border-radius:50%;
 }
+
+
+/* Final consultation date picker: one obvious control, no duplicate CTA. */
+.booking-date-step{padding-top:2px;}
+.date-picker-field{
+  position:relative;
+  display:flex;
+  align-items:center;
+  min-height:58px;
+  width:100%;
+  box-sizing:border-box;
+  padding:0 18px;
+  border:1px solid var(--line);
+  border-radius:14px;
+  background:var(--paper);
+  color:var(--text-dim);
+  cursor:pointer;
+  overflow:hidden;
+  transition:border-color .2s,box-shadow .2s,background .2s;
+}
+.date-picker-field:hover,
+.date-picker-field:focus-within{
+  border-color:rgba(242,84,12,.55);
+  box-shadow:0 0 0 4px rgba(242,84,12,.08);
+}
+.date-picker-text{
+  display:block;
+  width:100%;
+  padding-right:44px;
+  font-size:.95rem;
+  color:var(--text-dim);
+}
+.date-picker-field:has(input:not([value=""])) .date-picker-text{color:var(--ink);}
+.date-picker-field input[type="date"]{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  opacity:0;
+  cursor:pointer;
+  border:0;
+}
+.date-picker-field::after{
+  content:"▾";
+  position:absolute;
+  right:18px;
+  top:50%;
+  transform:translateY(-50%);
+  color:var(--text-dim);
+  pointer-events:none;
+  font-size:1rem;
+}
+.date-picker-hint{
+  margin:9px 0 0;
+  color:var(--text-dim);
+  font-size:.78rem;
+}
+
+.stories-focus-footer{color:rgba(23,19,15,.68);}
+@media(max-width:900px){
+  .stories-focus-footer{display:block;}
+  .stories-focus-footer>span{
+    display:block;
+    margin:0 0 12px;
+    color:rgba(23,19,15,.7);
+  }
+}
