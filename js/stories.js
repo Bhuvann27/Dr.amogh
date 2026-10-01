@@ -134,7 +134,8 @@
     if(window.gsap && window.ScrollTrigger){
       gsap.registerPlugin(ScrollTrigger);
       const n = pairEls.length;
-      const step = 1 / n;
+      const openingHold = 0.07;
+      const step = (1 - openingHold) / n;
 
       function fadeWindow(p, start, end, fadeFrac){
         const span = end - start;
@@ -147,23 +148,37 @@
       }
 
       function renderConversation(progress){
-        // Keep the opening frame occupied. The first dialogue is already
-        // readable when the black conversation stage enters the viewport,
-        // then the normal scroll-linked fade sequence takes over.
         const raw = Math.max(0, Math.min(1, progress));
-        const openingHold = 0.035;
-        const p = raw <= openingHold
-          ? 0
-          : (raw - openingHold) / (1 - openingHold);
+        const firstEnd = openingHold + step;
+
         pairEls.forEach((el, i) => {
-          const s = i * step;
-          const e = (i + 1) * step;
-          const op = fadeWindow(p, s, e, 0.3);
+          let op = 0;
+
+          if(i === 0){
+            // The conversation is already present when the section enters.
+            // It holds naturally, then fades into the next exchange.
+            if(raw <= openingHold){
+              op = 1;
+            }else if(raw < firstEnd){
+              const fadeStart = firstEnd - step * 0.3;
+              op = raw <= fadeStart
+                ? 1
+                : 1 - ((raw - fadeStart) / (firstEnd - fadeStart));
+            }
+          }else{
+            const s = openingHold + i * step;
+            const e = s + step;
+            op = fadeWindow(raw, s, e, 0.3);
+          }
+
           el.style.opacity = String(op);
-          el.style.transform = `translate(-50%, calc(-50% + ${(1 - op) * 16}px))`;
+          el.style.transform = `translate(-50%, calc(-50% + ${(1 - op) * 10}px))`;
         });
 
-        const active = Math.min(n - 1, Math.floor(p * n));
+        const activeRaw = raw <= openingHold
+          ? 0
+          : Math.min(n - 1, Math.floor((raw - openingHold) / step));
+        const active = Math.max(0, activeRaw);
         dots.forEach((d, i) => d.classList.toggle("active", i === active));
         if(progressNum){
           progressNum.textContent =
