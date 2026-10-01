@@ -1727,3 +1727,71 @@ section{ position: relative; }
 .section-stories-focus .story-card-secondary::after{
   display:none!important;
 }
+
+
+/* Final consultation emphasis: make the booking section feel like a clear
+   action point without changing the booking flow or navigation. */
+#consult{
+  position:relative;
+  overflow:hidden;
+  background:
+    radial-gradient(circle at 88% 18%, rgba(242,84,12,.18), transparent 30%),
+    linear-gradient(135deg, #17130F 0%, #211A14 55%, #17130F 100%);
+  color:var(--paper);
+}
+#consult::before{
+  content:"";
+  position:absolute;
+  width:320px;
+  height:320px;
+  right:-150px;
+  bottom:-170px;
+  border:1px solid rgba(242,84,12,.18);
+  border-radius:50%;
+  pointer-events:none;
+}
+#consult .container{position:relative;z-index:1;}
+#consult .section-head h2{color:var(--paper);}
+#consult .section-head>p{color:rgba(251,249,244,.72);}
+#consult .section-head .eyebrow{color:#FF7A3D;}
+#consult .consult-panel{
+  gap:28px;
+}
+#consult .booking-widget-wrap{
+  background:var(--paper);
+  border:1px solid rgba(251,249,244,.18);
+  border-top:4px solid var(--orange);
+  box-shadow:0 22px 55px rgba(0,0,0,.28);
+  transition:transform .28s var(--ease-out),box-shadow .28s var(--ease-out);
+}
+#consult .booking-widget-wrap:hover{
+  transform:translateY(-4px);
+  box-shadow:0 28px 65px rgba(0,0,0,.34);
+}
+#consult .booking-highlight{
+  padding-bottom:20px;
+  border-bottom:1px solid var(--line);
+}
+#consult .booking-highlight>strong{
+  color:var(--ink);
+}
+#consult .consult-summary{
+  background:rgba(251,249,244,.06);
+  border:1px solid rgba(251,249,244,.14);
+  color:var(--paper);
+  box-shadow:none;
+}
+#consult .consult-summary-row{color:var(--paper);}
+#consult .consult-note{color:rgba(251,249,244,.68);}
+#consult .booking-widget #bookDateNext{
+  background:var(--orange);
+  color:#fff;
+}
+#consult .booking-widget #bookDateNext:hover{
+  background:var(--orange-deep);
+  transform:translateY(-2px);
+}
+@media(max-width:780px){
+  #consult .booking-widget-wrap{border-top-width:3px;}
+  #consult .consult-summary{background:rgba(251,249,244,.07);}
+}
