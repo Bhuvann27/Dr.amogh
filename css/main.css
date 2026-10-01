@@ -2467,3 +2467,59 @@ section{ position: relative; }
     width:min(390px,calc(100vw - 48px));
   }
 }
+
+
+/* Safari/iOS: native button text can fall back to the browser's blue link
+   treatment unless the button's appearance and inherited color are explicit. */
+.care-item-head{
+  -webkit-appearance:none;
+  appearance:none;
+  color:var(--ink);
+  -webkit-tap-highlight-color:transparent;
+}
+.care-item-head .care-item-title,
+.care-item-head .care-item-desc,
+.care-item-head .care-item-icon{
+  color:inherit;
+}
+.care-item-head:visited,
+.care-item-head:hover,
+.care-item-head:active{
+  color:var(--ink);
+}
+
+/* Desktop-only hero typography cleanup. Mobile remains untouched. */
+@media (min-width:881px){
+  .coat-stage .hook-line{
+    top:17%;
+    width:min(30vw,430px);
+  }
+  .coat-stage .hook-line p{
+    font-size:clamp(1.15rem,2.15vw,1.65rem);
+    line-height:1.16;
+  }
+  .coat-stage #hook1{left:6.5%;}
+  .coat-stage #hook2{right:6.5%;}
+  .coat-stage #hook3{
+    display:none !important;
+  }
+  .coat-stage .identity-block{
+    bottom:6.5%;
+    width:min(560px,42vw);
+  }
+  .coat-stage .identity-name{
+    font-size:clamp(1.8rem,2.7vw,2.55rem);
+  }
+  .coat-stage .identity-qual,
+  .coat-stage .identity-hosp{
+    font-size:.9rem;
+  }
+  .coat-stage .identity-exp{
+    font-size:.78rem;
+    padding:6px 14px;
+  }
+  .coat-stage .identity-photo{
+    width:54px;
+    height:54px;
+  }
+}
