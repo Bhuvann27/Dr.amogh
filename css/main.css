@@ -2277,3 +2277,62 @@ section{ position: relative; }
     max-width:100%;
   }
 }
+
+
+/* Final consultation card cleanup: remove nested header box and excess vertical space */
+#consult .booking-widget-wrap{
+  padding:24px 28px 28px;
+  box-sizing:border-box;
+}
+#consult .booking-meta{
+  display:flex;
+  align-items:center;
+  justify-content:flex-start;
+  gap:0;
+  width:100%;
+  box-sizing:border-box;
+  padding:0 0 16px;
+  margin:0 0 24px;
+  border-bottom:1px solid var(--line);
+  color:var(--ink);
+  font-family:var(--font-display);
+  font-weight:800;
+  font-size:1rem;
+  line-height:1.2;
+}
+#consult .booking-meta span{
+  white-space:nowrap;
+}
+#consult .booking-meta i{
+  width:1px;
+  height:18px;
+  margin:0 11px;
+  background:var(--line);
+}
+#consult .booking-widget{
+  padding:0;
+}
+#consult .booking-widget .booking-step-label{
+  margin-top:0;
+}
+#consult .booking-widget .date-picker-hint{
+  margin-bottom:0;
+}
+@media(max-width:780px){
+  #consult .booking-widget-wrap{
+    padding:22px 18px 24px;
+    border-radius:18px;
+  }
+  #consult .booking-meta{
+    padding-bottom:14px;
+    margin-bottom:20px;
+    font-size:.98rem;
+  }
+  #consult .booking-meta i{
+    height:17px;
+    margin:0 10px;
+  }
+  #consult .booking-widget .booking-date-step{
+    padding-top:0;
+  }
+}
