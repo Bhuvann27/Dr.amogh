@@ -71,7 +71,12 @@
 
     const cw = heroCanvas.width;
     const ch = heroCanvas.height;
-    const scale = Math.max(cw / FRAME_W, ch / FRAME_H);
+    // Mobile keeps the established cover framing. Desktop uses contain so
+    // the complete portrait source frame remains visible without distortion.
+    const desktop = window.innerWidth >= 881;
+    const scale = desktop
+      ? Math.min(cw / FRAME_W, ch / FRAME_H)
+      : Math.max(cw / FRAME_W, ch / FRAME_H);
     const dw = FRAME_W * scale;
     const dh = FRAME_H * scale;
     const dx = (cw - dw) * 0.5;
