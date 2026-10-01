@@ -32,7 +32,7 @@
   const ROTATION_END = 0.96;
   const FRAME_W = 720;
   const FRAME_H = 1280;
-  const FRAME_COUNT = 193;
+  const FRAME_COUNT = 197;
   const FRAME_DIR = "assets/hero-sequence-hires/";
   const heroFrames = new Array(FRAME_COUNT);
   let heroFrame = 0;
