@@ -39,12 +39,24 @@
   }
   function esc(s){ return (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
 
+  function appointmentSummary(){
+    if(!state.dateISO || !state.slot) return "";
+    return `
+      <div class="booking-selection">
+        <span class="booking-selection-label">YOUR APPOINTMENT</span>
+        <strong>${esc(formatDateHuman(state.dateISO))}</strong>
+        <span>${esc(formatTimeHuman(state.slot))} · 15 min · ₹1,200</span>
+      </div>`;
+  }
+
   async function loadSlots(){
-    state.loadingSlots = true; state.slots = []; render();
+    state.loadingSlots = true; state.slots = []; state.error = ""; render();
     try {
       state.slots = await window.BookingDB.getAvailableSlots(state.dateISO);
     } catch(e){
+      console.error("Booking slot load failed", e);
       state.slots = [];
+      state.error = "We couldn't load the available times. Please try again.";
     }
     state.loadingSlots = false;
     render();
@@ -68,11 +80,16 @@
 
     slot: () => `
       <div class="booking-step">
-        <div class="booking-step-label">STEP 2 &middot; CHOOSE A TIME &mdash; ${esc(formatDateHuman(state.dateISO))}</div>
-        ${state.loadingSlots ? `<p style="color:var(--text-dim);">Checking available times&hellip;</p>` :
+        <div class="booking-step-label">STEP 2 &middot; CHOOSE A TIME</div>
+        <div class="booking-step-context">${esc(formatDateHuman(state.dateISO))}</div>
+        <div class="booking-progress" aria-label="Booking progress">
+          <span class="is-done">1</span><i></i><span class="is-active">2</span><i></i><span>3</span><i></i><span>4</span>
+        </div>
+        ${state.loadingSlots ? `<p class="booking-status">Checking available times&hellip;</p>` :
+          state.error ? `<div class="booking-error">${esc(state.error)}<button type="button" class="btn-ghost-sm" id="bookRetrySlots">Try again</button></div>` :
           state.slots.length ? `<div class="slot-grid">${state.slots.map((s) => `<button type="button" class="slot-chip" data-slot="${esc(s)}">${esc(formatTimeHuman(s))}</button>`).join("")}</div>` :
-          `<p style="color:var(--text-dim);">No times available on this date. Please try another date.</p>`}
-        <div style="margin-top:18px; display:flex; gap:10px;">
+          `<p class="booking-status">No consultation times are available on this date. Please choose another date.</p>`}
+        <div class="booking-step-actions">
           <button type="button" class="btn-ghost-sm" id="bookBackToDate">&larr; Change date</button>
         </div>
       </div>`,
@@ -80,21 +97,24 @@
     details: () => `
       <div class="booking-step">
         <div class="booking-step-label">STEP 3 &middot; YOUR DETAILS</div>
-        <p style="color:var(--text-dim); margin-bottom:16px;">${esc(formatDateHuman(state.dateISO))} at ${esc(formatTimeHuman(state.slot))}</p>
+        ${appointmentSummary()}
+        <div class="booking-progress" aria-label="Booking progress">
+          <span class="is-done">1</span><i></i><span class="is-done">2</span><i></i><span class="is-active">3</span><i></i><span>4</span>
+        </div>
         <div class="field-group">
           <label for="bookName">Name</label>
-          <input class="field-input" type="text" id="bookName" value="${esc(state.name)}" placeholder="Your name">
+          <input class="field-input" type="text" id="bookName" value="${esc(state.name)}" placeholder="Your name" autocomplete="name">
         </div>
         <div class="field-group">
           <label for="bookPhone">Phone</label>
-          <input class="field-input" type="tel" id="bookPhone" value="${esc(state.phone)}" placeholder="10-digit mobile number">
+          <input class="field-input" type="tel" id="bookPhone" value="${esc(state.phone)}" placeholder="10-digit mobile number" autocomplete="tel">
         </div>
         <div class="field-group">
-          <label for="bookEmail">Email <span style="font-weight:400; color:var(--text-dim);">(optional)</span></label>
-          <input class="field-input" type="email" id="bookEmail" value="${esc(state.email)}" placeholder="you@example.com">
+          <label for="bookEmail">Email <span class="optional-label">(optional)</span></label>
+          <input class="field-input" type="email" id="bookEmail" value="${esc(state.email)}" placeholder="you@example.com" autocomplete="email">
         </div>
-        ${state.error ? `<p style="color:#C0392B; font-size:0.9rem; margin-bottom:12px;">${esc(state.error)}</p>` : ""}
-        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        ${state.error ? `<p class="booking-error-text">${esc(state.error)}</p>` : ""}
+        <div class="booking-step-actions">
           <button type="button" class="btn-ghost-sm" id="bookBackToSlot">&larr; Back</button>
           <button type="button" class="btn btn-primary" id="bookToReview">Review request</button>
         </div>
@@ -103,21 +123,31 @@
     review: () => `
       <div class="booking-step">
         <div class="booking-step-label">STEP 4 &middot; REVIEW YOUR REQUEST</div>
-        <div class="review-rows">
-          <div><span>Date</span><strong>${esc(formatDateHuman(state.dateISO))}</strong></div>
-          <div><span>Time</span><strong>${esc(formatTimeHuman(state.slot))}</strong></div>
-          <div><span>Duration</span><strong>15 minutes</strong></div>
-          <div><span>Fee</span><strong>&#8377;1,200</strong></div>
-          <div><span>Name</span><strong>${esc(state.name)}</strong></div>
-          <div><span>Phone</span><strong>${esc(state.phone)}</strong></div>
-          ${state.email ? `<div><span>Email</span><strong>${esc(state.email)}</strong></div>` : ""}
+        ${appointmentSummary()}
+        <div class="booking-progress" aria-label="Booking progress">
+          <span class="is-done">1</span><i></i><span class="is-done">2</span><i></i><span class="is-done">3</span><i></i><span class="is-active">4</span>
         </div>
-        <p style="color:var(--text-dim); font-size:0.88rem; margin:16px 0;">
-          This sends a request only &mdash; the clinic will confirm your appointment on WhatsApp.
-          Payment is handled manually after confirmation.
-        </p>
-        ${state.error ? `<p style="color:#C0392B; font-size:0.9rem; margin-bottom:12px;">${esc(state.error)}</p>` : ""}
-        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <div class="review-card">
+          <div class="review-card-section">
+            <span class="review-card-label">CONSULTATION</span>
+            <div class="review-line"><span>Date</span><strong>${esc(formatDateHuman(state.dateISO))}</strong></div>
+            <div class="review-line"><span>Time</span><strong>${esc(formatTimeHuman(state.slot))}</strong></div>
+            <div class="review-line"><span>Duration</span><strong>15 minutes</strong></div>
+            <div class="review-line"><span>Fee</span><strong>₹1,200</strong></div>
+          </div>
+          <div class="review-card-section">
+            <span class="review-card-label">YOUR DETAILS</span>
+            <div class="review-line"><span>Name</span><strong>${esc(state.name) || "Not provided"}</strong></div>
+            <div class="review-line"><span>Phone</span><strong>${esc(state.phone) || "Not provided"}</strong></div>
+            ${state.email ? `<div class="review-line"><span>Email</span><strong>${esc(state.email)}</strong></div>` : ""}
+          </div>
+        </div>
+        <div class="review-note">
+          <strong>What happens next?</strong>
+          <p>Your request will be sent to the clinic. The clinic will confirm the appointment on WhatsApp. Payment is handled manually after confirmation.</p>
+        </div>
+        ${state.error ? `<p class="booking-error-text">${esc(state.error)}</p>` : ""}
+        <div class="booking-step-actions">
           <button type="button" class="btn-ghost-sm" id="bookBackToDetails">&larr; Back</button>
           <button type="button" class="btn btn-primary" id="bookSubmit">Request a consultation</button>
         </div>
@@ -167,7 +197,12 @@
       document.getElementById("bookEmail").addEventListener("input", (e) => state.email = e.target.value);
       document.getElementById("bookBackToSlot").addEventListener("click", () => { state.step = "slot"; render(); });
       document.getElementById("bookToReview").addEventListener("click", () => {
-        if(!state.name.trim() || !state.phone.trim()){
+        // Read the live fields again so mobile autofill/IME cannot leave the review blank.
+        state.name = document.getElementById("bookName").value.trim();
+        state.phone = document.getElementById("bookPhone").value.trim();
+        state.email = document.getElementById("bookEmail").value.trim();
+
+        if(!state.name || !state.phone){
           state.error = "Please enter your name and phone number.";
           render();
           return;
