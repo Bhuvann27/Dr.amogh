@@ -164,3 +164,11 @@
 #hook1{display:block !important;}
 .coat-imgwrap{opacity:1 !important;}
 .identity-block{opacity:1;}
+
+
+/* Final hero timing: bring back the coat's lift-off moment, then hand off
+   directly to the real doctor section. */
+@media(max-width:640px){
+  .coat-track{height:260vh;}
+}
+#hook1{display:block!important;}
