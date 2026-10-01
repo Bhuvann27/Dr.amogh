@@ -73,7 +73,7 @@
       el.innerHTML =
         '<p class="q">' + esc(pair.q) + '</p>' +
         '<p class="a">' + esc(pair.a) + '</p>';
-      if(i === 0) el.style.opacity = "1";
+      el.style.opacity = "0";
       pairsWrap.appendChild(el);
       pairEls.push(el);
       counterWrap.appendChild(document.createElement("i"));
@@ -123,39 +123,36 @@
     const vhPerPair = 110;
     track.style.height = Math.max(vhPerPair * pairEls.length, 320) + "vh";
 
-    function fadeWindow(p,start,end,fadeFrac){
-      const span = end - start;
-      const fadeIn = start + span * fadeFrac;
-      const fadeOut = end - span * fadeFrac;
-      if(p < start || p > end) return 0;
-      if(p < fadeIn) return (p-start)/(fadeIn-start);
-      if(p > fadeOut) return 1-(p-fadeOut)/(end-fadeOut);
-      return 1;
-    }
-
     if(window.gsap && window.ScrollTrigger){
       gsap.registerPlugin(ScrollTrigger);
       const n = pairEls.length;
       const step = 1 / n;
+
+      // Exactly one dialogue owns each scroll interval. This prevents a
+      // previous question from fading back in after it has already left.
+      function renderConversation(progress){
+        const active = Math.min(n - 1, Math.floor(progress * n));
+        pairEls.forEach((el,i) => {
+          const isActive = i === active;
+          el.style.opacity = isActive ? "1" : "0";
+          el.style.transform = isActive
+            ? "translate(-50%, -50%)"
+            : "translate(-50%, calc(-50% + 10px))";
+          el.style.pointerEvents = isActive ? "auto" : "none";
+        });
+        dots.forEach((d,i) => d.classList.toggle("active", i === active));
+        if(progressNum) progressNum.textContent = String(active + 1).padStart(2,"0") + " / " + totalStr;
+      }
+
       ScrollTrigger.create({
         trigger: track,
         start: "top top",
         end: "bottom bottom",
         scrub: true,
-        onUpdate: self => {
-          const p = self.progress;
-          pairEls.forEach((el,i) => {
-            const s = i * step;
-            const e = (i + 1) * step;
-            const op = fadeWindow(p,s,e,0.3);
-            el.style.opacity = op;
-            el.style.transform = "translate(-50%, calc(-50% + " + ((1-op)*16) + "px))";
-          });
-          const active = Math.min(n-1, Math.floor(p*n));
-          dots.forEach((d,i) => d.classList.toggle("active", i === active));
-          if(progressNum) progressNum.textContent = String(active+1).padStart(2,"0") + " / " + totalStr;
-        }
+        onUpdate: self => renderConversation(self.progress),
+        onRefresh: self => renderConversation(self.progress)
       });
+      renderConversation(0);
     }else{
       track.classList.add("no-js");
       track.style.height = "auto";
