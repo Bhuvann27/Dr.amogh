@@ -20,6 +20,21 @@ window.BookingDB = (function(){
   function toHHMM(mins){ const h = Math.floor(mins/60), m = mins%60; return `${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}`; }
   function formatDateISO(d){ return d.toISOString().slice(0,10); }
 
+  // All booking-date comparisons use India Standard Time.
+  function indiaNowParts(){
+    const parts=new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Kolkata",year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",hourCycle:"h23"}).formatToParts(new Date());
+    return Object.fromEntries(parts.filter(p=>p.type!=="literal").map(p=>[p.type,p.value]));
+  }
+  function indiaTodayISO(){const p=indiaNowParts();return `${p.year}-${p.month}-${p.day}`;}
+  function isBookingDateInWindow(dateISO){
+    if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(dateISO))return false;
+    const today=indiaTodayISO();
+    const limit=new Date(today+"T00:00:00Z");
+    limit.setUTCDate(limit.getUTCDate()+90);
+    return dateISO>=today&&new Date(dateISO+"T00:00:00Z")<=limit;
+  }
+
+
   // ---- public: read availability, compute free slots -------------
   async function getWeeklyAvailability(){
     const c = getClient();
@@ -50,9 +65,11 @@ window.BookingDB = (function(){
     const [weekly, blocks, taken] = await Promise.all([
       getWeeklyAvailability(), getBlocksForDate(dateISO), getTakenSlots(dateISO),
     ]);
-    const date = new Date(dateISO + "T00:00:00");
-    const dow = date.getDay();
-    const day = weekly.find((w) => w.day_of_week === dow);
+    if(!isBookingDateInWindow(dateISO)) return [];
+
+    const date=new Date(dateISO+"T00:00:00Z");
+    const dow=date.getUTCDay();
+    const day=weekly.find((w)=>w.day_of_week===dow);
     if(!day || !day.is_open) return [];
 
     const takenSet = new Set(taken);
@@ -61,9 +78,10 @@ window.BookingDB = (function(){
 
     const start = toMinutes(day.start_time.slice(0,5));
     const end = toMinutes(day.end_time.slice(0,5));
-    const now = new Date();
-    const isToday = formatDateISO(now) === dateISO;
-    const nowMins = now.getHours()*60 + now.getMinutes();
+    const nowParts=indiaNowParts();
+    const indiaToday=`${nowParts.year}-${nowParts.month}-${nowParts.day}`;
+    const isToday=indiaToday===dateISO;
+    const nowMins=Number(nowParts.hour)*60+Number(nowParts.minute);
 
     const slots = [];
     for(let m = start; m + SLOT_MINUTES <= end; m += SLOT_MINUTES){
@@ -87,8 +105,17 @@ window.BookingDB = (function(){
   // and ask the patient to pick again — the DB unique index is the real
   // guard, this is just how the UI finds out.
   async function requestAppointment({ name, phone, email, dateISO, startTime }){
-    const c = getClient();
+    const c=getClient();
     if(!c) throw new Error("Not connected to Supabase.");
+
+    if(!isBookingDateInWindow(dateISO)){
+      throw Object.assign(new Error("Booking date is outside the allowed window."),{invalidDate:true});
+    }
+    const currentSlots=await getAvailableSlots(dateISO);
+    if(!currentSlots.includes(startTime)){
+      throw Object.assign(new Error("That slot is no longer available."),{slotTaken:true});
+    }
+
     // Deliberately not chaining .select().single() here: patients can only INSERT
     // (never SELECT) appointment rows under RLS, so asking Postgres to return the
     // inserted row back would be filtered out by that same policy and look like a
