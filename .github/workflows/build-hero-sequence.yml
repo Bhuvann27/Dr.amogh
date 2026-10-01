@@ -33,9 +33,9 @@ jobs:
           shutil.rmtree(out, ignore_errors=True)
           out.mkdir(parents=True, exist_ok=True)
 
-          # Skip the dark opening. Start just after the first hook has cleared. Batch 1 trim.
+          # Start just before the first hook and keep the full coat lift-off payoff. Stop before the source fades to black.
           START_FRAME = 32
-          END_FRAME = 180
+          END_FRAME = 224
 
           cap = cv2.VideoCapture(str(src))
           total = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
