@@ -2011,15 +2011,20 @@ section{ position: relative; }
 }
 @media(max-width:780px){
   #consult .booking-highlight{
-    grid-template-columns:1fr;
+    grid-template-columns:minmax(0,1fr) auto;
     grid-template-areas:
-      "kicker"
-      "title"
-      "meta";
-    gap:5px;
+      "kicker meta"
+      "title meta";
+    align-items:center;
+    gap:5px 14px;
   }
   #consult .booking-highlight>div{
-    justify-self:start;
+    justify-self:end;
+    align-self:center;
+    text-align:right;
+  }
+  #consult .booking-highlight>div b{
+    display:inline-block;
   }
   #consult .booking-widget .field-group label{
     display:block;
