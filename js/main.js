@@ -275,32 +275,33 @@
   }
 
   function updateActiveNav(){
-    const scrollY = window.scrollY || window.pageYOffset || 0;
-    const homeRect = track ? track.getBoundingClientRect() : null;
-    const homeTop = scrollY + (homeRect ? homeRect.top : 0);
-    const homeBottom = scrollY + (homeRect ? homeRect.bottom : 0);
-
-    // Keep Home active for the full hero section.
-    if(homeRect && scrollY >= homeTop - 2 && scrollY < homeBottom - 2){
+    const homePoint=window.innerHeight*0.18;
+    const homeRect=track?track.getBoundingClientRect():null;
+    if(homeRect&&homeRect.top<=homePoint&&homeRect.bottom>homePoint){
       setActiveNav("index.html");
       return;
     }
-
-    // Use document section boundaries rather than a single viewport point.
-    // This keeps short sections such as Consultation highlighted for their
-    // entire scroll range instead of handing the highlight to the next section.
-    const navOffset = Math.min(110, Math.max(72, window.innerHeight * 0.14));
-    let active = null;
+    const point=window.innerHeight*0.30;
+    let active=null,best=Infinity;
     navSections.forEach(({id,href})=>{
-      const section = document.getElementById(id);
-      if(!section) return;
-      const top = scrollY + section.getBoundingClientRect().top;
-      if(scrollY + navOffset >= top){
-        active = href;
+      const section=document.getElementById(id);
+      if(!section)return;
+      const rect=section.getBoundingClientRect();
+      if(rect.top<=point&&rect.bottom>=point){
+        const distance=Math.abs(rect.top-point);
+        if(distance<best){best=distance;active=href;}
       }
     });
-
-    setActiveNav(active || "index.html");
+    if(!active){
+      navSections.forEach(({id,href})=>{
+        const section=document.getElementById(id);
+        if(!section)return;
+        const rect=section.getBoundingClientRect();
+        const distance=rect.bottom<point?point-rect.bottom:rect.top-point;
+        if(distance<best){best=distance;active=href;}
+      });
+    }
+    setActiveNav(active||"index.html");
   }
 
   let navUpdateQueued=false;
