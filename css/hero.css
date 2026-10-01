@@ -2,7 +2,7 @@
    Hero: full-resolution source-frame scroll sequence
    ========================================================= */
 
-.coat-track{position:relative;height:260vh;background:#0E0E0E;}
+.coat-track{position:relative;height:245vh;background:#0E0E0E;}
 .coat-stage{
   position:sticky;top:0;height:100vh;width:100%;
   overflow:hidden;
@@ -21,8 +21,6 @@
   max-width:none;
   max-height:none;
   aspect-ratio:auto;
-  object-fit:fill;
-  object-position:center;
   transform-origin:50% 50%;
   image-rendering:auto;
 }
@@ -122,7 +120,7 @@
   .coat-imgwrap{padding:0;align-items:center;justify-content:center;}
   .hero-frame-canvas{
     width:100%;
-    height:auto;
+    height:100%;
     max-width:none;
     max-height:none;
   }
@@ -172,6 +170,6 @@
 /* Final hero timing: bring back the coat's lift-off moment, then hand off
    directly to the real doctor section. */
 @media(max-width:640px){
-  .coat-track{height:260vh;}
+  .coat-track{height:245vh;}
 }
 #hook1{display:block!important;}
