@@ -12,7 +12,7 @@
 <link rel="stylesheet" href="css/main.css">
 <link rel="stylesheet" href="css/stories.css">
 </head>
-<body>
+<body class="patient-stories-page">
 
 <nav class="site-nav">
   <a href="index.html" class="wordmark">Dr. Amogh G<span class="dot">.</span></a>
@@ -38,17 +38,17 @@
   <div class="container">
     <a href="index.html" class="back-link reveal">&larr; Back to home</a>
     <span class="eyebrow reveal">PATIENT STORY</span>
-    <h1 id="storyTitle" class="reveal">&nbsp;</h1>
+    <h1 id="storyTitle">“I thought I was just tired.”</h1>
     <p class="subtitle reveal" style="margin-top:8px;">A patient's experience, shared anonymously.</p>
-    <p class="subtitle reveal" id="storyIntro" style="margin-top:18px; max-width:56ch;"></p>
-    <nav class="story-pills reveal" id="storyPills" aria-label="Choose a patient story"></nav>
+    <p class="subtitle" id="storyIntro" style="margin-top:18px; max-width:56ch;">A patient came in after feeling more tired than usual for a few weeks.</p>
+    <nav class="story-pills" id="storyPills" aria-label="Choose a patient story"><a class="story-pill" href="stories.html?story=fatigue" aria-current="true">STORY 01 · On fatigue that doesn’t go away with rest</a><a class="story-pill" href="stories.html?story=headache">STORY 02 · On headaches that keep coming back</a></nav>
   </div>
 </header>
 
 <div class="conv-track" id="convTrack">
   <div class="conv-stage" id="convStage">
     <p class="conv-intro-line">Shared with the patient's consent. Identifying details have been removed.</p>
-    <div id="convPairs"></div>
+    <div id="convPairs"><div class="conv-pair conv-fallback-pair" style="top:50%;left:50%;transform:translate(-50%,-50%);opacity:1;"><p class="q">When did you first notice it?</p><p class="a">I think it started a few weeks ago. At first, I thought it was because of work. I was busy, so I didn’t think much about it.</p></div></div>
     <div class="conv-progress-num" id="convProgressNum">01 / 06</div>
     <div class="conv-counter" id="convCounter"></div>
   </div>
