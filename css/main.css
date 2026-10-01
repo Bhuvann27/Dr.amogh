@@ -1795,3 +1795,152 @@ section{ position: relative; }
   #consult .booking-widget-wrap{border-top-width:3px;}
   #consult .consult-summary{background:rgba(251,249,244,.07);}
 }
+
+
+/* =========================================================
+   Consultation booking flow refinement
+   ========================================================= */
+#consult .booking-widget-wrap{
+  overflow:hidden;
+}
+#consult .booking-highlight{
+  align-items:flex-start;
+  flex-wrap:wrap;
+  border-bottom:1px solid var(--line);
+  padding-bottom:18px;
+}
+#consult .booking-highlight>strong{
+  margin-left:0;
+  flex:1 1 100%;
+  order:2;
+  font-size:clamp(1.15rem,2vw,1.35rem);
+}
+#consult .booking-highlight>span{order:1;}
+#consult .booking-highlight>div{order:3; margin-left:0;}
+.booking-widget .booking-step{max-width:720px;}
+.booking-progress{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  margin:0 0 20px;
+}
+.booking-progress span{
+  width:24px;
+  height:24px;
+  border:1px solid var(--line);
+  border-radius:50%;
+  display:grid;
+  place-items:center;
+  font-size:.68rem;
+  font-weight:800;
+  color:var(--text-dim);
+  background:var(--paper);
+}
+.booking-progress span.is-active{
+  background:var(--orange);
+  border-color:var(--orange);
+  color:#fff;
+}
+.booking-progress span.is-done{
+  background:var(--orange-soft);
+  border-color:rgba(242,84,12,.28);
+  color:var(--orange-deep);
+}
+.booking-progress i{
+  width:28px;
+  height:1px;
+  background:var(--line);
+}
+.booking-step-context{
+  font-family:var(--font-display);
+  font-weight:700;
+  font-size:1.02rem;
+  margin:-2px 0 16px;
+}
+.booking-selection{
+  display:grid;
+  gap:3px;
+  padding:14px 16px;
+  margin:0 0 18px;
+  border:1px solid rgba(242,84,12,.18);
+  border-left:3px solid var(--orange);
+  border-radius:12px;
+  background:var(--orange-soft);
+}
+.booking-selection-label{
+  font-size:.66rem;
+  letter-spacing:.1em;
+  font-weight:800;
+  color:var(--orange-deep);
+}
+.booking-selection strong{font-family:var(--font-display);font-size:1rem;}
+.booking-selection span:last-child{font-size:.84rem;color:var(--text-dim);}
+.booking-step-actions{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  align-items:center;
+  margin-top:18px;
+}
+.booking-status{color:var(--text-dim);margin:4px 0 0;line-height:1.5;}
+.booking-error{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  padding:14px 16px;
+  border:1px solid rgba(192,57,43,.2);
+  border-radius:12px;
+  color:#8f2f24;
+  background:rgba(192,57,43,.05);
+}
+.booking-error-text{color:#C0392B;font-size:.9rem;margin:0 0 12px;}
+.optional-label{font-weight:400;color:var(--text-dim);}
+.review-card{
+  border:1px solid var(--line);
+  border-radius:16px;
+  overflow:hidden;
+  background:var(--paper);
+}
+.review-card-section{padding:16px 18px;}
+.review-card-section + .review-card-section{border-top:1px solid var(--line);}
+.review-card-label{
+  display:block;
+  margin-bottom:9px;
+  font-size:.67rem;
+  font-weight:800;
+  letter-spacing:.1em;
+  color:var(--orange);
+}
+.review-line{
+  display:grid;
+  grid-template-columns:minmax(90px,.7fr) minmax(0,1.3fr);
+  gap:14px;
+  padding:9px 0;
+  border-top:1px solid var(--line);
+  font-size:.92rem;
+}
+.review-line:first-of-type{border-top:0;}
+.review-line span{color:var(--text-dim);}
+.review-line strong{overflow-wrap:anywhere;text-align:right;}
+.review-note{
+  margin-top:14px;
+  padding:14px 16px;
+  border-radius:12px;
+  background:var(--stone);
+}
+.review-note strong{font-family:var(--font-display);font-size:.95rem;}
+.review-note p{margin:5px 0 0;color:var(--text-dim);font-size:.84rem;line-height:1.5;}
+.booking-success-title{font-family:var(--font-display);font-weight:800;font-size:1.2rem;margin-bottom:10px;}
+.booking-success-copy{color:var(--text-dim);margin-bottom:20px;}
+@media(max-width:780px){
+  #consult .booking-widget-wrap{padding:18px;border-radius:18px;}
+  #consult .booking-highlight{padding:2px 0 16px;}
+  .booking-widget{padding:8px 0 0;}
+  .booking-progress{margin-bottom:17px;}
+  .booking-progress i{width:18px;}
+  .booking-selection{margin-bottom:16px;}
+  .review-card-section{padding:14px;}
+  .review-line{grid-template-columns:86px minmax(0,1fr);font-size:.88rem;}
+  .review-line strong{text-align:right;}
+}
