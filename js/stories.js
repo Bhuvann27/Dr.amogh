@@ -147,7 +147,14 @@
       }
 
       function renderConversation(progress){
-        const p = Math.max(0, Math.min(1, progress));
+        // Keep the opening frame occupied. The first dialogue is already
+        // readable when the black conversation stage enters the viewport,
+        // then the normal scroll-linked fade sequence takes over.
+        const raw = Math.max(0, Math.min(1, progress));
+        const openingHold = 0.035;
+        const p = raw <= openingHold
+          ? 0
+          : (raw - openingHold) / (1 - openingHold);
         pairEls.forEach((el, i) => {
           const s = i * step;
           const e = (i + 1) * step;
