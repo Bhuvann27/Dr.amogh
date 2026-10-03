@@ -111,7 +111,7 @@
           <label for="bookPhone">Phone</label>
           <div class="phone-input-wrap">
             <span class="phone-prefix" aria-hidden="true">+91</span>
-            <input class="field-input" type="tel" id="bookPhone" value="${esc((state.phone||"").replace(/^\\+91\\s*/, ""))}" placeholder="10-digit mobile number" autocomplete="tel" inputmode="numeric" maxlength="10">
+            <input class="field-input" type="tel" id="bookPhone" value="${esc((state.phone||"").replace(/^\+91\s*/, ""))}" placeholder="10-digit mobile number" autocomplete="tel" inputmode="numeric" maxlength="10">
           </div>
         </div>
         <div class="field-group">
