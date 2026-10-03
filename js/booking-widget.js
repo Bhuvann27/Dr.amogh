@@ -109,7 +109,10 @@
         </div>
         <div class="field-group">
           <label for="bookPhone">Phone</label>
-          <input class="field-input" type="tel" id="bookPhone" value="${esc(state.phone)}" placeholder="10-digit mobile number" autocomplete="tel">
+          <div class="phone-input-wrap">
+            <span class="phone-prefix" aria-hidden="true">+91</span>
+            <input class="field-input" type="tel" id="bookPhone" value="${esc((state.phone||"").replace(/^\\+91\\s*/, ""))}" placeholder="10-digit mobile number" autocomplete="tel" inputmode="numeric" maxlength="10">
+          </div>
         </div>
         <div class="field-group">
           <label for="bookEmail">Email <span class="optional-label">(optional)</span></label>
@@ -194,13 +197,18 @@
     }
     if(state.step === "details"){
       document.getElementById("bookName").addEventListener("input", (e) => state.name = e.target.value);
-      document.getElementById("bookPhone").addEventListener("input", (e) => state.phone = e.target.value);
+      document.getElementById("bookPhone").addEventListener("input", (e) => {
+        const digits = e.target.value.replace(/\\D/g, "").slice(0,10);
+        e.target.value = digits;
+        state.phone = digits ? `+91 ${digits}` : "";
+      });
       document.getElementById("bookEmail").addEventListener("input", (e) => state.email = e.target.value);
       document.getElementById("bookBackToSlot").addEventListener("click", () => { state.step = "slot"; render(); });
       document.getElementById("bookToReview").addEventListener("click", () => {
         // Read the live fields again so mobile autofill/IME cannot leave the review blank.
         state.name = document.getElementById("bookName").value.trim();
-        state.phone = document.getElementById("bookPhone").value.trim();
+        const phoneDigits = document.getElementById("bookPhone").value.replace(/\\D/g, "").slice(0,10);
+        state.phone = phoneDigits ? `+91 ${phoneDigits}` : "";
         state.email = document.getElementById("bookEmail").value.trim();
 
         if(!state.name || !state.phone){
@@ -208,7 +216,7 @@
           render();
           return;
         }
-        if(!/^\d{7,15}$/.test(state.phone.replace(/[\s-]/g, ""))){
+        if(!/^\d{10}$/.test(state.phone.replace(/^\+91\s*/, "").replace(/[\s-]/g, ""))){
           state.error = "Please enter a valid phone number.";
           render();
           return;
