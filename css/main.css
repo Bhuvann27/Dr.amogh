@@ -369,6 +369,29 @@ section{ position: relative; }
 .booking-step .field-group label{ display:block; font-weight:700; font-size: 0.9rem; margin-bottom: 6px; }
 .booking-step .field-input{ width:100%; border:1px solid var(--line); border-radius:10px; padding: 12px 14px; font-family:inherit; font-size:1rem; background: var(--paper); }
 .booking-step .field-input:focus{ outline:none; border-color: var(--orange); }
+.phone-input-wrap{
+  display:flex;
+  align-items:center;
+  width:100%;
+  border:1px solid var(--line);
+  border-radius:10px;
+  background:var(--paper);
+}
+.phone-prefix{
+  flex:none;
+  padding-left:14px;
+  color:var(--text-dim);
+  font-size:1rem;
+}
+.phone-input-wrap .field-input{
+  border:0;
+  background:transparent;
+  flex:1;
+  min-width:0;
+}
+.phone-input-wrap .field-input:focus{
+  border:0;
+}
 .slot-grid{ display:grid; grid-template-columns: repeat(auto-fill, minmax(96px,1fr)); gap: 10px; }
 .slot-chip{ padding: 12px 8px; border-radius: 10px; border:1px solid var(--line); background: var(--paper); font-weight:600; font-size:0.9rem; cursor:pointer; }
 .slot-chip:hover{ border-color: var(--orange); background: var(--orange-soft); }
