@@ -198,7 +198,7 @@
     if(state.step === "details"){
       document.getElementById("bookName").addEventListener("input", (e) => state.name = e.target.value);
       document.getElementById("bookPhone").addEventListener("input", (e) => {
-        const digits = e.target.value.replace(/\\D/g, "").slice(0,10);
+        const digits = e.target.value.replace(/\D/g, "").slice(0,10);
         e.target.value = digits;
         state.phone = digits ? `+91 ${digits}` : "";
       });
@@ -207,7 +207,7 @@
       document.getElementById("bookToReview").addEventListener("click", () => {
         // Read the live fields again so mobile autofill/IME cannot leave the review blank.
         state.name = document.getElementById("bookName").value.trim();
-        const phoneDigits = document.getElementById("bookPhone").value.replace(/\\D/g, "").slice(0,10);
+        const phoneDigits = document.getElementById("bookPhone").value.replace(/\D/g, "").slice(0,10);
         state.phone = phoneDigits ? `+91 ${phoneDigits}` : "";
         state.email = document.getElementById("bookEmail").value.trim();
 
