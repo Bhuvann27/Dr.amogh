@@ -1964,6 +1964,7 @@ section{ position: relative; }
 }
 #consult .booking-widget .field-input::placeholder{
   color:var(--text-dim);
+  -webkit-text-fill-color:var(--text-dim);
   opacity:1;
 }
 #consult .booking-widget .booking-selection strong{
