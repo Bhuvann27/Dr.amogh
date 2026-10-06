@@ -108,12 +108,15 @@
         z-index:10000!important;
         pointer-events:none!important;
       }
+      /* Match the two contact buttons exactly: same right edge, same 50px
+         diameter, and a 10px gap. This places the assistant as the third
+         button in one evenly spaced vertical stack. */
       .site-assistant .assistant-toggle{
         position:fixed!important;
-        right:20px!important;
-        bottom:calc(env(safe-area-inset-bottom,0px) + 132px)!important;
-        width:56px!important;
-        height:56px!important;
+        right:max(18px,env(safe-area-inset-right,0px))!important;
+        bottom:calc(max(18px,env(safe-area-inset-bottom,0px)) + 120px)!important;
+        width:50px!important;
+        height:50px!important;
         margin:0!important;
         z-index:10002!important;
         pointer-events:auto!important;
