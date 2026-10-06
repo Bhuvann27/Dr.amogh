@@ -8,8 +8,105 @@
   const input = document.getElementById("assistantInput");
   const messages = document.getElementById("assistantMessages");
   const suggestions = document.getElementById("assistantSuggestions");
+  const root = document.getElementById("siteAssistant");
 
   if(!toggle || !panel || !form || !input || !messages) return;
+
+  /* Keep the assistant self-contained so this refinement does not disturb the
+     site's existing mobile layout, hero, booking flow, or other sections. */
+  const style = document.createElement("style");
+  style.textContent = `
+    .site-assistant .assistant-panel{
+      display:flex!important;
+      flex-direction:column!important;
+      width:min(390px,calc(100vw - 28px))!important;
+      height:min(620px,68dvh)!important;
+      max-height:calc(100dvh - 120px)!important;
+      overflow:hidden!important;
+      border-radius:20px!important;
+    }
+    .site-assistant .assistant-head{
+      flex:0 0 auto!important;
+    }
+    .site-assistant .assistant-messages{
+      flex:1 1 auto!important;
+      min-height:0!important;
+      overflow-y:auto!important;
+      overflow-x:hidden!important;
+      overscroll-behavior:contain;
+      -webkit-overflow-scrolling:touch;
+      padding:18px!important;
+    }
+    .site-assistant .assistant-suggestions{
+      flex:0 0 auto!important;
+      display:flex!important;
+      flex-wrap:nowrap!important;
+      gap:8px!important;
+      max-width:100%!important;
+      overflow-x:auto!important;
+      overflow-y:hidden!important;
+      padding:8px 14px 10px!important;
+      margin:0!important;
+      scrollbar-width:none;
+      -webkit-overflow-scrolling:touch;
+      border-top:1px solid rgba(23,19,15,.08);
+    }
+    .site-assistant .assistant-suggestions::-webkit-scrollbar{display:none;}
+    .site-assistant .assistant-suggestions button{
+      flex:0 0 auto!important;
+      white-space:nowrap!important;
+      min-height:38px!important;
+      padding:8px 13px!important;
+      border-radius:999px!important;
+      font-size:.78rem!important;
+      line-height:1.15!important;
+    }
+    .site-assistant.has-conversation .assistant-suggestions{
+      display:none!important;
+    }
+    .site-assistant .assistant-form{
+      flex:0 0 auto!important;
+      min-width:0!important;
+    }
+    .site-assistant .assistant-form input{
+      min-width:0!important;
+    }
+    .site-assistant .assistant-action-wrap{
+      background:transparent!important;
+      padding:0!important;
+      margin:8px 0 2px!important;
+      border:0!important;
+    }
+    .site-assistant .assistant-action{
+      max-width:100%;
+      padding:9px 13px;
+      border:1px solid rgba(242,84,12,.3);
+      border-radius:999px;
+      background:rgba(242,84,12,.06);
+      color:var(--orange-deep);
+      font:inherit;
+      font-size:.78rem;
+      font-weight:700;
+      line-height:1.2;
+      cursor:pointer;
+    }
+    @media(max-width:640px){
+      .site-assistant{
+        right:12px!important;
+        bottom:116px!important;
+      }
+      .site-assistant .assistant-panel{
+        width:calc(100vw - 24px)!important;
+        height:min(620px,68dvh)!important;
+        max-height:calc(100dvh - 105px)!important;
+        border-radius:20px!important;
+      }
+      .site-assistant .assistant-messages{
+        padding:16px!important;
+      }
+    }
+  `;
+  document.head.appendChild(style);
 
   const endpoint = window.SUPABASE_CONFIG
     ? window.SUPABASE_CONFIG.url + "/functions/v1/site-assistant"
@@ -79,6 +176,7 @@
   };
 
   async function answer(q){
+    root?.classList.add("has-conversation");
     add(q, "user");
     input.value = "";
 
@@ -115,13 +213,12 @@
     panel.hidden = false;
     toggle.setAttribute("aria-expanded", "true");
     requestAnimationFrame(() => {
-      document.getElementById("siteAssistant")?.classList.add("is-open", "chat-open");
+      root?.classList.add("is-open", "chat-open");
       input.focus();
     });
   }
 
   function closeAssistant(){
-    const root = document.getElementById("siteAssistant");
     root?.classList.remove("is-open", "chat-open");
     toggle.setAttribute("aria-expanded", "false");
     clearTimeout(closeTimer);
