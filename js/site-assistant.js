@@ -26,27 +26,56 @@
     return el;
   };
 
+  const scrollToSection = (id) => {
+    const target = document.getElementById(id);
+    if(!target) return;
+    target.scrollIntoView({ behavior: "smooth", block: "start" });
+    closeAssistant();
+  };
+
+  const addAction = (label, target) => {
+    const wrap = document.createElement("div");
+    wrap.className = "assistant-msg bot assistant-action-wrap";
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "assistant-action";
+    button.textContent = label;
+    button.addEventListener("click", () => scrollToSection(target));
+    wrap.appendChild(button);
+    messages.appendChild(wrap);
+  };
+
   const localAnswer = (q) => {
     const x = q.toLowerCase();
     if(/book|appointment|consult/.test(x)){
-      return "You can use the Online Consultation section or call 7406886226 for clinic information.";
+      return "You can book an online consultation from the Consultation section. Choose a date and then an available time before entering your details.";
     }
-    if(/where|location|hospital|address|mandya/.test(x)){
-      return "The website lists Dr. Amogh at Pragati Hospital, Mandya. Use the Visit section for directions to Pragati Hospital on G.H. Road, Ashok Nagar, Mandya.";
+    if(/where|location|hospital|address|mandya|timing|time|open/.test(x)){
+      return "Dr. Amogh is listed at Pragati Hospital, General Hospital Road, Ashok Nagar, Mandya. The Visit section has the hospital address and directions.";
     }
-    if(/treat|care|condition|disease|special/.test(x)){
-      return "The website lists common General Medicine concerns including infections, headaches and dizziness, diabetes, blood pressure, digestive and liver concerns, respiratory problems and chronic health conditions. It also notes that this is not a complete list.";
+    if(/treat|care|condition|disease|special|diabet|sugar|pressure|liver|digest|acidity|headache|dizz|fever|infection|cough|breath/.test(x)){
+      return "The website lists General Medicine concerns including infections, headaches and dizziness, diabetes and blood pressure, digestive and liver concerns, respiratory problems, and chronic health conditions. It is not a complete list.";
     }
-    if(/about|qualification|degree|experience/.test(x)){
-      return "The website currently lists Dr. Amogh G as MBBS, MD General Medicine, with 12+ years of experience, at Pragati Hospital, Mandya.";
+    if(/about|qualification|degree|experience|doctor/.test(x)){
+      return "Dr. Amogh G is listed as MBBS, MD General Medicine, with 12+ years of experience, at Pragati Hospital, Mandya.";
     }
-    if(/story|insight|article/.test(x)){
-      return "Patient Stories and Insights contain patient-friendly information published through the website.";
+    if(/story|stories|insight|article/.test(x)){
+      return "You can read the patient stories and health insights directly on the website. The stories are shared anonymously.";
     }
     if(/symptom|diagnos|medicine|tablet|pain|fever|cough|dizz/.test(x)){
       return "I can explain information published on this website, but I can't diagnose you or recommend a personal treatment. If symptoms are sudden or severe, seek immediate medical attention.";
     }
-    return "I can help with Dr. Amogh's qualifications, areas of care, patient stories, consultations, contact details and the hospital information.";
+    return "I can help with Dr. Amogh's qualifications, areas of care, patient stories, online consultations, clinic information and general website questions.";
+  };
+
+  const actionForQuestion = (q) => {
+    const x = q.toLowerCase();
+    if(/book|appointment|consult/.test(x)) return ["Go to online consultation", "consult"];
+    if(/where|location|hospital|address|mandya|timing|time|open/.test(x)) return ["Open clinic information", "visit"];
+    if(/treat|care|condition|disease|special|diabet|sugar|pressure|liver|digest|acidity|headache|dizz|fever|infection|cough|breath/.test(x)) return ["See areas of care", "care"];
+    if(/about|qualification|degree|experience|doctor/.test(x)) return ["Learn about Dr. Amogh", "about"];
+    if(/story|stories|insight|article/.test(x)) return ["Read patient stories", "stories"];
+    return null;
   };
 
   async function answer(q){
@@ -74,6 +103,8 @@
       loading.textContent = localAnswer(q);
     }
 
+    const action = actionForQuestion(q);
+    if(action) addAction(action[0], action[1]);
     messages.scrollTop = messages.scrollHeight;
   }
 
@@ -113,7 +144,20 @@
   if(suggestions){
     suggestions.addEventListener("click", (e) => {
       const button = e.target.closest("button");
-      if(button) answer(button.textContent.trim());
+      if(!button) return;
+      const action = button.dataset.action;
+      if(action === "question"){
+        input.focus();
+        return;
+      }
+      const questionMap = {
+        consult: "How do I book an online consultation?",
+        care: "What does Dr. Amogh treat?",
+        visit: "Where is the hospital and what are the clinic details?",
+        stories: "Show me the patient stories and insights.",
+        about: "Tell me about Dr. Amogh."
+      };
+      if(action && questionMap[action]) answer(questionMap[action]);
     });
   }
 })();
