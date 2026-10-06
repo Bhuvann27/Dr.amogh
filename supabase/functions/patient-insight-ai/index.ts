@@ -7,7 +7,7 @@ const cors = {
   'Content-Type': 'application/json',
 }
 
-const MODEL = Deno.env.get('GEMINI_MODEL') || 'gemini-2.5-flash'
+const PRIMARY_MODEL = Deno.env.get('GEMINI_MODEL') || 'gemini-2.5-flash'
 const API_KEY = Deno.env.get('GEMINI_API_KEY') || Deno.env.get('GOOGLE_API_KEY') || ''
 
 function json(data: unknown, status = 200) {
@@ -19,17 +19,13 @@ function promptFor(mode: string, notes: string, conversation: unknown[], questio
   if (mode === 'analyze') {
     return `You are the clinical-story assistant for a General Medicine doctor's private Patient Insight editor.
 
-Your job is NOT to diagnose the patient and NOT to write the public story yet. First understand the doctor's case notes and decide whether there is enough information to create a compelling, accurate, de-identified patient narrative.
+Do NOT diagnose the patient and do NOT write the public story yet. Understand the doctor's case notes and decide whether there is enough information to create a compelling, accurate, de-identified patient narrative.
 
-The doctor may speak naturally for several minutes. Extract only facts explicitly supplied. Never invent a symptom, investigation, diagnosis, treatment, result, outcome, emotion, quote, or demographic detail.
+Extract only facts explicitly supplied. Never invent symptoms, investigations, diagnoses, treatment, results, outcomes, emotions, quotes, or demographics. The final story should help a reader recognise a similar lived experience and should feel like a doctor recounting a clinical encounter, not a disease encyclopedia or advertisement.
 
-The final public story should help a reader recognise a similar lived experience. It should feel like a doctor thoughtfully recounting a clinical encounter, not like a disease encyclopedia or an advertisement.
+Ask a follow-up question ONLY when a missing detail is genuinely useful for the story. Ask ONE concrete question at a time. Good questions include duration, progression/frequency, important associated symptoms, previous investigations, what was tried, what made the case stand out, or what the doctor noticed. Never ask vague prompts such as 'Can you tell me more?' Never ask for identifying information. Do not require a full medical history. If enough narrative detail exists, return ready. Ask no more than 4 follow-up questions total.
 
-Ask a follow-up question ONLY when a missing detail is genuinely useful for the story. Ask ONE question at a time. Questions must be concrete and directly answerable from the doctor's memory, for example: duration of each episode, progression/frequency, important associated symptom, previous investigation result, what had already been tried, what made the case stand out, or what the doctor noticed. Never ask vague prompts such as 'Can you tell me more?' Do not ask for identifying information.
-
-Do not require a full medical history. If enough narrative detail exists, return ready. Do not ask more than 4 follow-up questions total. If a detail is unknown or the doctor skips it, work around it.
-
-Return ONLY valid JSON with this exact shape:
+Return ONLY valid JSON:
 {
   "status": "needs_more" | "ready",
   "question": "",
@@ -47,7 +43,7 @@ Return ONLY valid JSON with this exact shape:
   }
 }
 
-If status is ready, question and question_reason must be empty. If a field is unknown, leave it empty. Never turn an inferred diagnosis into a fact.
+If ready, question and question_reason must be empty. Unknown fields stay empty. Never turn an inferred diagnosis into a fact.
 
 DOCTOR INPUT:
 ${context}`
@@ -55,70 +51,99 @@ ${context}`
 
   return `You are writing a patient-facing Patient Insight for a General Medicine doctor's website from private doctor notes.
 
-Create a warm, specific, clinically responsible narrative that makes a reader think, 'Someone I know has experienced something like this.' Do not make it a generic explanation of a disease and do not turn it into an advertisement for what the doctor can treat.
+Create a warm, specific, clinically responsible narrative that makes a reader think, 'Someone I know has experienced something like this.' Do not make it a generic disease explanation or an advertisement for what the doctor can treat.
 
-Use only information explicitly present in the doctor's notes and conversation. Never invent facts, quotes, test results, diagnoses, medicines, improvement, recovery, emotions, family details, or outcomes. If the doctor did not provide an outcome, do not manufacture a happy ending.
+Use only information explicitly present in the doctor's notes and conversation. Never invent facts, quotes, test results, diagnoses, medicines, improvement, recovery, emotions, family details, or outcomes. If no outcome was supplied, do not manufacture one.
 
-The story should feel like an HPI translated into human language: who came in, what they noticed first, how it changed over time, what it felt like or how it affected ordinary life, what they had already tried or investigated, why they sought further help, and what the doctor noticed or understood. Preserve uncertainty when the doctor expressed uncertainty.
+The story should feel like an HPI translated into human language: who came in, what they noticed first, how it changed, what it felt like or how it affected ordinary life, what had already been tried or investigated, why they sought help, and what the doctor noticed. Preserve uncertainty.
 
-You may turn factual patient-reported information into natural narrative language, but do not use quotation marks for words the doctor did not explicitly report as quotations. The dialogue section should be 'conversation-style' questions and answers, but answers are paraphrased from supplied facts, not invented verbatim patient quotes.
-
-Avoid disease-list language, exaggerated claims, guarantees, 'success story' language, and phrases like 'finally cured' unless the doctor explicitly supplied that outcome. Avoid identifying details. Do not include the patient's exact age unless it is supplied and genuinely useful to the story; prefer broad age wording when possible.
+The dialogue is conversation-style, but answers are paraphrases of supplied facts, not invented verbatim patient quotes. Avoid disease-list language, exaggerated claims, guarantees, or 'success story' language. Avoid identifying details.
 
 Return ONLY valid JSON:
 {
-  "title": "short human title, preferably in the patient's lived-language",
+  "title": "short human title",
   "subtitle": "short contextual label",
   "topic": "general topic, not a diagnosis unless explicitly supplied",
   "intro": "1-3 sentence opening",
   "dialogue": [{"q":"natural question","a":"accurate paraphrase"}],
-  "doctorPerspective": "short paragraph describing what stood out to the doctor, using only supplied facts",
+  "doctorPerspective": "short paragraph using only supplied facts",
   "relateIntro": "optional short bridge",
-  "relatePoints": ["2-4 relatable experiences stated without diagnosing the reader"],
+  "relatePoints": ["2-4 relatable experiences without diagnosing the reader"],
   "relateClose": "optional closing line",
-  "actionPoints": ["optional general next steps only if supported by the doctor's notes"],
-  "urgent": "optional urgent-care guidance only if the doctor explicitly supplied it",
+  "actionPoints": ["optional general next steps only if supported by notes"],
+  "urgent": "optional urgent-care guidance only if explicitly supplied",
   "needsDoctorReview": ["specific facts or wording the doctor should verify"]
 }
 
-Keep the story concise enough to read comfortably on a phone. Usually 4-7 dialogue exchanges are enough. Prefer concrete details and progression over generic medical education.
+Keep it concise for a phone. Usually 4-7 dialogue exchanges are enough. Prefer concrete progression over generic medical education.
 
 DOCTOR INPUT:
 ${context}`
 }
 
 async function callGemini(prompt: string) {
-  if (!API_KEY) throw new Error('Gemini API key is not configured for Patient Insight AI.')
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(MODEL)}:generateContent?key=${encodeURIComponent(API_KEY)}`
-  const response = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ contents: [{ role: 'user', parts: [{ text: prompt }] }], generationConfig: { temperature: 0.25, responseMimeType: 'application/json' } }),
-  })
-  const data = await response.json().catch(() => ({}))
-  if (!response.ok) throw new Error('The AI service could not complete this request. Please try again.')
-  const text = data?.candidates?.[0]?.content?.parts?.map((p: any) => p.text || '').join('') || ''
-  if (!text) throw new Error('The AI service returned an empty response.')
-  try { return JSON.parse(text.replace(/^```json\s*/i, '').replace(/```\s*$/i, '').trim()) }
-  catch { throw new Error('The AI returned an invalid draft. Please try again.') }
+  if (!API_KEY) throw new Error('Patient Insight AI is not configured: the Gemini API key is missing.')
+
+  const models = [...new Set([PRIMARY_MODEL, 'gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-2.0-flash'])]
+  let lastProviderError = ''
+
+  for (const model of models) {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-goog-api-key': API_KEY,
+      },
+      body: JSON.stringify({
+        contents: [{ role: 'user', parts: [{ text: prompt }] }],
+        generationConfig: { temperature: 0.25, responseMimeType: 'application/json' },
+      }),
+    })
+
+    const data = await response.json().catch(() => ({}))
+    if (response.ok) {
+      const text = data?.candidates?.[0]?.content?.parts?.map((p: any) => p.text || '').join('') || ''
+      if (!text) throw new Error('The AI service returned an empty response.')
+      try {
+        return JSON.parse(text.replace(/^```json\s*/i, '').replace(/```\s*$/i, '').trim())
+      } catch {
+        throw new Error('The AI returned an invalid structured response. Please try again.')
+      }
+    }
+
+    const providerMessage = data?.error?.message || `HTTP ${response.status}`
+    console.error(`Gemini ${model} failed`, response.status, providerMessage)
+    lastProviderError = providerMessage
+    if (response.status !== 404) break
+  }
+
+  console.error('Patient Insight Gemini failure:', lastProviderError)
+  if (/api key|api_key|permission|unauthenticated|invalid/i.test(lastProviderError)) {
+    throw new Error('Patient Insight AI could not authenticate with Gemini. Check the Gemini API key in Supabase.')
+  }
+  if (/quota|rate limit|resource exhausted|429/i.test(lastProviderError)) {
+    throw new Error('Patient Insight AI is temporarily rate-limited. Please try again in a little while.')
+  }
+  throw new Error('The AI service could not complete this request. Please try again.')
 }
 
-export default {
-  async fetch(req: Request) {
-    if (req.method === 'OPTIONS') return new Response('ok', { headers: cors })
-    if (req.method !== 'POST') return json({ error: 'Method not allowed.' }, 405)
-    try {
-      const body = await req.json()
-      const mode = body?.mode === 'draft' ? 'draft' : 'analyze'
-      const notes = String(body?.notes || '').trim()
-      if (notes.length < 20) return json({ error: 'Please provide a little more case information.' }, 400)
-      if (notes.length > 30000) return json({ error: 'The case notes are too long. Please keep them below 30,000 characters.' }, 400)
-      const conversation = Array.isArray(body?.conversation) ? body.conversation.slice(-12) : []
-      const result = await callGemini(promptFor(mode, notes, conversation, Number(body?.questionCount || 0), !!body?.regenerate))
-      return json(result)
-    } catch (error) {
-      console.error(error)
-      return json({ error: error instanceof Error ? error.message : 'Patient Insight AI failed.' }, 500)
-    }
-  },
-}
+Deno.serve(async (req: Request) => {
+  if (req.method === 'OPTIONS') return new Response('ok', { headers: cors })
+  if (req.method !== 'POST') return json({ error: 'Method not allowed.' }, 405)
+
+  try {
+    const body = await req.json()
+    const mode = body?.mode === 'draft' ? 'draft' : 'analyze'
+    const notes = String(body?.notes || '').trim()
+    if (notes.length < 20) return json({ error: 'Please provide a little more case information.' }, 400)
+    if (notes.length > 30000) return json({ error: 'The case notes are too long. Please keep them below 30,000 characters.' }, 400)
+
+    const conversation = Array.isArray(body?.conversation) ? body.conversation.slice(-12) : []
+    const result = await callGemini(promptFor(mode, notes, conversation, Number(body?.questionCount || 0), !!body?.regenerate))
+    return json(result)
+  } catch (error) {
+    console.error('Patient Insight AI error:', error)
+    return json({ error: error instanceof Error ? error.message : 'Patient Insight AI failed.' }, 500)
+  }
+})
