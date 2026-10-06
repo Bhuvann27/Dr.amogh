@@ -1,0 +1,117 @@
+.weekly-toggle input{ width:18px; height:18px; accent-color: var(--orange); }
+.weekly-row .field-input{ width: auto; max-width: 130px; padding: 8px 10px; }
+.weekly-row .field-input:disabled{ opacity: 0.4; }
+@media (max-width: 560px){
+  .weekly-toggle{ width: 100%; }
+  .weekly-row .field-input{ max-width: none; flex:1; }
+}
+
+/* preview mode: mimics the public story page look, condensed */
+.preview-shell{ max-width: 720px; margin: 0 auto; background: var(--paper); border-radius: 20px; border: 1px solid var(--line); padding: clamp(24px,5vw,48px); }
+.preview-shell .p-eyebrow{ color: var(--orange); font-weight:700; font-size: 0.78rem; letter-spacing:0.06em; text-transform:uppercase; margin-bottom: 10px; }
+.preview-shell h1{ font-size: clamp(1.5rem, 3.6vw, 2.1rem); margin-bottom: 10px; }
+.preview-shell .p-intro{ color: var(--text-dim); margin-bottom: 30px; }
+.preview-qa{ margin-bottom: 18px; padding-bottom: 18px; border-bottom: 1px solid var(--line); }
+.preview-qa .q{ font-size: 0.84rem; font-weight:700; color: var(--orange-deep); margin-bottom: 8px; }
+.preview-qa .a{ font-family: var(--font-display); font-weight:700; font-size: 1.1rem; line-height:1.4; }
+.preview-section{ margin-top: 34px; }
+.preview-section h3{ font-size: 1.05rem; margin-bottom: 12px; }
+.preview-section ul{ padding-left: 20px; color: var(--ink); line-height: 1.8; }
+.preview-urgent{ margin-top: 34px; background: #FFF3EE; border: 1px solid #F5C9B4; border-radius: 12px; padding: 18px 20px; font-size: 0.92rem; }
+
+/* ---- appointments: grouped by date, large time, labelled status control ---- */
+.admin-empty.compact{ padding: 32px 16px; }
+.admin-shell.tight .admin-hero{ margin-bottom: 18px; }
+.appt-group{ margin-bottom: 26px; }
+.appt-group-head{ display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 2px solid var(--ink); }
+.appt-group-head h2{ font-size: 1.15rem; margin:0; }
+.appt-daytag{ font-size: 0.68rem; font-weight:700; letter-spacing:0.05em; text-transform:uppercase; background: var(--orange); color:#fff; padding: 3px 9px; border-radius: 999px; vertical-align: middle; margin-left: 8px; }
+.appt-count{ font-size: 0.82rem; color: var(--text-dim); white-space:nowrap; }
+.appt-earlier-label{ font-size: 0.78rem; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color: var(--text-dim-2); margin: 30px 0 14px; }
+.appt-card{ display:grid; grid-template-columns: 112px 1fr auto; gap: 16px; align-items:center; background: var(--paper); border:1px solid var(--line); border-radius: 14px; padding: 16px 18px; margin-bottom: 10px; }
+.appt-time{ font-family: var(--font-display); font-weight:800; font-size: 1.45rem; line-height:1.1; white-space:nowrap; }
+.appt-name{ font-weight:700; font-size: 1.05rem; display:flex; flex-wrap:wrap; align-items:center; gap: 8px; }
+.appt-contact{ font-size: 0.98rem; margin-top: 3px; overflow-wrap:anywhere; }
+.appt-meta{ font-size: 0.8rem; color: var(--text-dim-2); margin-top: 4px; }
+.status-badge.requested{ background:#FFF1DC; color:#A45F00; }
+.status-badge.confirmed{ background:#E4F2E6; color:#1E7A34; }
+.status-badge.completed{ background: var(--stone); color: var(--text-dim); }
+.status-badge.cancelled{ background:#FBE3DE; color:#B23A13; }
+.appt-update{ display:flex; gap: 10px; }
+.appt-update label{ display:flex; flex-direction:column; gap: 4px; font-size: 0.7rem; font-weight:700; letter-spacing:0.05em; text-transform:uppercase; color: var(--text-dim); }
+.appt-update select{ font-size: 0.95rem; font-weight:600; padding: 11px 12px; min-height: 44px; border-radius: 10px; border:1px solid var(--line); background: var(--paper); color: var(--ink); font-family: inherit; text-transform:none; letter-spacing:0; }
+@media (max-width: 720px){
+  .appt-card{ grid-template-columns: 1fr; gap: 10px; padding: 14px; }
+  .appt-time{ font-size: 1.6rem; }
+  .appt-update{ display:grid; grid-template-columns: 1fr 1fr; }
+  .appt-update select{ width:100%; }
+}
+
+/* AI patient-insight drafting */
+.ai-draft-panel{margin:28px 0 42px;padding:28px;border:1px solid var(--line);border-radius:18px;background:#f8f7f3}
+.ai-draft-head{display:flex;justify-content:space-between;gap:24px;align-items:flex-start}
+.ai-draft-head h2{margin:7px 0 8px;font-size:clamp(1.35rem,2.4vw,1.8rem)}
+.ai-badge{font-size:.68rem;font-weight:800;letter-spacing:.08em;border:1px solid var(--line);padding:8px 10px;border-radius:999px;white-space:nowrap}
+.ai-fields{margin-top:24px}
+.ai-two-col{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.ai-actions{display:flex;align-items:center;gap:14px;margin-top:6px;flex-wrap:wrap}
+.ai-status{font-size:.9rem;color:var(--text-dim)}
+.ai-status.busy{font-weight:600}
+.ai-status.error{color:#b23a13}
+.ai-status.success{color:#286a45}
+.ai-review{margin-top:18px;padding:18px;border-radius:14px;background:#fff;border:1px solid var(--line)}
+.ai-review-warning{display:flex;flex-direction:column;gap:7px;margin-bottom:15px}
+.ai-review-warning strong{font-size:.92rem}
+.ai-review-warning ul{margin:8px 0 0;padding-left:20px}
+.ai-draft-panel .required{color:#b23a13}
+@media(max-width:720px){
+  .ai-draft-panel{padding:20px}
+  .ai-draft-head{display:block}
+  .ai-badge{display:inline-block;margin-top:14px}
+  .ai-two-col{grid-template-columns:1fr}
+  .ai-actions{align-items:flex-start}
+}
+
+/* patient insight dashboard: keep story cards inside the mobile viewport */
+@media (max-width: 640px){
+  .admin-shell{ padding-left:18px; padding-right:18px; }
+  .admin-toolbar{ align-items:stretch; }
+  .admin-toolbar > div:last-child{ width:100%; }
+  .admin-search{ width:100%; max-width:none; min-width:0; }
+  .btn-add{ justify-content:center; }
+  .insight-row{
+    display:grid;
+    grid-template-columns:minmax(0,1fr);
+    align-items:start;
+    gap:12px;
+    padding:18px;
+    box-sizing:border-box;
+    width:100%;
+    max-width:100%;
+    overflow:hidden;
+  }
+  .insight-row .main{
+    width:100%;
+    min-width:0;
+    max-width:100%;
+    overflow:hidden;
+  }
+  .insight-row h3,
+  .insight-row .preview-text{
+    max-width:100%;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:normal;
+    overflow-wrap:anywhere;
+    word-break:break-word;
+  }
+  .status-badge{ justify-self:start; }
+  .insight-row .row-actions{
+    width:100%;
+    min-width:0;
+    max-width:100%;
+    box-sizing:border-box;
+  }
+  .row-actions button,
+  .row-actions a{ white-space:nowrap; }
+}
