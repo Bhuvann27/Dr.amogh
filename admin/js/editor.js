@@ -1,530 +1,84 @@
 (function(){
   "use strict";
 
-  const TOTAL_STEPS = 6;
   const params = new URLSearchParams(window.location.search);
   const storyId = params.get("id");
+  const API = () => window.SUPABASE_CONFIG.url + "/functions/v1/patient-insight-ai";
 
-  const GENERAL_QUESTIONS = [
-    { q: "When did you first notice this?", a: "It started gradually. At first I didn't think much of it, but after a few weeks I realised it was happening more often." },
-    { q: "What did you notice first?", a: "I started feeling tired much earlier than usual, especially towards the evening." },
-    { q: "Was it happening every day?", a: "Not every day. Some days were better, but it kept coming back." },
-    { q: "How was it affecting your normal day?", a: "I was finding it harder to concentrate at work and I didn't have the same energy in the evening." },
-    { q: "Did you notice anything else?", a: "I was also getting headaches occasionally." },
-    { q: "Did anything seem to make it better or worse?", a: "I noticed it more on busy days, but resting didn't always make it go away." },
-    { q: "Had anything changed around the time it started?", a: "Nothing major. My routine was mostly the same." },
-    { q: "What made you decide to talk to a doctor?", a: "I realised it had been going on for long enough that I shouldn't keep ignoring it." },
-  ];
-
-  const TOPIC_QUESTIONS = {
-    "Tiredness": [
-      { q: "When did you first notice the tiredness?", a: "It started gradually, over a few weeks." },
-      { q: "Was it there every day?", a: "Not every day, but it kept coming back." },
-      { q: "Did it affect your work or normal routine?", a: "I had less energy to do things after work." },
-      { q: "How did you feel after sleeping?", a: "I didn't feel fresh, even after a full night's sleep." },
-      { q: "Did you notice anything else along with it?", a: "I was also getting occasional headaches." },
-      { q: "What made you decide to get it checked?", a: "It had been going on long enough that I didn't want to ignore it anymore." },
-    ],
-    "Headache": [
-      { q: "When did the headaches start?", a: "I don't remember the exact day \u2014 it was gradual." },
-      { q: "What was the first thing you noticed?", a: "Just an occasional dull ache, nothing I paid much attention to." },
-      { q: "How often were they happening?", a: "A couple of times a week, some weeks more." },
-      { q: "How were they affecting your normal day?", a: "I could still work, but I didn't feel comfortable." },
-      { q: "Did you notice anything else when they happened?", a: "I usually wanted to sit somewhere quiet until it passed." },
-      { q: "Was there something that made you decide to see a doctor?", a: "They were becoming more frequent than before." },
-    ],
-    "Stomach discomfort": [
-      { q: "When did you first notice the discomfort?", a: "It started a few weeks ago, on and off." },
-      { q: "When did you usually notice it?", a: "Mostly after meals." },
-      { q: "How did it affect eating or your routine?", a: "I started being more careful about what I ate." },
-      { q: "Did you start avoiding anything because of it?", a: "Yes, a few foods that seemed to make it worse." },
-      { q: "What made you decide to get it checked?", a: "It kept happening often enough that I wanted to understand why." },
-    ],
-    "Dizziness": [
-      { q: "When did you first notice it?", a: "It came on suddenly a few times over a couple of weeks." },
-      { q: "What did the feeling feel like to you?", a: "A brief lightheaded feeling, like the room tilted slightly." },
-      { q: "Did it affect your normal activities?", a: "I became more cautious about standing up quickly." },
-      { q: "Did it happen at particular times?", a: "Mostly in the mornings, or when I stood up quickly." },
-      { q: "What made you decide to speak to a doctor?", a: "It kept happening and I wanted to understand why." },
-    ],
-  };
-
-  const CUSTOM_Q_EXAMPLES = [
-    "What were you most worried about?",
-    "What was the hardest part of dealing with this?",
-    "Did it affect your sleep?",
-    "Did it change anything about your daily routine?",
-    "Did you initially think it was something else?",
-    "Was there something you were avoiding because of it?",
-  ];
-
-  const RELATE_PLACEHOLDERS = [
-    "You have been feeling tired for several weeks.",
-    "The tiredness is affecting your normal routine.",
-    "You are sleeping but still don't feel rested.",
-    "You have noticed the problem keeps returning.",
-    "You have started changing your routine because of it.",
-  ];
-
-  const ACTION_PLACEHOLDERS = [
-    "If a symptom keeps returning, lasts longer than expected, or starts affecting your normal routine, it may be worth discussing it with a doctor.",
-    "Keep track of when it happens and anything that seems to bring it on \u2014 this can be useful when discussing it with a doctor.",
-    "If you haven't had a routine health check recently, consider getting one.",
-  ];
-
-  let story = blankStory();
-  let currentStep = 1;
+  let story = {id:null,slug:"",title:"",subtitle:"",intro:"",topic:"",dialogue:[],relateIntro:"",relatePoints:[],relateClose:"",actionPoints:[],urgent:"",urgentReviewed:false,consentConfirmed:false,identifiersRemoved:false,privacyReviewed:false,noIdentifyingDetails:false,medicalReviewed:false,status:"draft"};
+  let rawNotes = "";
+  let transcript = [];
+  let aiQuestions = 0;
   let dirty = false;
-  let autosaveTimer = null;
+  let saveTimer = null;
+  let recognition = null;
+  let listening = false;
 
-  function blankStory(){
-    return {
-      id: null, slug: "", title: "", subtitle: "", intro: "", topic: "",
-      dialogue: [], relateIntro: "", relatePoints: [], relateClose: "",
-      actionPoints: [], urgent: "", urgentReviewed: false,
-      consentConfirmed: false, identifiersRemoved: false, privacyReviewed: false, noIdentifyingDetails: false, medicalReviewed: false,
-      status: "draft",
-    };
-  }
+  const wizard = document.getElementById("wizardView");
+  const progress = document.getElementById("wizardProgress");
 
-  function stripQuotes(s){ return (s || "").replace(/[\u201c\u201d"]/g, ""); }
-  function markDirty(){ dirty = true; scheduleAutosave(); }
+  function esc(s){return String(s||"").replace(/[&<>\"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c]));}
+  function clean(s){return String(s||"").trim();}
+  function markDirty(){dirty=true;scheduleSave();}
 
-  // ---------------- step navigation ----------------
-  function renderProgress(){
-    const wrap = document.getElementById("wizardProgress");
-    wrap.innerHTML = "";
-    for(let i = 1; i <= TOTAL_STEPS; i++){
-      const b = document.createElement("button");
-      b.type = "button";
-      b.className = "step-dot" + (i === currentStep ? " active" : i < currentStep ? " done" : "");
-      b.addEventListener("click", () => goToStep(i));
-      wrap.appendChild(b);
-    }
-  }
-
-  function goToStep(n){
-    currentStep = Math.max(1, Math.min(TOTAL_STEPS, n));
-    document.querySelectorAll(".wizard-step").forEach((el) => {
-      el.classList.toggle("active", Number(el.dataset.step) === currentStep);
-    });
-    renderProgress();
-    document.getElementById("prevBtn").style.visibility = currentStep === 1 ? "hidden" : "visible";
-    document.getElementById("nextBtn").style.display = currentStep === TOTAL_STEPS ? "none" : "";
-    document.getElementById("publishBtn").style.display = currentStep === TOTAL_STEPS ? "" : "none";
-    if(currentStep === 6) updateFinalReview();
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }
-
-  document.getElementById("prevBtn").addEventListener("click", () => goToStep(currentStep - 1));
-  document.getElementById("nextBtn").addEventListener("click", () => goToStep(currentStep + 1));
-
-  // ---------------- AI patient insight drafting ----------------
-  const aiEls = {
-    topic: document.getElementById("aiTopic"),
-    goal: document.getElementById("aiGoal"),
-    notes: document.getElementById("aiNotes"),
-    important: document.getElementById("aiImportant"),
-    redFlags: document.getElementById("aiRedFlags"),
-    treatment: document.getElementById("aiTreatment"),
-    misconceptions: document.getElementById("aiMisconceptions"),
-    button: document.getElementById("generateAiBtn"),
-    status: document.getElementById("aiStatus"),
-    review: document.getElementById("aiReview"),
-    reviewNotes: document.getElementById("aiReviewNotes"),
-    use: document.getElementById("useAiDraftBtn"),
-  };
-
-  function setAiStatus(message, kind){
-    if(!aiEls.status) return;
-    aiEls.status.textContent = message || "";
-    aiEls.status.className = "ai-status" + (kind ? " " + kind : "");
-  }
-
-  function fillAiSourceFromStory(){
-    if(!aiEls.topic) return;
-    aiEls.topic.value = story.topic || "";
-    if(!aiEls.notes.value) aiEls.notes.value = story.intro || "";
-  }
-
-  function applyAiDraft(draft){
-    story.title = draft.title || story.title;
-    story.subtitle = draft.subtitle || story.subtitle;
-    story.intro = draft.intro || story.intro;
-    story.topic = draft.topic || story.topic;
-    story.dialogue = Array.isArray(draft.dialogue) ? draft.dialogue.map((d) => ({ q: d.q || "", a: d.a || "" })) : story.dialogue;
-    story.relateIntro = draft.relateIntro || "";
-    story.relatePoints = Array.isArray(draft.relatePoints) ? draft.relatePoints.filter(Boolean) : [];
-    story.relateClose = draft.relateClose || "";
-    story.actionPoints = Array.isArray(draft.actionPoints) ? draft.actionPoints.filter(Boolean) : [];
-    story.urgent = draft.urgent || "";
-    story.urgentReviewed = false;
-    story.status = "draft";
-    populateForm();
-    goToStep(1);
-    markDirty();
-  }
-
-  async function generateAiDraft(){
-    const notes = aiEls.notes.value.trim();
-    if(!notes){
-      setAiStatus("Add the doctor’s rough medical notes first.", "error");
-      aiEls.notes.focus();
-      return;
-    }
-
-    aiEls.button.disabled = true;
-    setAiStatus("Generating a draft…", "busy");
-    aiEls.review.hidden = true;
-
-    try {
-      const session = await window.PatientInsightsDB.getSession();
-      if(!session?.access_token) throw new Error("Your admin session has expired. Please log in again.");
-
-      const payload = {
-        topic: aiEls.topic.value.trim(),
-        patientGoal: aiEls.goal.value.trim(),
-        roughNotes: notes,
-        importantPoints: aiEls.important.value.trim(),
-        redFlags: aiEls.redFlags.value.trim(),
-        treatmentInfo: aiEls.treatment.value.trim(),
-        misconceptions: aiEls.misconceptions.value.trim(),
-      };
-
-      const response = await fetch(window.SUPABASE_CONFIG.url + "/functions/v1/generate-patient-insight", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": "Bearer " + session.access_token,
-          "apikey": window.SUPABASE_CONFIG.anonKey,
-        },
-        body: JSON.stringify(payload),
-      });
-
-      const data = await response.json().catch(() => ({}));
-      if(!response.ok) throw new Error(data.error || "The AI draft could not be generated.");
-
-      const draft = data.draft || {};
-      aiEls.reviewNotes.innerHTML = "";
-      const notesList = Array.isArray(draft.needsDoctorReview) ? draft.needsDoctorReview : [];
-      if(notesList.length){
-        const ul = document.createElement("ul");
-        notesList.forEach((note) => {
-          const li = document.createElement("li");
-          li.textContent = note;
-          ul.appendChild(li);
-        });
-        aiEls.reviewNotes.appendChild(ul);
-      } else {
-        aiEls.reviewNotes.textContent = "Review every medical statement before publication.";
-      }
-
-      aiEls.review.hidden = false;
-      aiEls.use.onclick = () => {
-        applyAiDraft(draft);
-        aiEls.review.hidden = true;
-        setAiStatus("Draft loaded into the editor. Review and edit it before saving or publishing.", "success");
-      };
-      setAiStatus("Draft generated. It has not been published.", "success");
-    } catch(e){
-      setAiStatus(e.message || "Could not generate the draft.", "error");
-    } finally {
-      aiEls.button.disabled = false;
-    }
-  }
-
-  if(aiEls.button) aiEls.button.addEventListener("click", generateAiDraft);
-  fillAiSourceFromStory();
-
-  // ---------------- step 1: story basics ----------------
-  const fieldTitle = document.getElementById("fieldTitle");
-  const fieldTopic = document.getElementById("fieldTopic");
-  const fieldSubtitle = document.getElementById("fieldSubtitle");
-  const fieldIntro = document.getElementById("fieldIntro");
-
-  fieldTitle.addEventListener("input", () => { story.title = fieldTitle.value; markDirty(); });
-  fieldSubtitle.addEventListener("input", () => { story.subtitle = fieldSubtitle.value; markDirty(); });
-  fieldIntro.addEventListener("input", () => { story.intro = fieldIntro.value; markDirty(); });
-  fieldTopic.addEventListener("change", () => { story.topic = fieldTopic.value; markDirty(); renderSuggestedQuestions(); });
-
-  document.querySelectorAll(".examples-toggle").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const panel = document.getElementById(`examples-${btn.dataset.examples}`);
-      panel.classList.toggle("open");
-    });
-  });
-
-  // ---------------- step 2: conversation builder ----------------
-  const qaList = document.getElementById("qaList");
-
-  function renderSuggestedQuestions(){
-    const wrap = document.getElementById("suggestedQuestions");
-    const topicQs = TOPIC_QUESTIONS[story.topic] || [];
-    const combined = topicQs.concat(GENERAL_QUESTIONS).filter((sq, i, arr) =>
-      arr.findIndex((x) => x.q === sq.q) === i
-    );
-    const used = new Set(story.dialogue.map((d) => d.q));
-    wrap.innerHTML = "";
-    combined.filter((sq) => !used.has(sq.q)).slice(0, 8).forEach((sq) => {
-      const chip = document.createElement("button");
-      chip.type = "button";
-      chip.className = "sq-chip";
-      chip.textContent = sq.q;
-      chip.addEventListener("click", () => {
-        story.dialogue.push({ q: sq.q, a: "", _placeholder: sq.a });
-        markDirty();
-        renderQaList();
-        renderSuggestedQuestions();
-      });
-      wrap.appendChild(chip);
-    });
-  }
-
-  function renderQaList(){
-    qaList.innerHTML = "";
-    story.dialogue.forEach((pair, i) => {
-      const card = document.createElement("div");
-      card.className = "qa-card";
-      card.innerHTML = `
-        <div class="qa-head">
-          <span class="qa-num">QUESTION ${i + 1}</span>
-          <div class="qa-controls">
-            <button type="button" class="qa-icon-btn" data-move="up" title="Move up">&uarr;</button>
-            <button type="button" class="qa-icon-btn" data-move="down" title="Move down">&darr;</button>
-            <button type="button" class="qa-icon-btn danger" data-remove title="Delete question">&times;</button>
-          </div>
-        </div>
-        <div class="field-group" style="margin-bottom:12px;">
-          <textarea class="field-input q-input" rows="1" placeholder="For example: What were you most worried about?">${escapeHtml(pair.q)}</textarea>
-        </div>
-        <div class="field-group" style="margin-bottom:0;">
-          <textarea class="field-textarea a-input" placeholder="${escapeHtml(pair._placeholder || "Write the answer as naturally as possible.")}">${escapeHtml(pair.a)}</textarea>
-        </div>`;
-      card.querySelector(".q-input").addEventListener("input", (e) => { pair.q = e.target.value; markDirty(); });
-      card.querySelector(".a-input").addEventListener("input", (e) => { pair.a = e.target.value; markDirty(); });
-      card.querySelector('[data-move="up"]').addEventListener("click", () => { if(i>0){ swap(story.dialogue,i,i-1); markDirty(); renderQaList(); } });
-      card.querySelector('[data-move="down"]').addEventListener("click", () => { if(i<story.dialogue.length-1){ swap(story.dialogue,i,i+1); markDirty(); renderQaList(); } });
-      card.querySelector("[data-remove]").addEventListener("click", () => { story.dialogue.splice(i,1); markDirty(); renderQaList(); renderSuggestedQuestions(); });
-      qaList.appendChild(card);
-    });
-  }
-
-  function swap(arr, i, j){ const t = arr[i]; arr[i] = arr[j]; arr[j] = t; }
-  function escapeHtml(s){ return (s || "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
-
-  document.getElementById("addCustomQBtn").addEventListener("click", () => {
-    document.getElementById("customQGuidance").style.display = "block";
-    const example = CUSTOM_Q_EXAMPLES[story.dialogue.length % CUSTOM_Q_EXAMPLES.length];
-    story.dialogue.push({ q: "", a: "", _placeholder: "Write the patient's answer as naturally as possible.", _qPlaceholder: `For example: ${example}` });
-    markDirty();
-    renderQaList();
-    const cards = qaList.querySelectorAll(".qa-card");
-    const last = cards[cards.length - 1];
-    if(last){ const qInput = last.querySelector(".q-input"); qInput.placeholder = `For example: ${example}`; qInput.focus(); }
-  });
-
-  // ---------------- step 3 & 4: repeatable point lists ----------------
-  function renderPointList(containerId, arrKey, placeholders){
-    const container = document.getElementById(containerId);
-    container.innerHTML = "";
-    story[arrKey].forEach((val, i) => {
-      const row = document.createElement("div");
-      row.className = "point-row";
-      row.innerHTML = `
-        <input class="field-input" type="text" value="${escapeHtml(val)}" placeholder="${escapeHtml(placeholders[i % placeholders.length])}">
-        <button type="button" class="qa-icon-btn danger" title="Remove">&times;</button>`;
-      row.querySelector("input").addEventListener("input", (e) => { story[arrKey][i] = e.target.value; markDirty(); });
-      row.querySelector("button").addEventListener("click", () => { story[arrKey].splice(i,1); markDirty(); renderPointList(containerId, arrKey, placeholders); });
-      container.appendChild(row);
-    });
-  }
-
-  document.querySelectorAll("[data-addpoint]").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const key = btn.dataset.addpoint === "relate" ? "relatePoints" : "actionPoints";
-      const containerId = btn.dataset.addpoint === "relate" ? "relatePointsList" : "actionPointsList";
-      const placeholders = btn.dataset.addpoint === "relate" ? RELATE_PLACEHOLDERS : ACTION_PLACEHOLDERS;
-      story[key].push("");
-      markDirty();
-      renderPointList(containerId, key, placeholders);
-      const inputs = document.getElementById(containerId).querySelectorAll("input");
-      if(inputs.length) inputs[inputs.length - 1].focus();
-    });
-  });
-
-  document.getElementById("fieldRelateIntro").addEventListener("input", (e) => { story.relateIntro = e.target.value; markDirty(); });
-  document.getElementById("fieldRelateClose").addEventListener("input", (e) => { story.relateClose = e.target.value; markDirty(); });
-
-  // ---------------- step 5: urgent care ----------------
-  const fieldUrgent = document.getElementById("fieldUrgent");
-  const fieldUrgentReviewed = document.getElementById("fieldUrgentReviewed");
-  fieldUrgent.addEventListener("input", () => { story.urgent = fieldUrgent.value; markDirty(); });
-  fieldUrgentReviewed.addEventListener("change", () => { story.urgentReviewed = fieldUrgentReviewed.checked; markDirty(); });
-
-  // ---------------- step 6: privacy + final review ----------------
-  const chkConsent = document.getElementById("chkConsent");
-  const chkIdentifiers = document.getElementById("chkIdentifiers");
-  const chkReviewed = document.getElementById("chkReviewed");
-  const chkNoDetails = document.getElementById("chkNoDetails");
-  const chkMedical = document.getElementById("chkMedical");
-  [["consentConfirmed",chkConsent],["identifiersRemoved",chkIdentifiers],["privacyReviewed",chkReviewed],["noIdentifyingDetails",chkNoDetails],["medicalReviewed",chkMedical]]
-    .forEach(([key, el]) => el.addEventListener("change", () => { story[key] = el.checked; markDirty(); updateFinalReview(); }));
-
-  function privacyComplete(){
-    return story.consentConfirmed && story.identifiersRemoved && story.privacyReviewed && story.noIdentifyingDetails && story.medicalReviewed;
-  }
-  function urgentOk(){ return !story.urgent.trim() || story.urgentReviewed; }
-  function readyToPublish(){ return privacyComplete() && urgentOk() && story.title.trim().length > 0; }
-
-  function updateFinalReview(){
-    document.getElementById("rv-1").textContent = (story.title.trim() ? "\u25CF" : "\u25CB") + " The story is written in simple, patient-friendly language.";
-    document.getElementById("rv-2").textContent = (story.dialogue.length > 0 ? "\u25CF" : "\u25CB") + " The patient's experience is represented accurately.";
-    document.getElementById("rv-3").textContent = (privacyComplete() ? "\u25CF" : "\u25CB") + " The privacy checklist above is complete.";
-    document.getElementById("rv-4").textContent = (urgentOk() ? "\u25CF" : "\u25CB") + " Any urgent-care guidance has been reviewed.";
-    document.getElementById("publishBtn").disabled = !readyToPublish();
-    const pfp = document.getElementById("publishFromPreviewBtn");
-    if(pfp) pfp.disabled = !readyToPublish();
-  }
-
-  // ---------------- populate form from story state ----------------
-  function populateForm(){
-    fieldTitle.value = story.title;
-    fieldTopic.value = story.topic;
-    fieldSubtitle.value = story.subtitle;
-    fieldIntro.value = story.intro;
-    fieldUrgent.value = story.urgent;
-    fieldUrgentReviewed.checked = story.urgentReviewed;
-    chkConsent.checked = story.consentConfirmed;
-    chkIdentifiers.checked = story.identifiersRemoved;
-    chkReviewed.checked = story.privacyReviewed;
-    chkNoDetails.checked = story.noIdentifyingDetails;
-    chkMedical.checked = story.medicalReviewed;
-    document.getElementById("fieldRelateIntro").value = story.relateIntro;
-    document.getElementById("fieldRelateClose").value = story.relateClose;
-    renderQaList();
-    renderSuggestedQuestions();
-    renderPointList("relatePointsList", "relatePoints", RELATE_PLACEHOLDERS);
-    renderPointList("actionPointsList", "actionPoints", ACTION_PLACEHOLDERS);
-    document.getElementById("editorHeading").textContent = story.title ? `Editing: ${stripQuotes(story.title)}` : "New Patient Insight";
-    document.getElementById("saveDraftBtn").textContent = story.status === "published" ? "Save changes" : "Save draft";
-    updateFinalReview();
-  }
-
-  // ---------------- save / publish / preview ----------------
-  const autosaveStatus = document.getElementById("autosaveStatus");
-
-  function scheduleAutosave(){
-    if(!story.title.trim() && !story.id) return; // nothing worth saving yet
-    clearTimeout(autosaveTimer);
-    autosaveTimer = setTimeout(doAutosave, 2500);
-  }
-
-  async function doAutosave(){
-    autosaveStatus.textContent = "Saving\u2026";
-    try {
-      const saved = await window.PatientInsightsDB.save(cleanForSave(story));
-      story.id = saved.id;
-      story.slug = saved.slug;
-      dirty = false;
-      autosaveStatus.textContent = "Saved";
-      setTimeout(() => { if(autosaveStatus.textContent === "Saved") autosaveStatus.textContent = ""; }, 2000);
-    } catch(e){
-      autosaveStatus.textContent = "Couldn't save";
-    }
-  }
-
-  function cleanForSave(s){
-    const copy = Object.assign({}, s);
-    copy.dialogue = s.dialogue.map((d) => ({ q: d.q, a: d.a }));
-    copy.relatePoints = s.relatePoints.filter((p) => p.trim());
-    copy.actionPoints = s.actionPoints.filter((p) => p.trim());
-    return copy;
-  }
-
-  document.getElementById("saveDraftBtn").addEventListener("click", async () => {
-    clearTimeout(autosaveTimer);
-    await doAutosave();
-  });
-
-  document.getElementById("previewBtn").addEventListener("click", showPreview);
-  document.getElementById("backToEditBtn").addEventListener("click", () => {
-    document.getElementById("previewView").style.display = "none";
-    document.getElementById("wizardView").style.display = "";
-  });
-
-  function renderPreview(){
-    const shell = document.getElementById("previewShell");
-    const cleaned = cleanForSave(story);
-    shell.innerHTML = `
-      <div class="p-eyebrow">Patient Story &middot; Preview</div>
-      <h1>${escapeHtml(stripQuotes(cleaned.title) || "Untitled story")}</h1>
-      <p class="p-intro">${escapeHtml(cleaned.intro)}</p>
-      ${cleaned.dialogue.map((d) => `<div class="preview-qa"><p class="q">${escapeHtml(d.q)}</p><p class="a">${escapeHtml(d.a)}</p></div>`).join("")}
-      ${cleaned.relatePoints.length ? `
-        <div class="preview-section">
-          <h3>You might relate to this if&hellip;</h3>
-          <p>${escapeHtml(cleaned.relateIntro)}</p>
-          <ul>${cleaned.relatePoints.map((p) => `<li>${escapeHtml(p)}</li>`).join("")}</ul>
-          ${cleaned.relateClose ? `<p>${escapeHtml(cleaned.relateClose)}</p>` : ""}
-        </div>` : ""}
-      ${cleaned.actionPoints.length ? `
-        <div class="preview-section">
-          <h3>What you can do</h3>
-          <ul>${cleaned.actionPoints.map((p) => `<li>${escapeHtml(p)}</li>`).join("")}</ul>
-        </div>` : ""}
-      ${cleaned.urgent ? `<div class="preview-urgent"><strong>When to seek urgent care:</strong> ${escapeHtml(cleaned.urgent)}</div>` : ""}
+  function injectStyles(){
+    const css=`
+      .pi-new{max-width:980px;margin:0 auto 80px}.pi-hero{padding:8px 0 24px}.pi-hero h1{font-size:clamp(2rem,4vw,3.4rem);margin:0 0 12px;letter-spacing:-.04em}.pi-hero p{max-width:700px;color:var(--text-dim);font-size:1.02rem;line-height:1.65;margin:0}.pi-card{background:#fff;border:1px solid rgba(23,19,15,.1);border-radius:24px;padding:clamp(20px,4vw,36px);box-shadow:0 12px 40px rgba(23,19,15,.06);margin-top:20px}.pi-kicker{font-size:.68rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--orange-deep);display:block;margin-bottom:10px}.pi-card h2{margin:0 0 8px;font-size:clamp(1.35rem,2.8vw,2rem);letter-spacing:-.03em}.pi-help{color:var(--text-dim);line-height:1.55;margin:0 0 22px}.pi-intake{position:relative}.pi-textarea{width:100%;min-height:230px;resize:vertical;border:1px solid rgba(23,19,15,.14);border-radius:18px;padding:18px 62px 18px 18px;font:inherit;line-height:1.6;background:#fbfaf7;box-sizing:border-box}.pi-textarea:focus{outline:2px solid rgba(242,84,12,.2);border-color:var(--orange-deep)}.pi-mic{position:absolute;right:14px;bottom:14px;width:48px;height:48px;border:0;border-radius:50%;background:#17130f;color:#fff;display:grid;place-items:center;cursor:pointer;box-shadow:0 8px 22px rgba(23,19,15,.18)}.pi-mic svg{width:21px;height:21px;fill:currentColor}.pi-mic.listening{background:#d83b1f;animation:piPulse 1.2s infinite}@keyframes piPulse{50%{transform:scale(1.06);box-shadow:0 0 0 9px rgba(216,59,31,.12)}}.pi-mic-row{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-top:12px}.pi-listen-status{font-size:.86rem;color:var(--text-dim);min-height:20px}.pi-word-count{font-size:.76rem;color:var(--text-dim)}.pi-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}.pi-btn{border:0;border-radius:999px;padding:12px 18px;font:inherit;font-weight:750;cursor:pointer}.pi-btn-dark{background:#17130f;color:#fff}.pi-btn-orange{background:var(--orange-deep);color:#fff}.pi-btn-light{background:#f1eee8;color:#17130f;border:1px solid rgba(23,19,15,.1)}.pi-btn:disabled{opacity:.45;cursor:not-allowed}.pi-status{margin-top:12px;font-size:.9rem;min-height:22px;color:var(--text-dim)}.pi-status.error{color:#a22b18}.pi-status.success{color:#28724a}.pi-understood{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:20px}.pi-fact{background:#f7f4ef;border-radius:16px;padding:15px}.pi-fact b{display:block;font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px;color:var(--text-dim)}.pi-question{margin-top:20px;border-left:3px solid var(--orange-deep);padding:16px 18px;background:#fff7f1;border-radius:0 16px 16px 0}.pi-question strong{display:block;margin-bottom:7px}.pi-question p{margin:0;line-height:1.55}.pi-conversation{display:grid;gap:12px;margin-top:20px}.pi-turn{padding:16px 18px;border-radius:18px;background:#f7f4ef}.pi-turn.doctor{background:#17130f;color:#fff}.pi-turn b{display:block;font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;opacity:.62;margin-bottom:7px}.pi-review-grid{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:20px;align-items:start}.pi-preview-story{background:#fbfaf7;border:1px solid rgba(23,19,15,.1);border-radius:20px;padding:24px}.pi-preview-story h3{font-size:1.8rem;line-height:1.1;margin:0 0 10px}.pi-preview-story .lead{font-size:1.05rem;line-height:1.7}.pi-dialogue{display:grid;gap:16px;margin-top:24px}.pi-dialogue .q{font-weight:800;margin-bottom:5px}.pi-dialogue .a{line-height:1.7;color:#3e3934}.pi-review-side{background:#17130f;color:#fff;border-radius:20px;padding:20px;position:sticky;top:20px}.pi-review-side h3{margin:0 0 10px}.pi-review-side p,.pi-review-side li{color:rgba(255,255,255,.72);line-height:1.55;font-size:.9rem}.pi-review-side ul{padding-left:18px}.pi-privacy{margin-top:20px}.pi-check{display:flex;gap:10px;align-items:flex-start;padding:12px 0;border-bottom:1px solid rgba(23,19,15,.08);line-height:1.45}.pi-check input{margin-top:4px}.pi-privacy-note{font-size:.8rem;color:var(--text-dim);line-height:1.5;margin-top:14px}.pi-hidden-old{display:none!important}.pi-final-actions{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:24px}
+      @media(max-width:760px){.pi-understood,.pi-review-grid{grid-template-columns:1fr}.pi-review-side{position:static}.pi-textarea{min-height:260px}.pi-card{border-radius:20px}.pi-hero{padding-top:0}}
     `;
+    const style=document.createElement("style");style.textContent=css;document.head.appendChild(style);
   }
 
-  function showPreview(){
-    renderPreview();
-    document.getElementById("wizardView").style.display = "none";
-    document.getElementById("previewView").style.display = "";
-    window.scrollTo({ top: 0 });
+  function buildUI(){
+    injectStyles();
+    document.querySelectorAll("#wizardView > *").forEach(el=>el.classList.add("pi-hidden-old"));
+    const wrap=document.createElement("main");wrap.className="pi-new";wrap.id="piApp";
+    wrap.innerHTML=`
+      <div class="pi-hero"><span class="pi-kicker">PATIENT INSIGHT · AI ASSISTED</span><h1>Tell me about the patient.</h1><p>You don't need to write a story. Talk naturally about the case, just as you would explain it after seeing the patient. I'll organise the clinical details, ask only what is missing, and turn it into a patient-friendly insight for you to review.</p></div>
+      <section class="pi-card" id="piIntakeCard"><span class="pi-kicker">STEP 1 · YOUR CASE NOTES</span><h2>Just tell me what happened.</h2><p class="pi-help">Speak for as long as you need. Mention what the patient complained of, how it changed, what had already been done, and anything that made the case stand out. Don't include the patient's name, phone number, address, hospital ID or other identifying information.</p><div class="pi-intake"><textarea id="piNotes" class="pi-textarea" placeholder="Example: I saw a 50-year-old woman today who had headaches for around six months. Initially they were once a month, but gradually became twice a week..."></textarea><button class="pi-mic" id="piMic" type="button" aria-label="Start voice input" title="Speak your case"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 14a3 3 0 0 0 3-3V6a3 3 0 1 0-6 0v5a3 3 0 0 0 3 3Zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21H8v2h8v-2h-3v-3.08A7 7 0 0 0 19 11h-2Zm-5 5a5 5 0 0 1-5-5H5a7 7 0 0 0 14 0h-2a5 5 0 0 1-5 5Z"/></svg></button></div><div class="pi-mic-row"><span id="piListenStatus" class="pi-listen-status">Tap the microphone to speak, or type normally.</span><span id="piWordCount" class="pi-word-count">0 words</span></div><div class="pi-actions"><button class="pi-btn pi-btn-dark" id="piUnderstandBtn" type="button">Understand this case</button><button class="pi-btn pi-btn-light" id="piClearBtn" type="button">Clear</button></div><div class="pi-status" id="piStatus" role="status"></div></section>
+      <section class="pi-card" id="piConversationCard" hidden><span class="pi-kicker">STEP 2 · CLARIFYING THE CASE</span><h2 id="piQuestionTitle">I need one detail.</h2><p class="pi-help">I'll only ask for information that matters to the story. You can answer by voice or typing. If the detail isn't known, you can skip it.</p><div id="piQuestionBox" class="pi-question"></div><div class="pi-intake" style="margin-top:16px"><textarea id="piAnswer" class="pi-textarea" style="min-height:150px" placeholder="Answer the question in your own words..."></textarea><button class="pi-mic" id="piAnswerMic" type="button" aria-label="Answer by voice"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 14a3 3 0 0 0 3-3V6a3 3 0 1 0-6 0v5a3 3 0 0 0 3 3Zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21H8v2h8v-2h-3v-3.08A7 7 0 0 0 19 11h-2Zm-5 5a5 5 0 0 1-5-5H5a7 7 0 0 0 14 0h-2a5 5 0 0 1-5-5Z"/></svg></button></div><div class="pi-actions"><button class="pi-btn pi-btn-dark" id="piAnswerBtn" type="button">Continue</button><button class="pi-btn pi-btn-light" id="piSkipBtn" type="button">Skip this detail</button></div><div class="pi-conversation" id="piConversation"></div></section>
+      <section class="pi-card" id="piDraftCard" hidden><span class="pi-kicker">STEP 3 · AI DRAFT</span><h2>Your story is ready to review.</h2><p class="pi-help">The AI has only used information supplied by you. Read the story carefully. You can regenerate or edit it before publishing.</p><div class="pi-review-grid"><div class="pi-preview-story" id="piDraftPreview"></div><aside class="pi-review-side"><h3>Doctor review</h3><p>Before publishing, confirm that the clinical facts, wording and privacy are accurate.</p><ul id="piReviewList"></ul></aside></div><div class="pi-actions"><button class="pi-btn pi-btn-dark" id="piUseDraftBtn" type="button">Use this story</button><button class="pi-btn pi-btn-light" id="piRegenerateBtn" type="button">Regenerate</button></div></section>
+      <section class="pi-card" id="piPublishCard" hidden><span class="pi-kicker">FINAL · DOCTOR APPROVAL</span><h2>Review and publish</h2><p class="pi-help">These checks remain deliberately explicit because this is a real patient's story, not a decorative blog post.</p><div class="pi-preview-story" id="piFinalPreview"></div><div class="pi-privacy"><label class="pi-check"><input id="piConsent" type="checkbox"><span>I have obtained appropriate consent to publish this patient's story.</span></label><label class="pi-check"><input id="piIdentifiers" type="checkbox"><span>I have removed unnecessary identifying information.</span></label><label class="pi-check"><input id="piPrivacy" type="checkbox"><span>I have reviewed the story and confirmed that it does not reveal private information that should not be published.</span></label><label class="pi-check"><input id="piNoDetails" type="checkbox"><span>The story contains no unnecessary names, addresses, phone numbers, workplace details or other identifying information.</span></label><label class="pi-check"><input id="piMedical" type="checkbox"><span>I have reviewed the medical information in this story for accuracy.</span></label></div><p class="pi-privacy-note">These checks do not replace your legal or professional obligations. Follow the consent, privacy and professional requirements that apply to your practice and location.</p><div class="pi-final-actions"><button class="pi-btn pi-btn-light" id="piBackBtn" type="button">Back to story</button><button class="pi-btn pi-btn-orange" id="piPublishBtn" type="button" disabled>Save draft</button></div><div class="pi-status" id="piPublishStatus"></div></section>`;
+    wizard.appendChild(wrap);if(progress)progress.classList.add("pi-hidden-old");bindUI();
   }
 
-  async function doPublish(){
-    if(!readyToPublish()){
-      goToStep(6);
-      alert("Before publishing: finish the privacy checklist, confirm urgent-care guidance has been reviewed (if you added any), and make sure the story has a title.");
-      return;
-    }
-    story.status = "published";
-    try {
-      const saved = await window.PatientInsightsDB.save(cleanForSave(story));
-      story.id = saved.id; story.slug = saved.slug; dirty = false;
-      window.location.href = "index.html";
-    } catch(e){
-      alert("Couldn't publish: " + e.message);
-    }
+  function bindUI(){
+    const notes=document.getElementById("piNotes"),mic=document.getElementById("piMic"),answer=document.getElementById("piAnswer"),answerMic=document.getElementById("piAnswerMic");
+    notes.addEventListener("input",()=>{rawNotes=notes.value;updateWordCount(notes);});
+    document.getElementById("piClearBtn").onclick=()=>{notes.value="";rawNotes="";transcript=[];aiQuestions=0;updateWordCount(notes);document.getElementById("piStatus").textContent="";};
+    document.getElementById("piUnderstandBtn").onclick=understandCase;
+    document.getElementById("piAnswerBtn").onclick=()=>submitAnswer(answer.value.trim());
+    document.getElementById("piSkipBtn").onclick=()=>submitAnswer("[Doctor does not know / prefers not to add this detail]");
+    document.getElementById("piUseDraftBtn").onclick=useDraft;
+    document.getElementById("piRegenerateBtn").onclick=()=>generateDraft(true);
+    document.getElementById("piBackBtn").onclick=()=>{document.getElementById("piPublishCard").hidden=true;document.getElementById("piDraftCard").hidden=false;};
+    document.getElementById("piPublishBtn").onclick=publishStory;
+    ["piConsent","piIdentifiers","piPrivacy","piNoDetails","piMedical"].forEach(id=>document.getElementById(id).addEventListener("change",updatePublishButton));
+    mic.onclick=()=>toggleRecognition(notes,mic);
+    answerMic.onclick=()=>toggleRecognition(answer,answerMic);
   }
-  document.getElementById("publishBtn").addEventListener("click", doPublish);
-  document.getElementById("publishFromPreviewBtn").addEventListener("click", doPublish);
+  function updateWordCount(el){document.getElementById("piWordCount").textContent=(el.value.trim()?el.value.trim().split(/\s+/).length:0)+" words";}
+  function setListenStatus(t){const e=document.getElementById("piListenStatus");if(e)e.textContent=t;}
+  function setupRecognition(){const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR)return null;const r=new SR();r.lang="en-IN";r.continuous=true;r.interimResults=true;r.maxAlternatives=1;r.onerror=e=>{listening=false;setListenStatus("Voice input stopped. You can continue typing.");console.warn("Speech recognition",e.error)};r.onend=()=>{listening=false;document.querySelectorAll(".pi-mic").forEach(b=>b.classList.remove("listening"));setListenStatus("Voice input stopped. You can edit the transcript before continuing.")};return r;}
+  function toggleRecognition(target,button){if(!(window.SpeechRecognition||window.webkitSpeechRecognition)){setListenStatus("Voice input is not supported in this browser. You can type normally.");return}if(listening){recognition?.stop();return}recognition=setupRecognition();if(!recognition)return;let finalText="";recognition.onstart=()=>{listening=true};recognition.onresult=event=>{let interim="";for(let i=event.resultIndex;i<event.results.length;i++){const t=event.results[i][0].transcript;if(event.results[i].isFinal)finalText+=t+" ";else interim+=t}target.value=(target.value.trim()?target.value.trim()+" ":"")+finalText+interim;target.dispatchEvent(new Event("input",{bubbles:true}));if(target.id==="piNotes")rawNotes=target.value};button.classList.add("listening");setListenStatus("Listening… speak naturally. Tap the microphone again when you're done.");recognition.start();}
 
-  document.getElementById("logoutBtn").addEventListener("click", () => window.AdminAuth.logout());
+  async function authHeaders(){const session=await window.PatientInsightsDB.getSession();if(!session?.access_token)throw new Error("Your admin session has expired. Please log in again.");return {"Content-Type":"application/json","Authorization":"Bearer "+session.access_token,"apikey":window.SUPABASE_CONFIG.anonKey};}
+  async function callAI(body){const res=await fetch(API(),{method:"POST",headers:await authHeaders(),body:JSON.stringify(body)});const data=await res.json().catch(()=>({}));if(!res.ok)throw new Error(data.error||"The Patient Insight AI could not respond.");return data;}
+  function setStatus(t,k){const e=document.getElementById("piStatus");e.textContent=t;e.className="pi-status"+(k?" "+k:"");}
 
-  window.addEventListener("beforeunload", (e) => {
-    if(!dirty) return;
-    e.preventDefault();
-    e.returnValue = "";
-  });
+  async function understandCase(){const notes=clean(rawNotes||document.getElementById("piNotes").value);if(notes.length<30){setStatus("Tell me a little more about the case first. A few sentences are enough to start.","error");return}rawNotes=notes;const b=document.getElementById("piUnderstandBtn");b.disabled=true;setStatus("Reading the case and identifying what matters…","busy");try{handleAnalysis(await callAI({mode:"analyze",notes,conversation:transcript,questionCount:aiQuestions}))}catch(e){setStatus(e.message,"error")}finally{b.disabled=false}}
+  function handleAnalysis(data){const card=document.getElementById("piConversationCard");if(data.status==="ready"){setStatus("I have enough information to build the story.","success");renderFacts(data.known||{});card.hidden=false;document.getElementById("piQuestionTitle").textContent="The case is clear.";document.getElementById("piQuestionBox").innerHTML="<strong>Enough information.</strong><p>I have the main clinical story. I can now turn it into a patient-friendly narrative without adding facts that you didn't provide.</p>";document.getElementById("piAnswer").value="";document.getElementById("piAnswerBtn").textContent="Create the story";document.getElementById("piAnswerBtn").onclick=()=>generateDraft(false);document.getElementById("piSkipBtn").style.display="none";return}const q=clean(data.question);if(!q){generateDraft(false);return}aiQuestions++;card.hidden=false;document.getElementById("piQuestionTitle").textContent="One specific detail would help.";document.getElementById("piQuestionBox").innerHTML=`<strong>${esc(q)}</strong><p>${esc(data.question_reason||"This detail helps keep the story accurate and specific.")}</p>`;document.getElementById("piAnswer").value="";document.getElementById("piAnswerBtn").textContent="Continue";document.getElementById("piAnswerBtn").onclick=()=>submitAnswer(document.getElementById("piAnswer").value.trim());document.getElementById("piSkipBtn").style.display="";renderFacts(data.known||{});setStatus("One focused question at a time. No vague questionnaires.","success")}
+  function renderFacts(known){const old=document.getElementById("piFacts");if(old)old.remove();const card=document.getElementById("piConversationCard"),box=document.createElement("div");box.id="piFacts";box.className="pi-understood";Object.entries(known).filter(([_,v])=>v&&String(v).trim()).slice(0,8).forEach(([k,v])=>{const d=document.createElement("div");d.className="pi-fact";d.innerHTML=`<b>${esc(k.replace(/_/g," "))}</b><span>${esc(Array.isArray(v)?v.join(", "):v)}</span>`;box.appendChild(d)});card.appendChild(box)}
+  async function submitAnswer(answer){if(!clean(answer)){setListenStatus("Give an answer or choose skip.");return}const q=document.getElementById("piQuestionBox").querySelector("strong")?.textContent||"Clarification";transcript.push({role:"assistant",content:q});transcript.push({role:"doctor",content:answer});document.getElementById("piConversation").insertAdjacentHTML("afterbegin",`<div class="pi-turn doctor"><b>Your answer</b>${esc(answer)}</div>`);const all=rawNotes+"\n\nAdditional clarification:\n"+transcript.filter(x=>x.role==="doctor").map(x=>x.content).join("\n");const b=document.getElementById("piAnswerBtn");b.disabled=true;setStatus("Updating the case understanding…","busy");try{handleAnalysis(await callAI({mode:"analyze",notes:all,conversation:transcript,questionCount:aiQuestions}))}catch(e){setStatus(e.message,"error")}finally{b.disabled=false}}
+  async function generateDraft(regenerate){setStatus(regenerate?"Regenerating the story…":"Writing the patient-friendly story…","busy");try{const notes=rawNotes+"\n\nClarifications:\n"+transcript.filter(x=>x.role==="doctor").map(x=>x.content).join("\n");const data=await callAI({mode:"draft",notes,conversation:transcript,regenerate:!!regenerate});renderDraft(data.draft||{});setStatus("Draft ready. Nothing is published until you approve it.","success");document.getElementById("piConversationCard").hidden=true;document.getElementById("piDraftCard").hidden=false}catch(e){setStatus(e.message,"error")}}
+  function renderDraft(d){const html=`<h3>${esc(d.title||"Patient insight")}</h3>${d.subtitle?`<p class="pi-kicker">${esc(d.subtitle)}</p>`:""}<p class="lead">${esc(d.intro||"")}</p><div class="pi-dialogue">${(d.dialogue||[]).map(x=>`<div><div class="q">${esc(x.q)}</div><div class="a">${esc(x.a)}</div></div>`).join("")}</div>${d.doctorPerspective?`<div style="margin-top:24px;padding-top:18px;border-top:1px solid rgba(23,19,15,.1)"><div class="q">What stood out to the doctor</div><div class="a">${esc(d.doctorPerspective)}</div></div>`:""}${(d.relatePoints||[]).length?`<div style="margin-top:24px"><div class="q">You might recognise this if…</div><ul>${d.relatePoints.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`:""}`;document.getElementById("piDraftPreview").innerHTML=html;document.getElementById("piFinalPreview").innerHTML=html;const list=document.getElementById("piReviewList");list.innerHTML="";(d.needsDoctorReview||["Check every clinical statement before publishing."]).forEach(x=>{const li=document.createElement("li");li.textContent=x;list.appendChild(li)});window.__piDraft=d}
+  function useDraft(){const d=window.__piDraft||{};story.title=d.title||"";story.subtitle=d.subtitle||"";story.intro=d.intro||"";story.topic=d.topic||"Patient Insight";story.dialogue=Array.isArray(d.dialogue)?d.dialogue.map(x=>({q:x.q||"",a:x.a||""})):[];story.relateIntro=d.relateIntro||"";story.relatePoints=Array.isArray(d.relatePoints)?d.relatePoints.filter(Boolean):[];story.relateClose=d.relateClose||"";story.actionPoints=Array.isArray(d.actionPoints)?d.actionPoints.filter(Boolean):[];story.urgent=d.urgent||"";story.urgentReviewed=false;story.status="draft";markDirty();document.getElementById("piPublishCard").hidden=false;document.getElementById("piDraftCard").hidden=true;document.getElementById("piPublishBtn").textContent="Save draft";updatePublishButton();saveDraft()}
+  function updatePublishButton(){const ok=["piConsent","piIdentifiers","piPrivacy","piNoDetails","piMedical"].every(id=>document.getElementById(id)?.checked);const b=document.getElementById("piPublishBtn");b.disabled=!ok;b.textContent=ok?"Publish story":"Save draft"}
+  async function saveDraft(){try{const saved=await window.PatientInsightsDB.save(cleanStory(story));story.id=saved.id;story.slug=saved.slug;dirty=false;document.getElementById("autosaveStatus").textContent="Saved";setTimeout(()=>{document.getElementById("autosaveStatus").textContent=""},1800)}catch(e){document.getElementById("piPublishStatus").textContent="Couldn't save: "+e.message}}
+  function cleanStory(s){const c={...s};c.dialogue=(s.dialogue||[]).map(x=>({q:x.q,a:x.a}));c.relatePoints=(s.relatePoints||[]).filter(Boolean);c.actionPoints=(s.actionPoints||[]).filter(Boolean);return c}
+  function scheduleSave(){clearTimeout(saveTimer);saveTimer=setTimeout(()=>{if(dirty)saveDraft()},1400)}
+  async function publishStory(){const b=document.getElementById("piPublishBtn");if(b.disabled)return;const st=document.getElementById("piPublishStatus");b.disabled=true;st.textContent="Publishing…";story.status="published";try{const saved=await window.PatientInsightsDB.save(cleanStory(story));story.id=saved.id;story.slug=saved.slug;dirty=false;st.textContent="Published.";setTimeout(()=>window.location.href="index.html",500)}catch(e){story.status="draft";st.textContent="Couldn't publish: "+e.message;updatePublishButton()}}
 
-  // ---------------- boot ----------------
-  window.AdminAuth.requireSession().then(async () => {
-    if(storyId){
-      try {
-        story = await window.PatientInsightsDB.getById(storyId);
-        story.dialogue = (story.dialogue || []).map((d) => ({ q: d.q, a: d.a }));
-      } catch(e){
-        alert("Couldn't load that story.");
-        window.location.href = "index.html";
-        return;
-      }
-    }
-    populateForm();
-    fillAiSourceFromStory();
-    const step = params.get("step");
-    goToStep(step === "preview" ? TOTAL_STEPS : 1);
-    if(step === "preview") showPreview();
-  }).catch(() => {});
+  async function load(){await window.AdminAuth.requireSession();if(storyId){try{story=await window.PatientInsightsDB.getById(storyId);story.dialogue=story.dialogue||[];rawNotes=story.intro||story.title||"";document.getElementById("piNotes").value=rawNotes;updateWordCount(document.getElementById("piNotes"));}catch(e){alert("Couldn't load that story.");window.location.href="index.html";return}}}
+  buildUI();load().catch(e=>{console.error(e);alert(e.message||"Couldn't load the Patient Insight editor.")});
 })();
