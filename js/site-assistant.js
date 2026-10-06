@@ -29,6 +29,7 @@
       overflow:hidden!important;
       border-radius:20px!important;
       z-index:10000!important;
+      transform:none!important;
     }
     .site-assistant .assistant-head{
       flex:0 0 auto!important;
@@ -99,19 +100,48 @@
     }
     @media(max-width:640px){
       .site-assistant{
-        right:12px!important;
-        bottom:116px;
+        position:fixed!important;
+        right:0!important;
+        bottom:0!important;
+        width:100%!important;
+        height:0!important;
+        z-index:10000!important;
+        pointer-events:none!important;
+      }
+      .site-assistant .assistant-toggle{
+        position:fixed!important;
+        right:20px!important;
+        bottom:calc(env(safe-area-inset-bottom,0px) + 132px)!important;
+        width:56px!important;
+        height:56px!important;
+        margin:0!important;
+        z-index:10002!important;
+        pointer-events:auto!important;
       }
       .site-assistant .assistant-panel{
-        right:12px!important;
-        top:calc(env(safe-area-inset-top,0px) + 74px)!important;
-        width:calc(100vw - 24px)!important;
-        height:min(700px,calc(100dvh - 92px))!important;
-        max-height:calc(100dvh - 92px)!important;
-        border-radius:20px!important;
+        position:fixed!important;
+        left:14px!important;
+        right:14px!important;
+        top:auto!important;
+        bottom:calc(env(safe-area-inset-bottom,0px) + 204px)!important;
+        width:auto!important;
+        height:min(620px,60dvh)!important;
+        max-height:calc(100dvh - 260px)!important;
+        min-height:430px!important;
+        border-radius:22px!important;
+        transform:none!important;
+        z-index:10001!important;
+        margin:0!important;
+      }
+      .site-assistant .assistant-head{
+        min-height:60px!important;
+        padding:14px 18px!important;
       }
       .site-assistant .assistant-messages{
-        padding:16px!important;
+        padding:14px!important;
+      }
+      .site-assistant .assistant-form{
+        padding-bottom:max(10px,env(safe-area-inset-bottom,0px))!important;
       }
     }
   `;
