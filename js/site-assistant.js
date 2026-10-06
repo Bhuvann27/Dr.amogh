@@ -17,16 +17,22 @@
   const style = document.createElement("style");
   style.textContent = `
     .site-assistant .assistant-panel{
+      position:fixed!important;
       display:flex!important;
       flex-direction:column!important;
-      width:min(390px,calc(100vw - 28px))!important;
-      height:min(620px,68dvh)!important;
-      max-height:calc(100dvh - 120px)!important;
+      right:max(12px,env(safe-area-inset-right,0px))!important;
+      bottom:auto!important;
+      top:calc(env(safe-area-inset-top,0px) + 78px)!important;
+      width:min(400px,calc(100vw - 24px))!important;
+      height:min(680px,calc(100dvh - 100px))!important;
+      max-height:calc(100dvh - 100px)!important;
       overflow:hidden!important;
       border-radius:20px!important;
+      z-index:10000!important;
     }
     .site-assistant .assistant-head{
       flex:0 0 auto!important;
+      min-height:62px!important;
     }
     .site-assistant .assistant-messages{
       flex:1 1 auto!important;
@@ -36,6 +42,7 @@
       overscroll-behavior:contain;
       -webkit-overflow-scrolling:touch;
       padding:18px!important;
+      scroll-behavior:smooth;
     }
     .site-assistant .assistant-suggestions{
       flex:0 0 auto!important;
@@ -93,12 +100,14 @@
     @media(max-width:640px){
       .site-assistant{
         right:12px!important;
-        bottom:116px!important;
+        bottom:116px;
       }
       .site-assistant .assistant-panel{
+        right:12px!important;
+        top:calc(env(safe-area-inset-top,0px) + 74px)!important;
         width:calc(100vw - 24px)!important;
-        height:min(620px,68dvh)!important;
-        max-height:calc(100dvh - 105px)!important;
+        height:min(700px,calc(100dvh - 92px))!important;
+        max-height:calc(100dvh - 92px)!important;
         border-radius:20px!important;
       }
       .site-assistant .assistant-messages{
@@ -145,24 +154,33 @@
   const localAnswer = (q) => {
     const x = q.toLowerCase();
     if(/book|appointment|consult/.test(x)){
-      return "You can book an online consultation from the Consultation section. Choose a date and then an available time before entering your details.";
+      return "You can book an online consultation from the Consultation section. It is listed as a 15-minute consultation for ₹1,200. Choose a date and available time before entering your details.";
     }
     if(/where|location|hospital|address|mandya|timing|time|open/.test(x)){
-      return "Dr. Amogh is listed at Pragati Hospital, General Hospital Road, Ashok Nagar, Mandya. The Visit section has the hospital address and directions.";
+      return "Dr. Amogh G is listed at Pragati Hospital, Mandya. The Visit section contains the hospital information and directions shown on this website.";
     }
-    if(/treat|care|condition|disease|special|diabet|sugar|pressure|liver|digest|acidity|headache|dizz|fever|infection|cough|breath/.test(x)){
-      return "The website lists General Medicine concerns including infections, headaches and dizziness, diabetes and blood pressure, digestive and liver concerns, respiratory problems, and chronic health conditions. It is not a complete list.";
+    if(/stomach|abdominal|abdomen|belly|gastric|acidity|indigestion|constipat|diarrh|loose motion|vomit/.test(x)){
+      return "Stomach or abdominal pain can have several causes, including indigestion or reflux, constipation, infection, or other gastrointestinal problems. The cause cannot be determined safely from a chat alone, so persistent or recurring pain is worth discussing with a doctor. Seek urgent medical care if the pain is severe or worsening, or if there is repeated vomiting, blood or black stool, fainting, marked abdominal swelling, or high fever.";
+    }
+    if(/headache|migraine|dizz|gidd|weak|fatigue|tired/.test(x)){
+      return "Headache, dizziness and weakness can have many causes, from dehydration or an acute illness to migraine, anaemia, blood-pressure or metabolic problems. The website lists these among the concerns assessed in General Medicine. If symptoms are sudden, severe, associated with fainting, confusion, weakness on one side, chest pain or difficulty breathing, seek urgent medical care.";
+    }
+    if(/fever|infection|cold|flu|cough|breath|breathing/.test(x)){
+      return "Fever, cough and breathing symptoms can occur with infections and several other conditions. The website includes fever and infections and respiratory concerns among its areas of care. Persistent or worsening symptoms should be assessed clinically, and sudden severe breathing difficulty or other severe symptoms need urgent medical attention.";
+    }
+    if(/treat|care|condition|disease|special|diabet|sugar|pressure|blood pressure|liver|digest|respiratory/.test(x)){
+      return "The website lists General Medicine care for fever and infections; headache, dizziness and weakness; blood sugar, blood pressure and metabolic health; digestive and liver concerns; and respiratory and other concerns. Examples include diabetes, hypertension, acidity or reflux, diarrhoeal illnesses, fatty liver disease, asthma and COPD. This is not a complete list.";
     }
     if(/about|qualification|degree|experience|doctor/.test(x)){
-      return "Dr. Amogh G is listed as MBBS, MD General Medicine, with 12+ years of experience, at Pragati Hospital, Mandya.";
+      return "Dr. Amogh G is listed as MBBS, MD General Medicine, with 12+ years of clinical experience at Pragati Hospital, Mandya.";
     }
     if(/story|stories|insight|article/.test(x)){
-      return "You can read the patient stories and health insights directly on the website. The stories are shared anonymously.";
+      return "The Patient Stories section shares anonymous patient experiences, and the Insights section provides health information. You can open the stories directly from the website and read them at your own pace.";
     }
-    if(/symptom|diagnos|medicine|tablet|pain|fever|cough|dizz/.test(x)){
-      return "I can explain information published on this website, but I can't diagnose you or recommend a personal treatment. If symptoms are sudden or severe, seek immediate medical attention.";
+    if(/symptom|diagnos|medicine|tablet|drug|dose|treatment|pain/.test(x)){
+      return "I can give general health information and explain what the website covers, but I cannot diagnose you or choose a personal medicine or dose from a chat. Tell me the symptom, how long it has been happening, and any important associated symptoms, and I can explain the general possibilities and warning signs.";
     }
-    return "I can help with Dr. Amogh's qualifications, areas of care, patient stories, online consultations, clinic information and general website questions.";
+    return "I can help with Dr. Amogh's qualifications, areas of care, consultations, hospital information, patient stories, or general health information. Ask me a specific question and I’ll answer that question directly.";
   };
 
   const actionForQuestion = (q) => {
@@ -215,6 +233,7 @@
     requestAnimationFrame(() => {
       root?.classList.add("is-open", "chat-open");
       input.focus();
+      messages.scrollTop = messages.scrollHeight;
     });
   }
 
