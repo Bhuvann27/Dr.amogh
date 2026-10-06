@@ -2,6 +2,17 @@
    Shared auth guard for every admin page except login.html.
    Include this after supabase-config.js + patient-insights-db.js.
    ========================================================= */
+(function(){
+  "use strict";
+  if(!document.querySelector('link[data-admin-restore]')){
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = "css/admin-restore.css";
+    link.dataset.adminRestore = "";
+    document.head.appendChild(link);
+  }
+})();
+
 window.AdminAuth = (function(){
   "use strict";
 
