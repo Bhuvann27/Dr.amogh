@@ -99,14 +99,18 @@
       cursor:pointer;
     }
 
-    /* Desktop: keep the assistant button as the third member of the
-       WhatsApp / Call floating stack. The chat panel opens directly above
-       that button instead of jumping to the top of the viewport. */
+    /* Desktop: the closed assistant stays above WhatsApp. Once chat opens,
+       the assistant button moves down to the exact call-button position and
+       the panel follows it, opening upward from that fixed control point. */
     @media(min-width:881px){
       .site-assistant{
         right:max(28px,env(safe-area-inset-right,0px))!important;
         bottom:160px!important;
         z-index:120!important;
+        transition:bottom .2s ease!important;
+      }
+      .site-assistant.chat-open{
+        bottom:28px!important;
       }
       .site-assistant .assistant-toggle{
         width:56px!important;
