@@ -86,6 +86,23 @@
         margin-top:10px;
         margin-bottom:0;
       }
+      #consult .booking-widget .phone-input-wrap{
+        display:flex;
+        align-items:stretch;
+      }
+      #consult .booking-widget .phone-prefix{
+        display:inline-flex;
+        align-items:center;
+        flex:0 0 auto;
+        padding:0 14px 0 4px;
+        margin-right:14px;
+        border-right:1px solid var(--line);
+        color:var(--text-dim);
+      }
+      #consult .booking-widget .phone-input-wrap .field-input{
+        flex:1 1 auto;
+        min-width:0;
+      }
     `;
     document.head.appendChild(style);
 
