@@ -1,3 +1,4 @@
+/* Desktop-only hero renderer. Mobile exits before any DOM or frame work. */
 (function(){
   'use strict';
   if (window.innerWidth < 881) return;
@@ -14,14 +15,10 @@
   const ctx=canvas.getContext('2d',{alpha:false});
   let current=0, raf=0;
 
-  // Desktop-only cleanup: the old portrait-side pseudo elements are no longer
-  // needed because the new frames already contain a continuous wide background.
   const style=document.createElement('style');
   style.textContent='@media (min-width:881px){.coat-imgwrap::before,.coat-imgwrap::after{display:none!important}.hero-frame-canvas{position:relative!important;z-index:1!important}}';
   document.head.appendChild(style);
 
-  // Very restrained ambient objects. They are decorative only and never alter
-  // the mobile hero because this entire file exits below 881px.
   const ambient=document.createElement('div');
   ambient.className='hero-ambient-desktop';
   ambient.innerHTML='<span class="ambient-mark ambient-cross">+</span><span class="ambient-mark ambient-ring"></span><span class="ambient-mark ambient-ecg">⌁</span><span class="ambient-mark ambient-dot"></span>';
@@ -84,7 +81,6 @@
     const h1=document.getElementById('hook1'),h2=document.getElementById('hook2'),h3=document.getElementById('hook3');
     if(h1) h1.style.opacity=fade(p,.04,.18,.28);
     if(h2) h2.style.opacity=fade(p,.18,.36,.28);
-    // Give the third hook a longer, clearer desktop window.
     if(h3){ h3.style.opacity=fade(p,.34,.60,.24); h3.style.transform='translateX(-50%)'; }
 
     const progress=document.getElementById('progressFill');
@@ -100,7 +96,6 @@
     img.onload=()=>{frames[i]=img;if(i===0||i===current)draw(current);};
   }
 
-  // Gentle pointer parallax for the ambient objects only. The coat never moves.
   stage.addEventListener('pointermove',(e)=>{
     if(window.innerWidth<881) return;
     const r=stage.getBoundingClientRect();
