@@ -340,3 +340,25 @@
     right:0;
   }
 }
+
+/* =========================================================
+   DESKTOP HERO BACKGROUND — plain dark side extension only.
+   The portrait frame sequence itself is unchanged. Mobile is intentionally
+   excluded so its existing hero rendering remains untouched.
+   ========================================================= */
+@media (min-width:881px){
+  .coat-imgwrap::before,
+  .coat-imgwrap::after{
+    content:"";
+    position:absolute;
+    top:0;
+    bottom:0;
+    width:calc((100% - min(100%, 56.25vh)) / 2);
+    background:#0E0E0E;
+    z-index:2;
+    pointer-events:none;
+  }
+  .coat-imgwrap::before{left:0;}
+  .coat-imgwrap::after{right:0;}
+  .hero-frame-canvas{position:relative;z-index:1;}
+}
