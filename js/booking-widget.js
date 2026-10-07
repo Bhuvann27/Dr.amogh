@@ -39,14 +39,63 @@
   }
   function esc(s){ return (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
 
-  function appointmentSummary(){
-    if(!state.dateISO || !state.slot) return "";
-    return `
-      <div class="booking-selection">
-        <span class="booking-selection-label">YOUR APPOINTMENT</span>
-        <strong>${esc(formatDateHuman(state.dateISO))}</strong>
-        <span>${esc(formatTimeHuman(state.slot))} · 15 min · ₹1,200</span>
-      </div>`;
+  // Desktop-only consultation refinement. Mobile keeps its existing layout and behavior untouched.
+  function applyDesktopConsultationRefinement(){
+    if(!window.matchMedia("(min-width: 781px)").matches) return;
+
+    const style = document.createElement("style");
+    style.id = "desktop-consultation-refinement";
+    style.textContent = `
+      #consult .consult-panel{
+        grid-template-columns:minmax(280px,.78fr) minmax(520px,1.22fr);
+        gap:clamp(42px,6vw,84px);
+        align-items:start;
+      }
+      #consult .consult-summary{
+        order:1;
+        max-width:420px;
+        padding-top:28px;
+      }
+      #consult .booking-widget-wrap{
+        order:2;
+        width:100%;
+        max-width:700px;
+        justify-self:end;
+        padding:30px 34px 34px;
+        border-radius:24px;
+      }
+      #consult .booking-meta{
+        padding-bottom:18px;
+        margin-bottom:24px;
+        border-bottom:1px solid var(--line);
+      }
+      #consult .booking-widget .booking-date-step{
+        padding-top:0;
+      }
+      #consult .booking-widget .booking-step-label{
+        margin-bottom:12px;
+      }
+      #consult .booking-widget .date-picker-field{
+        min-height:64px;
+        background:#fff;
+      }
+      #consult .booking-widget .date-picker-field::after{
+        pointer-events:none;
+      }
+      #consult .booking-widget .date-picker-hint{
+        margin-top:10px;
+        margin-bottom:0;
+      }
+    `;
+    document.head.appendChild(style);
+
+    const input = document.getElementById("bookDateInput");
+    if(input && typeof input.showPicker === "function"){
+      input.addEventListener("pointerdown", (event) => {
+        event.preventDefault();
+        try { input.showPicker(); } catch(e) { input.focus(); }
+      }, { once:true });
+    }
   }
 
   async function loadSlots(){
@@ -171,6 +220,16 @@
       </div>`,
   };
 
+  function appointmentSummary(){
+    if(!state.dateISO || !state.slot) return "";
+    return `
+      <div class="booking-selection">
+        <span class="booking-selection-label">YOUR APPOINTMENT</span>
+        <strong>${esc(formatDateHuman(state.dateISO))}</strong>
+        <span>${esc(formatTimeHuman(state.slot))} · 15 min · ₹1,200</span>
+      </div>`;
+  }
+
   function attachHandlers(){
     if(state.step === "date"){
       const input = document.getElementById("bookDateInput");
@@ -188,12 +247,22 @@
         render();
         loadSlots();
       });
+      // Re-apply the desktop picker interaction after every render of Step 1.
+      if(window.matchMedia("(min-width: 781px)").matches && typeof input.showPicker === "function"){
+        input.addEventListener("pointerdown", (event) => {
+          event.preventDefault();
+          try { input.showPicker(); } catch(e) { input.focus(); }
+        }, { once:true });
+      }
     }
     if(state.step === "slot"){
       root.querySelectorAll(".slot-chip").forEach((btn) => {
         btn.addEventListener("click", () => { state.slot = btn.dataset.slot; state.step = "details"; state.error = ""; render(); });
       });
-      document.getElementById("bookBackToDate").addEventListener("click", () => { state.step = "date"; render(); });
+      const back = document.getElementById("bookBackToDate");
+      if(back) back.addEventListener("click", () => { state.step = "date"; render(); });
+      const retry = document.getElementById("bookRetrySlots");
+      if(retry) retry.addEventListener("click", loadSlots);
     }
     if(state.step === "details"){
       document.getElementById("bookName").addEventListener("input", (e) => state.name = e.target.value);
@@ -280,5 +349,6 @@
     }
   }
 
+  applyDesktopConsultationRefinement();
   render();
 })();
