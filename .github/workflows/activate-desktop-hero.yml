@@ -1,0 +1,40 @@
+name: Activate desktop hero renderer
+
+on:
+  push:
+    branches:
+      - anise/patient-insight-improve
+
+permissions:
+  contents: write
+
+jobs:
+  activate:
+    if: contains(github.event.head_commit.message, 'Build desktop hero frame sequence')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Activate desktop-only renderer
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text()
+          marker='<script src="js/main.js"></script>'
+          inject=marker+'\n<script src="js/hero-desktop.js"></script>'
+          if 'js/hero-desktop.js' not in s:
+              s=s.replace(marker,inject,1)
+              p.write_text(s)
+          PY
+      - name: Commit activation
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html
+          git commit -m 'Activate desktop hero renderer [build-desktop-hero]'
+          git push
+      - name: Remove temporary activation workflow
+        run: |
+          git rm .github/workflows/activate-desktop-hero.yml
+          git commit -m 'Remove temporary desktop hero activation workflow [build-desktop-hero]'
+          git push
