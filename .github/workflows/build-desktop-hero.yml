@@ -1,0 +1,79 @@
+name: Build desktop hero frames
+
+on:
+  push:
+    branches:
+      - anise/patient-insight-improve
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    if: contains(github.event.head_commit.message, '[build-desktop-hero]') == false
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Pillow
+        run: python -m pip install --upgrade pillow
+
+      - name: Generate desktop frame sequence
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from PIL import Image, ImageFilter, ImageEnhance, ImageOps
+
+          SRC=Path('assets/hero-sequence-hires')
+          DST=Path('assets/hero-sequence-desktop')
+          DST.mkdir(parents=True,exist_ok=True)
+          W,H=1440,810
+          for i in range(1,198):
+              src=SRC/f'frame_{i:04d}.webp'
+              out=DST/f'frame_{i:04d}.webp'
+              im=Image.open(src).convert('RGB')
+              center=im.resize((455,H),Image.Resampling.LANCZOS)
+              left=im.crop((0,0,170,im.height)).resize((500,H),Image.Resampling.LANCZOS)
+              right=im.crop((im.width-170,0,im.width,im.height)).resize((500,H),Image.Resampling.LANCZOS)
+              left=ImageOps.mirror(left).filter(ImageFilter.GaussianBlur(5))
+              right=right.filter(ImageFilter.GaussianBlur(5))
+              left=ImageEnhance.Brightness(left).enhance(0.78)
+              right=ImageEnhance.Brightness(right).enhance(0.78)
+              canvas=Image.new('RGB',(W,H),(14,14,14))
+              canvas.paste(left,(0,0))
+              canvas.paste(right,(940,0))
+              canvas.paste(center,(492,0))
+              band=24
+              for x in range(468,492):
+                  a=(x-468)/band
+                  canvas.paste(Image.blend(left.crop((x,0,x+1,H)),center.crop((x-468,0,x-467,H)),a),(x,0))
+              for x in range(947,971):
+                  a=(x-947)/band
+                  canvas.paste(Image.blend(center.crop((x-492,0,x-491,H)),right.crop((x-947,0,x-946,H)),a),(x,0))
+              canvas=ImageEnhance.Contrast(canvas).enhance(0.94)
+              canvas.save(out,'WEBP',quality=88,method=6)
+          print('generated',len(list(DST.glob('*.webp'))),'desktop frames')
+          PY
+
+      - name: Commit generated frames
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add assets/hero-sequence-desktop
+          git commit -m 'Build desktop hero frame sequence [build-desktop-hero]'
+          git push
+
+      - name: Remove temporary workflow
+        if: success()
+        run: |
+          git rm .github/workflows/build-desktop-hero.yml
+          git commit -m 'Remove temporary desktop hero build workflow [build-desktop-hero]'
+          git push
