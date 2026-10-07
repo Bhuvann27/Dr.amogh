@@ -16,7 +16,7 @@ jobs:
       - name: Checkout branch
         uses: actions/checkout@v4
         with:
-          fetch-depth: 1
+          fetch-depth: 2
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -69,6 +69,7 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add assets/hero-sequence-desktop
           git commit -m 'Build desktop hero frame sequence [build-desktop-hero]'
+          git pull --rebase origin anise/patient-insight-improve
           git push
 
       - name: Remove temporary workflow
@@ -76,4 +77,5 @@ jobs:
         run: |
           git rm .github/workflows/build-desktop-hero.yml
           git commit -m 'Remove temporary desktop hero build workflow [build-desktop-hero]'
+          git pull --rebase origin anise/patient-insight-improve
           git push
