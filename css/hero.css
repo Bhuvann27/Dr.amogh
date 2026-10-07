@@ -207,3 +207,144 @@
   .scroll-progress{right:34px;height:160px;}
   .scroll-cue{bottom:22px;}
 }
+
+/* =========================================================
+   DESKTOP UI REFINEMENT — requested layout corrections only
+   These rules are intentionally scoped to desktop and do not alter
+   mobile/tablet behavior.
+   ========================================================= */
+@media (min-width:881px){
+  /* Patient Stories: use a true two-column card layout, but keep the
+     contents of each card in one clean vertical reading flow. */
+  .section-stories-focus .story-cards-focus{
+    display:grid;
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+    gap:24px;
+    align-items:stretch;
+  }
+  .section-stories-focus .story-card-primary,
+  .section-stories-focus .story-card-secondary{
+    min-width:0;
+    min-height:410px;
+    width:100%;
+    padding:34px 32px;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:0;
+    overflow:hidden;
+    box-sizing:border-box;
+  }
+  .section-stories-focus .story-card .story-kicker{
+    display:block;
+    margin:0 0 22px;
+    line-height:1.25;
+  }
+  .section-stories-focus .story-card .quote{
+    display:block;
+    width:100%;
+    max-width:16ch;
+    margin:0;
+    font-size:clamp(2rem,3vw,3rem);
+    line-height:1.02;
+  }
+  .section-stories-focus .story-card .desc{
+    width:100%;
+    max-width:44ch;
+    margin:20px 0 0;
+    font-size:.96rem;
+    line-height:1.55;
+  }
+  .section-stories-focus .story-card .story-cta{
+    align-self:flex-end;
+    margin-top:28px;
+    flex:none;
+  }
+
+  /* About: make the credential column read as four deliberate, evenly
+     weighted rows rather than four unrelated blocks. */
+  #about .about-grid{
+    grid-template-columns:minmax(0,1.02fr) minmax(360px,.98fr);
+    gap:clamp(64px,7vw,96px);
+    align-items:start;
+  }
+  #about .about-grid > div:first-child{
+    max-width:620px;
+    padding-top:0;
+  }
+  #about .about-credentials{
+    display:grid;
+    grid-template-rows:repeat(4,minmax(96px,auto));
+    gap:0;
+    align-self:stretch;
+  }
+  #about .about-credentials > div{
+    min-height:96px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    padding:16px 0;
+    margin:0;
+    border-top:1px solid var(--line);
+  }
+  #about .about-credentials > div:first-child{
+    padding-top:0;
+    justify-content:flex-start;
+  }
+  #about .about-credentials span{
+    margin-bottom:7px;
+  }
+  #about .about-credentials strong{
+    line-height:1.25;
+  }
+  #about .about-credentials small{
+    line-height:1.45;
+  }
+
+  /* Areas of Care: separate the expanded header from its chips so the
+     orange header never visually runs into the first chip row. */
+  #care .care-item.open .care-item-head{
+    padding-bottom:22px;
+    border-bottom:1px solid rgba(242,84,12,.16);
+  }
+  #care .care-item.open .care-item-body{
+    background:var(--paper);
+  }
+  #care .care-item.open .care-item-body-inner{
+    padding:20px 24px 30px 74px;
+    border-top:0;
+  }
+  #care .care-item.open .care-item-body ul{
+    gap:12px;
+    margin:0;
+  }
+  #care .care-item.open .care-item-body li{
+    padding:8px 15px;
+    line-height:1.2;
+  }
+
+  /* Desktop floating controls: assistant, WhatsApp and Call form one
+     aligned vertical stack with the same diameter and fixed spacing. */
+  .floating-contact{
+    right:max(28px,env(safe-area-inset-right,0px));
+    bottom:max(28px,env(safe-area-inset-bottom,0px));
+    gap:10px;
+  }
+  .floating-contact a{
+    width:56px;
+    height:56px;
+  }
+  .site-assistant{
+    right:max(28px,env(safe-area-inset-right,0px));
+    bottom:162px;
+    z-index:90;
+  }
+  .site-assistant .assistant-toggle{
+    width:56px!important;
+    height:56px!important;
+  }
+  .site-assistant .assistant-panel{
+    right:0;
+  }
+}
