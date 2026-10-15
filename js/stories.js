@@ -126,31 +126,37 @@
       slides.push(el);
     }
 
-    slides.forEach((_,i)=>{
-      const dot=document.createElement("i");
-      dot.className=i===0?"active":"";
-      if(counter)counter.appendChild(dot);
-    });
-
     let active=0;
     const total=slides.length;
+
+    if(counter){
+      counter.setAttribute("aria-label","Conversation progress");
+      counter.setAttribute("role","list");
+      slides.forEach((_,i)=>{
+        const dot=document.createElement("button");
+        dot.type="button";
+        dot.className="conv-progress-dot"+(i===0?" active":"");
+        dot.setAttribute("role","listitem");
+        dot.setAttribute("aria-label","Go to exchange "+(i+1)+" of "+total);
+        dot.addEventListener("click",()=>render(i,true));
+        counter.appendChild(dot);
+      });
+    }
+
     function render(next,focus){
       active=Math.max(0,Math.min(total-1,next));
-      wrap.style.transform="translate3d("+(-active*100)+"%,0,0)";
+      wrap.style.transform="translate3d(0,"+(-active*100)+"%,0)";
       slides.forEach((el,i)=>el.classList.toggle("is-active",i===active));
-      if(progress)progress.textContent=String(active+1).padStart(2,"0")+" / "+String(total).padStart(2,"0");
-      if(counter)Array.from(counter.children).forEach((d,i)=>d.classList.toggle("active",i===active));
+      if(progress)progress.textContent=String(active+1)+" / "+String(total);
+      if(counter)Array.from(counter.children).forEach((d,i)=>{
+        d.classList.toggle("active",i===active);
+        d.setAttribute("aria-current",i===active?"step":"false");
+      });
       if(focus){const viewport=document.getElementById("convViewport");if(viewport)viewport.focus({preventScroll:true});}
     }
 
-    const controls=document.createElement("div");
-    controls.className="conv-controls";
-    controls.innerHTML='<button type="button" class="conv-nav conv-prev" aria-label="Previous exchange">←</button><span class="conv-swipe-hint">Swipe to continue</span><button type="button" class="conv-nav conv-next" aria-label="Next exchange">→</button>';
-    stage.appendChild(controls);
-    controls.querySelector(".conv-prev").onclick=()=>render(active-1,true);
-    controls.querySelector(".conv-next").onclick=()=>render(active+1,true);
-
     let startX=0,startY=0,dragging=false;
+    let wheelLock=false;
     const viewport=document.getElementById("convViewport");
     if(viewport){
       viewport.addEventListener("touchstart",e=>{
@@ -160,7 +166,7 @@
         if(!dragging)return;
         dragging=false;
         const t=e.changedTouches[0],dx=t.clientX-startX,dy=t.clientY-startY;
-        if(Math.abs(dx)>48&&Math.abs(dx)>Math.abs(dy)*1.15)render(active+(dx<0?1:-1));
+        if(Math.abs(dy)>48&&Math.abs(dy)>Math.abs(dx)*1.15)render(active+(dy<0?1:-1));
       },{passive:true});
       viewport.addEventListener("pointerdown",e=>{
         if(e.pointerType==="touch")return;
@@ -170,12 +176,21 @@
         if(!dragging||e.pointerType==="touch")return;
         dragging=false;
         const dx=e.clientX-startX,dy=e.clientY-startY;
-        if(Math.abs(dx)>60&&Math.abs(dx)>Math.abs(dy)*1.15)render(active+(dx<0?1:-1));
+        if(Math.abs(dy)>60&&Math.abs(dy)>Math.abs(dx)*1.15)render(active+(dy<0?1:-1));
       });
+      viewport.addEventListener("wheel",e=>{
+        if(Math.abs(e.deltaY)<=Math.abs(e.deltaX)||Math.abs(e.deltaY)<18)return;
+        e.preventDefault();
+        if(wheelLock)return;
+        wheelLock=true;
+        render(active+(e.deltaY>0?1:-1));
+        window.setTimeout(()=>{wheelLock=false;},520);
+      },{passive:false});
       viewport.tabIndex=0;
+      viewport.setAttribute("aria-label","Patient and doctor conversation. Swipe up for the next exchange.");
       viewport.addEventListener("keydown",e=>{
-        if(e.key==="ArrowRight"){e.preventDefault();render(active+1,true);}
-        if(e.key==="ArrowLeft"){e.preventDefault();render(active-1,true);}
+        if(e.key==="ArrowDown"||e.key==="PageDown"||e.key===" "){e.preventDefault();render(active+1,true);}
+        if(e.key==="ArrowUp"||e.key==="PageUp"){e.preventDefault();render(active-1,true);}
       });
     }
     render(0,false);
