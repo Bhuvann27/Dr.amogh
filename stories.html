@@ -11,6 +11,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/main.css">
 <link rel="stylesheet" href="css/stories.css">
+<link rel="stylesheet" href="css/stories-redesign.css">
 </head>
 <body class="patient-stories-page">
 
@@ -39,8 +40,18 @@
     <a href="index.html" class="back-link reveal">&larr; Back to home</a>
     <span class="eyebrow reveal">PATIENT STORIES</span>
     <h1 class="reveal">Choose a patient story</h1>
-    <p class="subtitle reveal" style="max-width:56ch;">Two separate patient experiences. Step into one conversation and follow what unfolded, one exchange at a time.</p>
-    <nav class="story-pills reveal" id="storyPills" aria-label="Choose a patient story"></nav>
+    <p class="subtitle reveal" style="max-width:56ch;">Explore the patient stories from this practice. Filter by topic, search by title, and open one conversation at a time.</p>
+    <div class="story-library reveal" id="storyLibrary">
+      <div class="story-library-top">
+        <div>
+          <span class="story-library-label">STORY LIBRARY</span>
+          <strong id="storyCountLabel">Stories from this practice</strong>
+        </div>
+        <label class="story-search"><span class="sr-only">Search patient stories</span><input id="storySearch" type="search" placeholder="Search stories" autocomplete="off"></label>
+      </div>
+      <div class="story-category-row" id="storyCategories" aria-label="Filter patient stories"></div>
+      <nav class="story-pills" id="storyPills" aria-label="Choose a patient story"></nav>
+    </div>
   </div>
 </header>
 
@@ -53,8 +64,8 @@
 </section>
 <div class="conv-track" id="convTrack">
   <div class="conv-stage" id="convStage">
-    <p class="conv-intro-line"><span class="conv-guide-label">PATIENT ↔ DOCTOR</span><span class="conv-guide-copy">A simple conversation. Scroll to follow what happened, one exchange at a time.</span></p>
-    <div id="convPairs"><div class="conv-pair conv-fallback-pair" style="top:50%;left:50%;transform:translate(-50%,-50%);opacity:1;"><p class="q">When did you first notice it?</p><p class="a">I think it started a few weeks ago. At first, I thought it was because of work. I was busy, so I didn’t think much about it.</p></div></div>
+    <p class="conv-intro-line"><span class="conv-guide-label">PATIENT ↔ DOCTOR</span><span class="conv-guide-copy">One exchange at a time. Swipe or use the controls to continue.</span></p>
+    <div id="convPairs"></div>
     <div class="conv-progress-num" id="convProgressNum">01 / 06</div>
     <div class="conv-counter" id="convCounter"></div>
   </div>
@@ -72,13 +83,22 @@
   <div class="container">
     <div class="section-head reveal">
       <span class="eyebrow">WHAT YOU CAN DO</span>
-      <h2>A few reasonable next steps</h2>
+      <h2>Practical things you can do now</h2>
     </div>
     <ol class="action-list reveal" id="actionList"></ol>
     <div class="urgent-note reveal" id="urgentNote">
       <strong>WHEN TO SEEK URGENT CARE</strong>
       <span id="urgentText"></span>
     </div>
+  </div>
+</section>
+
+<section class="section-pad" style="text-align:center;">
+  <div class="container">
+    <p class="reveal" style="font-family:var(--font-display); font-weight:700; letter-spacing:-0.01em; font-size:clamp(1.15rem,2.4vw,1.4rem); max-width:36ch; margin:0 auto;">
+      If this sounds familiar, Dr. Amogh is at Pragati Hospital, Mandya.
+    </p>
+    <p class="reveal" style="margin-top:14px;"><a href="index.html#visit" style="font-weight:600; color:var(--text-dim); border-bottom:1px solid var(--line);">View clinic details &rarr;</a></p>
   </div>
 </section>
 
@@ -89,15 +109,6 @@
       <h2>Other conversations from this practice</h2>
     </div>
     <div class="other-story-grid reveal" id="otherStories"></div>
-  </div>
-</section>
-
-<section class="section-pad" style="text-align:center;">
-  <div class="container">
-    <p class="reveal" style="font-family:var(--font-display); font-weight:700; letter-spacing:-0.01em; font-size:clamp(1.15rem,2.4vw,1.4rem); max-width:36ch; margin:0 auto;">
-      If this sounds familiar, Dr. Amogh is at Pragati Hospital, Mandya.
-    </p>
-    <p class="reveal" style="margin-top:14px;"><a href="index.html#visit" style="font-weight:600; color:var(--text-dim); border-bottom:1px solid var(--line);">View clinic details &rarr;</a></p>
   </div>
 </section>
 
