@@ -7,6 +7,7 @@
 window.PATIENT_STORIES = [
   {
     slug: "fatigue",
+    category: "Everyday symptoms",
     title: "\u201cI thought I was just tired.\u201d",
     subtitle: "On fatigue that doesn't go away with rest",
     intro: "A patient came in after feeling more tired than usual for a few weeks.",
@@ -37,6 +38,7 @@ window.PATIENT_STORIES = [
   },
   {
     slug: "headache",
+    category: "Everyday symptoms",
     title: "\u201cMy headaches started becoming part of my day.\u201d",
     subtitle: "On headaches that keep coming back",
     intro: "A patient came in after having headaches on and off for some time.",
