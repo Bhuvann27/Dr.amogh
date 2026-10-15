@@ -55,8 +55,8 @@
       margin:0;
       opacity:0;
       cursor:pointer;
-      z-index:2;
-      -webkit-appearance:auto;
+      z-index:1;
+      pointer-events:none;
     }
   `;
   document.head.appendChild(datePickerStyle);
@@ -128,13 +128,6 @@
     `;
     document.head.appendChild(style);
 
-    const input = document.getElementById("bookDateInput");
-    if(input && typeof input.showPicker === "function"){
-      input.addEventListener("pointerdown", (event) => {
-        event.preventDefault();
-        try { input.showPicker(); } catch(e) { input.focus(); }
-      }, { once:true });
-    }
   }
 
   async function loadSlots(){
@@ -274,14 +267,21 @@
       const input = document.getElementById("bookDateInput");
       const field = root.querySelector(".date-picker-field");
       if(field){
-        field.addEventListener("pointerdown", (event) => {
-          if(event.target === input) return;
+        const openNativeDatePicker = (event) => {
           event.preventDefault();
           try {
             if(typeof input.showPicker === "function") input.showPicker();
             else input.click();
           } catch(e) {
             try { input.click(); } catch(_) { input.focus(); }
+          }
+        };
+        // Use the trusted click on the whole visible box. The input itself is
+        // pointer-transparent, so text, empty space and the arrow all reach here.
+        field.addEventListener("click", openNativeDatePicker);
+        field.addEventListener("keydown", (event) => {
+          if(event.key === "Enter" || event.key === " "){
+            openNativeDatePicker(event);
           }
         });
       }
@@ -299,13 +299,6 @@
         render();
         loadSlots();
       });
-      // Re-apply the desktop picker interaction after every render of Step 1.
-      if(window.matchMedia("(min-width: 781px)").matches && typeof input.showPicker === "function"){
-        input.addEventListener("pointerdown", (event) => {
-          event.preventDefault();
-          try { input.showPicker(); } catch(e) { input.focus(); }
-        }, { once:true });
-      }
     }
     if(state.step === "slot"){
       root.querySelectorAll(".slot-chip").forEach((btn) => {
