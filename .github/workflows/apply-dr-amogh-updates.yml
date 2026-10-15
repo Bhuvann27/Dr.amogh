@@ -9,14 +9,19 @@ permissions:
 
 jobs:
   update-site:
-    if: ${{ !startsWith(github.event.head_commit.message, '[bot] Apply Dr Amogh updates') }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
       - name: Apply requested fixes
+        env:
+          COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
         run: |
+          if [ "$COMMIT_MESSAGE" = "[bot] Apply Dr Amogh updates" ]; then
+            echo "Bot update commit already applied. Nothing to do."
+            exit 0
+          fi
           python - <<'PY'
           from pathlib import Path
 
@@ -68,11 +73,10 @@ jobs:
           assistant.write_text(text)
           PY
 
-      - name: Commit changes and remove temporary workflow
+      - name: Commit changes
         run: |
-          rm -f .github/workflows/apply-dr-amogh-updates.yml
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add index.html js/booking-widget.js js/site-assistant.js .github/workflows/apply-dr-amogh-updates.yml
+          git add index.html js/booking-widget.js js/site-assistant.js
           git commit -m "[bot] Apply Dr Amogh updates"
           git push origin main
