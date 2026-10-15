@@ -1,0 +1,29 @@
+name: Fix Patient Insight editor
+on:
+  push:
+    branches: [main]
+permissions:
+  contents: write
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Remove recursive patch
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('admin/js/editor.js')
+          t=p.read_text(encoding='utf-8')
+          marker='/* ANISE_EDITOR_UX_PATCH_V1 */'
+          if marker in t:
+              t=t.split(marker,1)[0].rstrip()+'\n'
+          p.write_text(t,encoding='utf-8')
+          PY
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add admin/js/editor.js
+          git commit -m "Remove recursive Patient Insight patch [skip ci]" || exit 0
+          git push
