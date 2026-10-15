@@ -13,9 +13,7 @@
       const bySlug = new Map(local.map(s => [s.slug, s]));
       remote.forEach(s => bySlug.set(s.slug, s));
       return Array.from(bySlug.values());
-    }catch(e){
-      return local;
-    }
+    }catch(e){ return local; }
   }
 
   function esc(value){
@@ -24,199 +22,239 @@
     }[ch]));
   }
 
+  function inferCategory(story){
+    const raw = String(story.category || story.topic || story.subtitle || story.title || "").toLowerCase();
+    if(/pregnan|pregnancy|antenatal|postpartum|women/.test(raw)) return "Women's health";
+    if(/headache|dizziness|migraine|sleep|stress|fatigue|tired/.test(raw)) return "Everyday symptoms";
+    if(/diabet|sugar|blood pressure|hypertension|cholesterol|metabolic/.test(raw)) return "Long-term health";
+    if(/infection|fever|cough|cold|viral|respirat/.test(raw)) return "Infections";
+    if(/digest|gastric|stomach|meal|acid|bowel/.test(raw)) return "Digestive health";
+    return "General medicine";
+  }
+
+  function categoryFor(story){ return String(story.category || story.topic || inferCategory(story)).trim() || "General medicine"; }
+
   loadStories().then(init);
 
   function init(stories){
     if(!stories.length) return;
-
     const params = new URLSearchParams(window.location.search);
     const requested = params.get("story");
     const story = stories.find(s => s.slug === requested) || stories[0];
     const storyIndex = Math.max(0, stories.indexOf(story));
 
-    document.getElementById("year").textContent = new Date().getFullYear();
-    document.title = story.title.replace(/[“”]/g, "") + " — Dr. Amogh G";
+    const year = document.getElementById("year");
+    if(year) year.textContent = new Date().getFullYear();
+    document.title = String(story.title || "Patient Story").replace(/[“”]/g, "") + " — Dr. Amogh G";
 
     const storyEyebrow = document.getElementById("selectedStoryLabel");
     const storyTitle = document.getElementById("storyTitle");
     const storyIntro = document.getElementById("storyIntro");
     if(storyEyebrow) storyEyebrow.textContent = "PATIENT STORY " + String(storyIndex + 1).padStart(2,"0");
-    if(storyTitle) storyTitle.textContent = story.title;
-    if(storyIntro) storyIntro.textContent = story.intro;
+    if(storyTitle) storyTitle.textContent = story.title || "Patient story";
+    if(storyIntro) storyIntro.textContent = story.intro || "A patient conversation from this practice.";
 
-    const pillsWrap = document.getElementById("storyPills");
-    pillsWrap.innerHTML = "";
-    stories.forEach((s,i) => {
-      const a = document.createElement("a");
-      a.href = "stories.html?story=" + encodeURIComponent(s.slug);
-      a.className = "story-choice";
-      if(s.slug === story.slug) a.setAttribute("aria-current","true");
-      a.innerHTML =
-        '<span class="story-choice-num">' + String(i+1).padStart(2,"0") + '</span>' +
-        '<span><strong>STORY ' + String(i+1).padStart(2,"0") + '</strong><span>' + esc(s.title.replace(/[“”]/g,"")) + '</span></span>' +
-        '<span class="story-choice-arrow">↗</span>';
-      pillsWrap.appendChild(a);
-    });
+    buildLibrary(stories, story);
+    buildConversation(story);
 
-    const pairsWrap = document.getElementById("convPairs");
-    const counterWrap = document.getElementById("convCounter");
-    pairsWrap.innerHTML = "";
-    counterWrap.innerHTML = "";
-
-    const pairEls = [];
-    story.dialogue.forEach((pair,i) => {
-      const el = document.createElement("div");
-      el.className = "conv-pair";
-      el.style.top = "50%";
-      el.style.left = "50%";
-      el.style.transform = "translate(-50%, -50%)";
-      el.innerHTML =
-        '<p class="q">' + esc(pair.q) + '</p>' +
-        '<p class="a">' + esc(pair.a) + '</p>';
-      el.style.opacity = "0";
-      pairsWrap.appendChild(el);
-      pairEls.push(el);
-      counterWrap.appendChild(document.createElement("i"));
-    });
-
-    const dots = Array.from(counterWrap.children);
-    const progressNum = document.getElementById("convProgressNum");
-    const totalStr = String(pairEls.length).padStart(2,"0");
-    if(progressNum) progressNum.textContent = "01 / " + totalStr;
-    dots.forEach((d,i) => d.classList.toggle("active", i === 0));
-
-    document.getElementById("relateIntro").textContent = story.relateIntro;
-    document.getElementById("relateClose").textContent = story.relateClose;
+    const relateIntro = document.getElementById("relateIntro");
+    const relateClose = document.getElementById("relateClose");
+    if(relateIntro) relateIntro.textContent = story.relateIntro || "Sometimes small changes are easy to ignore. You may have noticed that:";
+    if(relateClose) relateClose.textContent = story.relateClose || "When something keeps happening or starts affecting everyday life, it is worth paying attention to.";
 
     const relateList = document.getElementById("relateList");
-    relateList.innerHTML = "";
-    story.relatePoints.forEach(point => {
-      const li = document.createElement("li");
-      li.innerHTML = '<span class="dot"></span><span>' + esc(point) + '</span>';
-      relateList.appendChild(li);
-    });
+    if(relateList){
+      relateList.innerHTML = "";
+      (story.relatePoints || []).forEach(point => {
+        const li = document.createElement("li");
+        li.innerHTML = '<span class="dot"></span><span>' + esc(point) + '</span>';
+        relateList.appendChild(li);
+      });
+    }
 
     const actionList = document.getElementById("actionList");
-    actionList.innerHTML = "";
-    story.actionPoints.forEach(point => {
-      const li = document.createElement("li");
-      li.textContent = point;
-      actionList.appendChild(li);
-    });
-    document.getElementById("urgentText").textContent = story.urgent;
-
-    // The bottom section is a single "next story" card, never a second
-    // copy of the currently selected story.
-    const otherWrap = document.getElementById("otherStories");
-    if(otherWrap){
-      otherWrap.innerHTML = "";
-      const otherStory = stories.find(s => s.slug !== story.slug);
-      if(otherStory){
-        const otherIndex = stories.indexOf(otherStory);
-        const a = document.createElement("a");
-        a.href = "stories.html?story=" + encodeURIComponent(otherStory.slug);
-        a.className = "other-story-card";
-        a.innerHTML =
-          '<span class="other-story-number">PATIENT STORY ' + String(otherIndex + 1).padStart(2,"0") + '</span>' +
-          '<p class="quote">' + esc(otherStory.title) + '</p>' +
-          '<p class="meta">' + esc(otherStory.subtitle) + '</p>' +
-          '<span class="other-story-read">READ THIS STORY ↗</span>';
-        otherWrap.appendChild(a);
-      }else{
-        otherWrap.parentElement.parentElement.style.display = "none";
-      }
-    }
-
-    const track = document.getElementById("convTrack");
-    // Keep each exchange readable, but don't make the visitor scroll through
-    // a huge pinned track just to move past one conversation card.
-    const vhPerPair = 68;
-    track.style.height = Math.max(vhPerPair * pairEls.length, 320) + "vh";
-
-    if(window.gsap && window.ScrollTrigger){
-      gsap.registerPlugin(ScrollTrigger);
-      const n = pairEls.length;
-      const openingHold = 0.07;
-      const step = (1 - openingHold) / n;
-
-      function fadeWindow(p, start, end, fadeFrac){
-        const span = end - start;
-        const fadeIn = start + span * fadeFrac;
-        const fadeOut = end - span * fadeFrac;
-        if(p < start || p > end) return 0;
-        if(p < fadeIn) return (p - start) / (fadeIn - start);
-        if(p > fadeOut) return 1 - (p - fadeOut) / (end - fadeOut);
-        return 1;
-      }
-
-      function renderConversation(progress){
-        const raw = Math.max(0, Math.min(1, progress));
-        const firstEnd = openingHold + step;
-
-        pairEls.forEach((el, i) => {
-          let op = 0;
-
-          if(i === 0){
-            // The conversation is already present when the section enters.
-            // It holds naturally, then fades into the next exchange.
-            if(raw <= openingHold){
-              op = 1;
-            }else if(raw < firstEnd){
-              const fadeStart = firstEnd - step * 0.3;
-              op = raw <= fadeStart
-                ? 1
-                : 1 - ((raw - fadeStart) / (firstEnd - fadeStart));
-            }
-          }else{
-            const s = openingHold + i * step;
-            const e = s + step;
-            op = fadeWindow(raw, s, e, 0.3);
-          }
-
-          el.style.opacity = String(op);
-          el.style.transform = `translate(-50%, calc(-50% + ${(1 - op) * 10}px))`;
-        });
-
-        const activeRaw = raw <= openingHold
-          ? 0
-          : Math.min(n - 1, Math.floor((raw - openingHold) / step));
-        const active = Math.max(0, activeRaw);
-        dots.forEach((d, i) => d.classList.toggle("active", i === active));
-        if(progressNum){
-          progressNum.textContent =
-            String(active + 1).padStart(2,"0") + " / " + totalStr;
-        }
-      }
-
-      ScrollTrigger.create({
-        trigger: track,
-        start: "top top",
-        end: "bottom bottom",
-        scrub: true,
-        onUpdate: self => renderConversation(self.progress),
-        onRefresh: self => renderConversation(self.progress)
+    if(actionList){
+      actionList.innerHTML = "";
+      (story.actionPoints || []).forEach(point => {
+        const li = document.createElement("li");
+        li.textContent = point;
+        actionList.appendChild(li);
       });
+    }
+    const urgent = document.getElementById("urgentText");
+    if(urgent) urgent.textContent = story.urgent || "If symptoms are sudden, severe, or getting worse, seek medical attention promptly.";
 
-      renderConversation(0);
-    }else{
-      track.classList.add("no-js");
-      track.style.height = "auto";
-      if(progressNum) progressNum.style.display = "none";
+    buildOtherStories(stories, story);
+    setupReveals();
+  }
+
+  function buildLibrary(stories, selected){
+    const wrap = document.getElementById("storyPills");
+    const categoriesWrap = document.getElementById("storyCategories");
+    const search = document.getElementById("storySearch");
+    const count = document.getElementById("storyCountLabel");
+    if(!wrap) return;
+
+    const categories = ["All", ...Array.from(new Set(stories.map(categoryFor)))];
+    let activeCategory = "All";
+    let query = "";
+
+    function render(){
+      const filtered = stories.filter(s => {
+        const categoryMatch = activeCategory === "All" || categoryFor(s) === activeCategory;
+        const haystack = [s.title,s.subtitle,s.intro,s.topic,categoryFor(s)].join(" ").toLowerCase();
+        return categoryMatch && (!query || haystack.includes(query));
+      });
+      wrap.innerHTML = "";
+      filtered.forEach(s => {
+        const i = stories.indexOf(s);
+        const a = document.createElement("a");
+        a.href = "stories.html?story=" + encodeURIComponent(s.slug);
+        a.className = "story-choice" + (s.slug === selected.slug ? " is-selected" : "");
+        if(s.slug === selected.slug) a.setAttribute("aria-current","true");
+        a.innerHTML =
+          '<span class="story-choice-num">' + String(i+1).padStart(2,"0") + '</span>' +
+          '<span class="story-choice-copy"><strong>' + esc(categoryFor(s)) + '</strong><span>' + esc(String(s.title || "").replace(/[“”]/g,"")) + '</span></span>' +
+          '<span class="story-choice-arrow" aria-hidden="true">↗</span>';
+        wrap.appendChild(a);
+      });
+      if(count) count.textContent = filtered.length + (filtered.length === 1 ? " story" : " stories");
+      if(!filtered.length) wrap.innerHTML = '<p class="story-empty">No stories match that filter yet.</p>';
     }
 
-    const revealEls = document.querySelectorAll(".reveal");
+    if(categoriesWrap){
+      categoriesWrap.innerHTML = "";
+      categories.forEach(category => {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "story-category" + (category === activeCategory ? " is-active" : "");
+        b.textContent = category;
+        b.setAttribute("aria-pressed", category === activeCategory ? "true" : "false");
+        b.onclick = () => {
+          activeCategory = category;
+          categoriesWrap.querySelectorAll(".story-category").forEach(x => {
+            const active = x.textContent === activeCategory;
+            x.classList.toggle("is-active", active);
+            x.setAttribute("aria-pressed", active ? "true" : "false");
+          });
+          render();
+        };
+        categoriesWrap.appendChild(b);
+      });
+    }
+    if(search) search.oninput = () => { query = search.value.trim().toLowerCase(); render(); };
+    render();
+  }
+
+  function buildConversation(story){
+    const stage = document.getElementById("convStage");
+    const wrap = document.getElementById("convPairs");
+    const counter = document.getElementById("convCounter");
+    const progress = document.getElementById("convProgressNum");
+    if(!stage || !wrap) return;
+
+    const pairs = Array.isArray(story.dialogue) ? story.dialogue : [];
+    wrap.innerHTML = "";
+    if(counter) counter.innerHTML = "";
+
+    const viewport = document.createElement("div");
+    viewport.className = "conv-carousel-viewport";
+    const carousel = document.createElement("div");
+    carousel.className = "conv-carousel";
+    wrap.appendChild(viewport);
+    viewport.appendChild(carousel);
+
+    const slides = pairs.map((pair,i) => {
+      const el = document.createElement("article");
+      el.className = "conv-pair" + (i === 0 ? " is-active" : "");
+      el.innerHTML = '<span class="conv-speaker">PATIENT ↔ DOCTOR · ' + String(i+1).padStart(2,"0") + '</span><p class="q">' + esc(pair.q) + '</p><p class="a">' + esc(pair.a) + '</p>';
+      carousel.appendChild(el);
+      return el;
+    });
+
+    if(!slides.length){
+      const el=document.createElement("article");
+      el.className="conv-pair is-active";
+      el.innerHTML='<span class="conv-speaker">PATIENT ↔ DOCTOR</span><p class="a">This story is being prepared.</p>';
+      carousel.appendChild(el);
+      slides.push(el);
+    }
+
+    slides.forEach((_,i)=>{
+      const dot=document.createElement("i");
+      dot.className=i===0?"active":"";
+      if(counter) counter.appendChild(dot);
+    });
+
+    const controls = document.createElement("div");
+    controls.className="conv-controls";
+    controls.innerHTML='<button type="button" class="conv-nav conv-prev" aria-label="Previous exchange">←</button><span class="conv-swipe-hint">Swipe to continue</span><button type="button" class="conv-nav conv-next" aria-label="Next exchange">→</button>';
+    stage.appendChild(controls);
+
+    let active=0;
+    const total=slides.length;
+    function render(next, focus=false){
+      active=Math.max(0,Math.min(total-1,next));
+      carousel.style.transform='translate3d(' + (-active*100) + '%,0,0)';
+      slides.forEach((el,i)=>el.classList.toggle("is-active",i===active));
+      if(progress) progress.textContent=String(active+1).padStart(2,"0")+' / '+String(total).padStart(2,"0");
+      if(counter) Array.from(counter.children).forEach((d,i)=>d.classList.toggle("active",i===active));
+      controls.querySelector('.conv-prev').disabled=active===0;
+      controls.querySelector('.conv-next').disabled=active===total-1;
+      if(focus) stage.focus({preventScroll:true});
+    }
+    controls.querySelector('.conv-prev').onclick=()=>render(active-1,true);
+    controls.querySelector('.conv-next').onclick=()=>render(active+1,true);
+
+    let startX=0,startY=0,dragging=false;
+    viewport.addEventListener('touchstart',e=>{
+      const t=e.changedTouches[0]; startX=t.clientX; startY=t.clientY; dragging=true;
+    },{passive:true});
+    viewport.addEventListener('touchend',e=>{
+      if(!dragging)return; dragging=false;
+      const t=e.changedTouches[0], dx=t.clientX-startX, dy=t.clientY-startY;
+      if(Math.abs(dx)>48 && Math.abs(dx)>Math.abs(dy)*1.2) render(active+(dx<0?1:-1));
+    },{passive:true});
+    viewport.addEventListener('pointerdown',e=>{
+      if(e.pointerType==='touch')return;
+      startX=e.clientX; startY=e.clientY; dragging=true;
+    });
+    viewport.addEventListener('pointerup',e=>{
+      if(!dragging || e.pointerType==='touch')return; dragging=false;
+      const dx=e.clientX-startX,dy=e.clientY-startY;
+      if(Math.abs(dx)>60 && Math.abs(dx)>Math.abs(dy)*1.2) render(active+(dx<0?1:-1));
+    });
+    stage.tabIndex=0;
+    stage.addEventListener('keydown',e=>{
+      if(e.key==='ArrowRight') {e.preventDefault();render(active+1);}
+      if(e.key==='ArrowLeft') {e.preventDefault();render(active-1);}
+    });
+    render(0);
+  }
+
+  function buildOtherStories(stories, selected){
+    const wrap=document.getElementById("otherStories");
+    if(!wrap)return;
+    wrap.innerHTML="";
+    const others=stories.filter(s=>s.slug!==selected.slug).slice(0,6);
+    if(!others.length){wrap.parentElement.parentElement.style.display="none";return;}
+    others.forEach(s=>{
+      const i=stories.indexOf(s);
+      const a=document.createElement("a");
+      a.href="stories.html?story="+encodeURIComponent(s.slug);
+      a.className="other-story-card";
+      a.innerHTML='<span class="other-story-number">PATIENT STORY '+String(i+1).padStart(2,"0")+'</span><p class="quote">'+esc(s.title||"")+'</p><p class="meta">'+esc(s.subtitle||categoryFor(s))+'</p><span class="other-story-read">READ THIS STORY ↗</span>';
+      wrap.appendChild(a);
+    });
+  }
+
+  function setupReveals(){
+    const revealEls=document.querySelectorAll(".reveal");
     if("IntersectionObserver" in window){
-      const io = new IntersectionObserver(entries => {
-        entries.forEach(entry => {
-          if(entry.isIntersecting){
-            entry.target.classList.add("is-visible");
-            io.unobserve(entry.target);
-          }
-        });
-      },{threshold:0.15});
-      revealEls.forEach(el => io.observe(el));
-    }else{
-      revealEls.forEach(el => el.classList.add("is-visible"));
-    }
+      const io=new IntersectionObserver(entries=>entries.forEach(entry=>{
+        if(entry.isIntersecting){entry.target.classList.add("is-visible");io.unobserve(entry.target);}
+      }),{threshold:.15});
+      revealEls.forEach(el=>io.observe(el));
+    }else revealEls.forEach(el=>el.classList.add("is-visible"));
   }
 })();
