@@ -9,15 +9,37 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Remove recursive patch
+      - name: Apply safe Patient Insight UX
         run: |
           python3 - <<'PY'
           from pathlib import Path
           p=Path('admin/js/editor.js')
           t=p.read_text(encoding='utf-8')
+
           marker='/* ANISE_EDITOR_UX_PATCH_V1 */'
           if marker in t:
               t=t.split(marker,1)[0].rstrip()+'\n'
+
+          css='.pi-status.error{color:#a22b18}.pi-status.success{color:#28724a}'
+          css2=css+'.pi-status.busy{display:flex;align-items:center;gap:9px}.pi-status.busy:before{content:"";width:13px;height:13px;border:2px solid rgba(23,19,15,.14);border-top-color:var(--orange-deep);border-radius:50%;animation:piStatusSpin .75s linear infinite;flex:0 0 auto}@keyframes piStatusSpin{to{transform:rotate(360deg)}}.pi-step-note{margin:7px 0 0;color:var(--text-dim);font-size:.82rem;line-height:1.5}.pi-processing{display:flex;align-items:center;gap:10px;margin-top:14px;padding:12px 14px;border-radius:14px;background:#f7f4ef;border:1px solid rgba(23,19,15,.08);color:#3e3934;font-size:.88rem;line-height:1.45}.pi-processing[hidden]{display:none!important}.pi-processing.error{color:#a22b18}.pi-spinner{width:16px;height:16px;border:2px solid rgba(23,19,15,.16);border-top-color:var(--orange-deep);border-radius:50%;animation:piStatusSpin .75s linear infinite;flex:0 0 auto}'
+          if 'piStatusSpin' not in t:
+              t=t.replace(css,css2,1)
+
+          q='<div id="piQuestionBox" class="pi-question"></div><div class="pi-intake" style="margin-top:16px">'
+          q2='<div id="piQuestionBox" class="pi-question"></div><p class="pi-step-note">A short answer in your own words is enough. If you are unsure, you can skip this detail.</p><div class="pi-intake" style="margin-top:16px">'
+          t=t.replace(q,q2,1)
+
+          a='<div class="pi-actions"><button class="pi-btn pi-btn-dark" id="piAnswerBtn" type="button">Continue</button><button class="pi-btn pi-btn-light" id="piSkipBtn" type="button">Skip this detail</button></div><div class="pi-conversation" id="piConversation"></div>'
+          a2='<div class="pi-actions"><button class="pi-btn pi-btn-dark" id="piAnswerBtn" type="button">Continue</button><button class="pi-btn pi-btn-light" id="piSkipBtn" type="button">Skip this detail</button></div><div class="pi-processing" id="piStep2Processing" hidden><span class="pi-spinner" aria-hidden="true"></span><span><strong>Creating the patient-friendly story…</strong><br><span>Turning the clarified case into a draft. Nothing is published automatically.</span></span></div><div class="pi-conversation" id="piConversation"></div>'
+          t=t.replace(a,a2,1)
+
+          t=t.replace('<span class="pi-kicker">STEP 3 · AI DRAFT</span><h2>Your story is ready to review.</h2><p class="pi-help">Read it carefully. Nothing is published automatically.</p>','<span class="pi-kicker">STEP 3 · DOCTOR REVIEW</span><h2>Your story is ready to review.</h2><p class="pi-help">Review the draft carefully. Nothing is published until you approve it.</p>',1)
+
+          old='''  async function generateDraft(regenerate){try{status(regenerate?"Regenerating the story…":"Writing the patient-friendly story…","busy");const notes=rawNotes+"\\n\\nClarifications:\\n"+transcript.filter(x=>x.role==="doctor").map(x=>x.content).join("\\n");const d=await callAI({mode:"draft",notes,conversation:transcript,regenerate:!!regenerate});renderDraft(d);document.getElementById("piConversationCard").hidden=true;document.getElementById("piDraftCard").hidden=false;status("Draft ready. Nothing is published until you approve it.","success")}catch(e){status(e.message,"error")}}'''
+          new='''  async function generateDraft(regenerate){const c=document.getElementById("piConversationCard"),b=document.getElementById("piAnswerBtn"),loader=document.getElementById("piStep2Processing"),fromStep2=!c.hidden;if(fromStep2){b.disabled=true;loader.hidden=false;loader.classList.remove("error")}else status(regenerate?"Regenerating the story…":"Writing the patient-friendly story…","busy");try{const notes=rawNotes+"\\n\\nClarifications:\\n"+transcript.filter(x=>x.role==="doctor").map(x=>x.content).join("\\n");const d=await callAI({mode:"draft",notes,conversation:transcript,regenerate:!!regenerate});renderDraft(d);c.hidden=true;document.getElementById("piDraftCard").hidden=false;if(!fromStep2)status("Draft ready. Nothing is published until you approve it.","success")}catch(e){if(fromStep2){loader.classList.add("error");loader.innerHTML='<span>⚠</span><span><strong>Could not create the story.</strong><br><span>'+esc(e.message||"Please try again.")+'</span></span>'}else status(e.message,"error")}finally{if(fromStep2)b.disabled=false}}'''
+          if old not in t:
+              raise SystemExit('generateDraft target not found')
+          t=t.replace(old,new,1)
           p.write_text(t,encoding='utf-8')
           PY
       - name: Commit
@@ -25,5 +47,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add admin/js/editor.js
-          git commit -m "Remove recursive Patient Insight patch [skip ci]" || exit 0
+          git commit -m "Fix Patient Insight workflow loading states [skip ci]" || exit 0
           git push
