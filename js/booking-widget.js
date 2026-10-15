@@ -37,7 +37,7 @@
     const h12 = h % 12 === 0 ? 12 : h % 12;
     return `${h12}:${String(m).padStart(2,"0")} ${ampm}`;
   }
-  function esc(s){ return (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+  function esc(s){ return (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\"/g,"&quot;"); }
 
   // Desktop-only consultation refinement. Mobile keeps its existing layout and behavior untouched.
   function applyDesktopConsultationRefinement(){
@@ -203,7 +203,7 @@
             <div class="review-line"><span>Date</span><strong>${esc(formatDateHuman(state.dateISO))}</strong></div>
             <div class="review-line"><span>Time</span><strong>${esc(formatTimeHuman(state.slot))}</strong></div>
             <div class="review-line"><span>Duration</span><strong>15 minutes</strong></div>
-            <div class="review-line"><span>Fee</span><strong>₹1,200</strong></div>
+            <div class="review-line"><span>Fee</span><strong>₹500</strong></div>
           </div>
           <div class="review-card-section">
             <span class="review-card-label">YOUR DETAILS</span>
@@ -243,13 +243,26 @@
       <div class="booking-selection">
         <span class="booking-selection-label">YOUR APPOINTMENT</span>
         <strong>${esc(formatDateHuman(state.dateISO))}</strong>
-        <span>${esc(formatTimeHuman(state.slot))} · 15 min · ₹1,200</span>
+        <span>${esc(formatTimeHuman(state.slot))} · 15 min · ₹500</span>
       </div>`;
   }
 
   function attachHandlers(){
     if(state.step === "date"){
       const input = document.getElementById("bookDateInput");
+      const field = root.querySelector(".date-picker-field");
+      if(field){
+        field.addEventListener("pointerdown", (event) => {
+          if(event.target === input) return;
+          event.preventDefault();
+          try {
+            if(typeof input.showPicker === "function") input.showPicker();
+            else input.click();
+          } catch(e) {
+            try { input.click(); } catch(_) { input.focus(); }
+          }
+        });
+      }
       input.addEventListener("change", () => {
         state.dateISO=input.value;
         if(!state.dateISO)return;
