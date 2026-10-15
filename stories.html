@@ -40,17 +40,12 @@
     <a href="index.html" class="back-link reveal">&larr; Back to home</a>
     <span class="eyebrow reveal">PATIENT STORIES</span>
     <h1 class="reveal">Choose a patient story</h1>
-    <p class="subtitle reveal" style="max-width:56ch;">Explore the patient stories from this practice. Filter by topic, search by title, and open one conversation at a time.</p>
-    <div class="story-library reveal" id="storyLibrary">
-      <div class="story-library-top">
-        <div>
-          <span class="story-library-label">STORY LIBRARY</span>
-          <strong id="storyCountLabel">Stories from this practice</strong>
-        </div>
-        <label class="story-search"><span class="sr-only">Search patient stories</span><input id="storySearch" type="search" placeholder="Search stories" autocomplete="off"></label>
+    <p class="subtitle reveal" style="max-width:56ch;">Every story is a conversation. Choose one and follow it from the first question to the final answer.</p>
+    <div class="story-carousel-wrap reveal">
+      <div class="story-carousel-viewport" id="storyCarouselViewport">
+        <div class="story-carousel" id="storyPills" aria-label="Choose a patient story"></div>
       </div>
-      <div class="story-category-row" id="storyCategories" aria-label="Filter patient stories"></div>
-      <nav class="story-pills" id="storyPills" aria-label="Choose a patient story"></nav>
+      <div class="story-carousel-cue" aria-hidden="true">Swipe to explore more stories <span>→</span></div>
     </div>
   </div>
 </header>
@@ -62,17 +57,28 @@
     <p class="subtitle" id="storyIntro">A patient came in after feeling more tired than usual for a few weeks.</p>
   </div>
 </section>
-<div class="conv-track" id="convTrack">
+
+<section class="conv-track" id="conversation">
+  <div class="conv-story-intro container">
+    <span class="eyebrow">STEP INTO THE CONVERSATION</span>
+    <h2>Imagine you're sitting across from Dr. Amogh.</h2>
+    <p>These are the questions a doctor asks, and the answers a patient gives. Follow the conversation one exchange at a time.</p>
+  </div>
   <div class="conv-stage" id="convStage">
-    <p class="conv-intro-line"><span class="conv-guide-label">PATIENT ↔ DOCTOR</span><span class="conv-guide-copy">One exchange at a time. Swipe or use the controls to continue.</span></p>
-    <div id="convPairs"></div>
+    <div class="conv-carousel-viewport" id="convViewport">
+      <div class="conv-carousel" id="convPairs"></div>
+    </div>
     <div class="conv-progress-num" id="convProgressNum">01 / 06</div>
     <div class="conv-counter" id="convCounter"></div>
   </div>
-</div>
+</section>
 
 <section class="section-pad relate-section" id="relate">
   <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow">PAUSE FOR A MOMENT</span>
+      <h2 id="relateHeading">Could these small changes be worth paying attention to?</h2>
+    </div>
     <p class="relate-intro reveal" id="relateIntro"></p>
     <ul class="relate-list reveal" id="relateList"></ul>
     <p class="relate-close reveal" id="relateClose"></p>
@@ -81,9 +87,10 @@
 
 <section class="section-pad action-panel">
   <div class="container">
-    <div class="section-head reveal">
+    <div class="section-head reveal action-section-head">
       <span class="eyebrow">WHAT YOU CAN DO</span>
       <h2>Practical things you can do now</h2>
+      <p>Simple, sensible steps you can take while paying attention to what your body is telling you.</p>
     </div>
     <ol class="action-list reveal" id="actionList"></ol>
     <div class="urgent-note reveal" id="urgentNote">
@@ -93,12 +100,10 @@
   </div>
 </section>
 
-<section class="section-pad" style="text-align:center;">
+<section class="section-pad clinic-story-bridge">
   <div class="container">
-    <p class="reveal" style="font-family:var(--font-display); font-weight:700; letter-spacing:-0.01em; font-size:clamp(1.15rem,2.4vw,1.4rem); max-width:36ch; margin:0 auto;">
-      If this sounds familiar, Dr. Amogh is at Pragati Hospital, Mandya.
-    </p>
-    <p class="reveal" style="margin-top:14px;"><a href="index.html#visit" style="font-weight:600; color:var(--text-dim); border-bottom:1px solid var(--line);">View clinic details &rarr;</a></p>
+    <p class="reveal">If this sounds familiar, <strong>Dr. Amogh is at Pragati Hospital, Mandya.</strong></p>
+    <a class="reveal" href="index.html#visit">View clinic details &rarr;</a>
   </div>
 </section>
 
