@@ -217,7 +217,7 @@
   const localAnswer = (q) => {
     const x = q.toLowerCase();
     if(/book|appointment|consult/.test(x)){
-      return "You can book an online consultation from the Consultation section. It is listed as a 15-minute consultation for ₹1,200. Choose a date and available time before entering your details.";
+      return "You can book an online consultation from the Consultation section. It is listed as a 15-minute consultation for ₹500. Choose a date and available time before entering your details.";
     }
     if(/where|location|hospital|address|mandya|timing|time|open/.test(x)){
       return "Dr. Amogh G is listed at Pragati Hospital, Mandya. The Visit section contains the hospital information and directions shown on this website.";
@@ -235,7 +235,7 @@
       return "The website lists General Medicine care for fever and infections; headache, dizziness and weakness; blood sugar, blood pressure and metabolic health; digestive and liver concerns; and respiratory and other concerns. Examples include diabetes, hypertension, acidity or reflux, diarrhoeal illnesses, fatty liver disease, asthma and COPD. This is not a complete list.";
     }
     if(/about|qualification|degree|experience|doctor/.test(x)){
-      return "Dr. Amogh G is listed as MBBS, MD General Medicine, with 12+ years of clinical experience at Pragati Hospital, Mandya.";
+      return "Dr. Amogh G completed his MBBS at Bangalore Medical College and MD General Medicine at Mandya Institute of Medical Science. He is listed with 14+ years of clinical experience at Pragati Hospital, Mandya.";
     }
     if(/story|stories|insight|article/.test(x)){
       return "The Patient Stories section shares anonymous patient experiences, and the Insights section provides health information. You can open the stories directly from the website and read them at your own pace.";
