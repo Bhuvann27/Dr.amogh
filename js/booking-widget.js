@@ -39,6 +39,28 @@
   }
   function esc(s){ return (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\"/g,"&quot;"); }
 
+  // Make the entire existing date field a real native date-input hit area.
+  // The visual box stays unchanged; the transparent input sits over the whole box
+  // so a tap anywhere on it opens the calendar, including the text area.
+  const datePickerStyle = document.createElement("style");
+  datePickerStyle.id = "booking-date-picker-tap-fix";
+  datePickerStyle.textContent = `
+    .date-picker-field{position:relative;cursor:pointer;touch-action:manipulation;}
+    .date-picker-field .date-picker-text{pointer-events:none;}
+    .date-picker-field > input[type="date"]{
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+      margin:0;
+      opacity:0;
+      cursor:pointer;
+      z-index:2;
+      -webkit-appearance:auto;
+    }
+  `;
+  document.head.appendChild(datePickerStyle);
+
   // Desktop-only consultation refinement. Mobile keeps its existing layout and behavior untouched.
   function applyDesktopConsultationRefinement(){
     if(!window.matchMedia("(min-width: 781px)").matches) return;
