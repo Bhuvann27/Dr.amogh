@@ -24,7 +24,7 @@
 
   function inferCategory(story){
     const raw = String(story.category || story.topic || story.subtitle || story.title || "").toLowerCase();
-    if(/pregnan|pregnancy|antenatal|postpartum|women/.test(raw)) return "Women's health";
+    if(/pregnan|antenatal|postpartum|women/.test(raw)) return "Women's health";
     if(/headache|dizziness|migraine|sleep|stress|fatigue|tired/.test(raw)) return "Everyday symptoms";
     if(/diabet|sugar|blood pressure|hypertension|cholesterol|metabolic/.test(raw)) return "Long-term health";
     if(/infection|fever|cough|cold|viral|respirat/.test(raw)) return "Infections";
@@ -32,7 +32,7 @@
     return "General medicine";
   }
 
-  function categoryFor(story){ return String(story.category || story.topic || inferCategory(story)).trim() || "General medicine"; }
+  function categoryFor(story){ return String(story.category || inferCategory(story)).trim() || "General medicine"; }
 
   loadStories().then(init);
 
