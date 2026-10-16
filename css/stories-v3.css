@@ -1,4 +1,4 @@
-/* Patient Stories v3: true vertical swipe deck */
+/* Patient Stories v3: vertical swipe deck, rebuilt for reliable touch */
 .patient-stories-page .story-header .container,
 .patient-stories-page .selected-story-heading .container,
 .patient-stories-page .conv-story-intro.container{
@@ -10,54 +10,60 @@
 .patient-stories-page .story-carousel{padding-left:0!important;}
 .patient-stories-page .story-choice{scroll-snap-align:start;}
 
-/* Intro is intentionally light so the consultation does not look like the end of the page. */
+/* Light consultation introduction. */
 .patient-stories-page .conv-track{background:var(--stone)!important;color:var(--ink)!important;overflow:visible!important;}
 .patient-stories-page .conv-story-intro{background:var(--stone)!important;color:var(--ink)!important;}
 .patient-stories-page .conv-story-intro h2{color:var(--ink)!important;}
 .patient-stories-page .conv-story-intro p{color:var(--text-dim)!important;}
 
-/* The stage is a single centered viewport. Individual exchanges are moved by JS, not page scroll thresholds. */
+/* One viewport-sized reading stage. The parent supplies enough scroll room for the deck. */
 .patient-stories-page .conv-stage{
   position:sticky!important;
   top:0!important;
+  z-index:4!important;
   height:100svh!important;
   min-height:560px!important;
-  padding:clamp(38px,7svh,72px) clamp(18px,4vw,56px) clamp(78px,11svh,104px)!important;
+  padding:clamp(34px,7svh,72px) clamp(14px,4vw,56px) clamp(78px,11svh,104px)!important;
   display:grid!important;
-  grid-template-columns:minmax(0,1fr) clamp(18px,3vw,30px)!important;
-  column-gap:clamp(12px,2vw,24px)!important;
+  grid-template-columns:minmax(0,1fr) clamp(22px,3vw,32px)!important;
+  column-gap:clamp(10px,2vw,24px)!important;
   align-items:center!important;
   justify-content:center!important;
   box-sizing:border-box!important;
   overflow:hidden!important;
   background:#0d0b09!important;
+  color:var(--paper)!important;
 }
 .patient-stories-page .conv-stage::before{pointer-events:none!important;}
 
+/* Touch is handled by the deck. This prevents the browser from fighting the swipe with page scrolling. */
+.patient-stories-page .conv-stage,
+.patient-stories-page .conv-carousel-viewport,
+.patient-stories-page .conv-carousel{
+  touch-action:none!important;
+}
 .patient-stories-page .conv-carousel-viewport{
   position:relative!important;
   z-index:2!important;
   width:min(100%,760px)!important;
   height:min(72svh,680px)!important;
   max-height:calc(100svh - 150px)!important;
-  min-height:420px!important;
+  min-height:400px!important;
   margin:0 auto!important;
   overflow:hidden!important;
   border-radius:28px!important;
   outline:none!important;
-  touch-action:pan-y!important;
-  overscroll-behavior:contain!important;
+  overscroll-behavior:none!important;
 }
 .patient-stories-page .conv-carousel{
   display:flex!important;
   flex-direction:column!important;
   width:100%!important;
   height:100%!important;
-  transform:translate3d(0,0,0)!important;
-  transition:transform .52s cubic-bezier(.22,.8,.24,1)!important;
-  will-change:transform!important;
+  transform:translate3d(0,0,0);
+  transition:transform .48s cubic-bezier(.22,.8,.24,1);
+  will-change:transform;
 }
-.patient-stories-page .conv-carousel.is-animating{transition:transform .52s cubic-bezier(.22,.8,.24,1)!important;}
 .patient-stories-page .conv-pair{
   position:relative!important;
   inset:auto!important;
@@ -73,11 +79,10 @@
   color:var(--paper)!important;
 }
 .patient-stories-page .conv-pair[aria-hidden="true"]{pointer-events:none!important;}
-
 .patient-stories-page .conv-card-inner{
   height:100%!important;
   min-height:0!important;
-  padding:clamp(30px,5.5vw,58px) clamp(25px,5vw,56px)!important;
+  padding:clamp(32px,5.5vw,58px) clamp(25px,5vw,56px)!important;
   border-radius:24px!important;
   display:flex!important;
   flex-direction:column!important;
@@ -86,18 +91,18 @@
   overflow:hidden!important;
 }
 .patient-stories-page .conv-pair .q{
-  margin:clamp(26px,4vw,42px) 0 20px!important;
+  margin:clamp(24px,4vw,42px) 0 20px!important;
   max-width:43ch!important;
   font-size:clamp(.94rem,2vw,1.1rem)!important;
   line-height:1.48!important;
 }
 .patient-stories-page .conv-pair .a{
   max-width:31ch!important;
-  font-size:clamp(1.3rem,3.35vw,2.15rem)!important;
+  font-size:clamp(1.28rem,3.35vw,2.15rem)!important;
   line-height:1.2!important;
 }
 
-/* Progress dots live in the right-middle column, never inside the text. */
+/* Progress dots: dedicated right-middle rail, never over the text. */
 .patient-stories-page .conv-counter{
   position:relative!important;
   z-index:8!important;
@@ -116,12 +121,17 @@
   pointer-events:auto!important;
 }
 .patient-stories-page .conv-progress-dot{
+  appearance:none!important;
+  border:0!important;
+  padding:0!important;
   width:7px!important;
   height:7px!important;
   min-width:7px!important;
   min-height:7px!important;
   border-radius:50%!important;
   background:rgba(251,249,244,.28)!important;
+  cursor:pointer!important;
+  box-sizing:border-box!important;
 }
 .patient-stories-page .conv-progress-dot.active{
   width:9px!important;
@@ -144,8 +154,8 @@
   .patient-stories-page .selected-story-heading .container,
   .patient-stories-page .conv-story-intro.container{width:calc(100% - 32px);}
   .patient-stories-page .conv-stage{
-    padding:34px 12px 82px!important;
-    grid-template-columns:minmax(0,1fr) 18px!important;
+    padding:30px 10px 82px!important;
+    grid-template-columns:minmax(0,1fr) 22px!important;
     column-gap:8px!important;
   }
   .patient-stories-page .conv-carousel-viewport{
