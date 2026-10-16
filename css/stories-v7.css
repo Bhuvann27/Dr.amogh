@@ -1,0 +1,287 @@
+/* Patient Stories v7
+   One controller, one vertical deck, no nested scroll surface. */
+
+html,
+body{
+  width:100%;
+  max-width:100%;
+}
+
+body{
+  overflow-x:clip!important;
+  scrollbar-width:none;
+}
+body::-webkit-scrollbar{
+  width:0;
+  height:0;
+}
+
+/* Full-width story chooser without the phantom right gutter. */
+.patient-stories-page .story-carousel-viewport{
+  width:100%!important;
+  max-width:100%!important;
+  margin-left:0!important;
+  margin-right:0!important;
+  padding-left:0!important;
+  padding-right:0!important;
+  overflow-x:auto!important;
+}
+.patient-stories-page .story-carousel{
+  padding-left:0!important;
+  padding-right:0!important;
+  gap:16px!important;
+}
+.patient-stories-page .story-choice{
+  flex:0 0 clamp(230px,31vw,310px)!important;
+}
+
+/* Full-bleed conversation stage. */
+.patient-stories-page .conv-track{
+  position:relative!important;
+  width:100vw!important;
+  max-width:100vw!important;
+  margin-left:calc(50% - 50vw)!important;
+  margin-right:0!important;
+  overflow:visible!important;
+  background:var(--stone)!important;
+  border-top:1px solid var(--line)!important;
+  border-bottom:1px solid var(--line)!important;
+}
+
+.patient-stories-page .conv-story-intro{
+  position:relative!important;
+  z-index:2!important;
+  padding-top:clamp(48px,7vw,78px)!important;
+  padding-bottom:clamp(42px,6vw,64px)!important;
+  text-align:center!important;
+  background:var(--stone)!important;
+}
+.patient-stories-page .conv-story-intro h2{
+  max-width:24ch!important;
+  margin:10px auto 0!important;
+  color:var(--ink)!important;
+  font-size:clamp(1.65rem,4vw,2.65rem)!important;
+  line-height:1.03!important;
+}
+.patient-stories-page .conv-story-intro p{
+  max-width:58ch!important;
+  margin:14px auto 0!important;
+  color:var(--text-dim)!important;
+  font-size:.92rem!important;
+  line-height:1.62!important;
+}
+
+/* One sticky stage. The document stops moving while the conversation
+   changes, then releases only after the sixth card. */
+.patient-stories-page .conv-stage{
+  position:sticky!important;
+  top:var(--story-nav-offset,0px)!important;
+  z-index:20!important;
+  width:100%!important;
+  height:var(--deck-stage-h,100svh)!important;
+  min-height:560px!important;
+  padding:0 14px 16px!important;
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) 14px!important;
+  grid-template-rows:1fr auto!important;
+  column-gap:8px!important;
+  align-items:center!important;
+  justify-content:center!important;
+  box-sizing:border-box!important;
+  overflow:visible!important;
+  background:#0d0b09!important;
+  color:var(--paper)!important;
+  touch-action:none!important;
+  overscroll-behavior:contain!important;
+}
+.patient-stories-page .conv-stage::before{
+  content:""!important;
+  position:absolute!important;
+  inset:0!important;
+  z-index:0!important;
+  pointer-events:none!important;
+  background:radial-gradient(85% 70% at 50% 44%,rgba(242,84,12,.10),transparent 68%)!important;
+}
+.patient-stories-page .conv-stage::after{
+  display:none!important;
+}
+
+/* Smaller than the viewport so the rounded card is never cut at the
+   browser chrome or bottom edge. */
+.patient-stories-page .conv-carousel-viewport{
+  grid-column:1!important;
+  grid-row:1!important;
+  align-self:center!important;
+  width:100%!important;
+  height:var(--deck-card-h,56svh)!important;
+  min-height:460px!important;
+  max-height:680px!important;
+  margin:0!important;
+  padding:0!important;
+  position:relative!important;
+  overflow:hidden!important;
+  border-radius:28px!important;
+  box-sizing:border-box!important;
+  z-index:2!important;
+  touch-action:none!important;
+  overscroll-behavior:none!important;
+}
+.patient-stories-page .conv-carousel{
+  position:relative!important;
+  width:100%!important;
+  height:100%!important;
+  margin:0!important;
+  padding:0!important;
+  display:block!important;
+  overflow:visible!important;
+  transform:none!important;
+  transition:none!important;
+}
+
+/* Every conversation slide is one complete card. */
+.patient-stories-page .conv-pair{
+  position:absolute!important;
+  inset:0!important;
+  width:100%!important;
+  height:var(--deck-card-h,56svh)!important;
+  min-height:460px!important;
+  max-height:680px!important;
+  margin:0!important;
+  padding:5px!important;
+  display:block!important;
+  opacity:1!important;
+  visibility:visible!important;
+  box-sizing:border-box!important;
+  will-change:transform!important;
+  transition:transform .52s cubic-bezier(.22,.8,.22,1)!important;
+  z-index:1!important;
+}
+.patient-stories-page .conv-pair.is-active{
+  z-index:3!important;
+}
+.patient-stories-page .conv-card-inner{
+  width:100%!important;
+  height:100%!important;
+  min-height:0!important;
+  padding:clamp(26px,4vw,44px) clamp(22px,4.5vw,48px)!important;
+  border-radius:24px!important;
+  box-sizing:border-box!important;
+  display:flex!important;
+  flex-direction:column!important;
+  justify-content:center!important;
+  overflow:hidden!important;
+}
+.patient-stories-page .conv-pair .q{
+  margin:clamp(20px,4vw,32px) 0 17px!important;
+  max-width:40ch!important;
+  font-size:clamp(.9rem,2vw,1.04rem)!important;
+  line-height:1.48!important;
+}
+.patient-stories-page .conv-pair .a{
+  max-width:31ch!important;
+  font-size:clamp(1.16rem,3.1vw,1.86rem)!important;
+  line-height:1.25!important;
+}
+
+/* Dedicated progress rail. */
+.patient-stories-page .conv-counter{
+  grid-column:2!important;
+  grid-row:1!important;
+  align-self:center!important;
+  justify-self:center!important;
+  position:relative!important;
+  width:14px!important;
+  height:auto!important;
+  margin:0!important;
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:7px!important;
+  z-index:10!important;
+}
+.patient-stories-page .conv-progress-dot{
+  appearance:none!important;
+  width:5px!important;
+  height:5px!important;
+  min-width:5px!important;
+  min-height:5px!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:50%!important;
+  background:rgba(251,249,244,.28)!important;
+  box-shadow:none!important;
+  flex:none!important;
+}
+.patient-stories-page .conv-progress-dot.active{
+  width:8px!important;
+  height:8px!important;
+  min-width:8px!important;
+  min-height:8px!important;
+  background:#ffd9c5!important;
+  box-shadow:0 0 0 3px rgba(242,84,12,.12),0 0 10px rgba(242,84,12,.4)!important;
+}
+.patient-stories-page .conv-progress-num{
+  grid-column:1/3!important;
+  grid-row:2!important;
+  position:relative!important;
+  left:auto!important;
+  right:auto!important;
+  bottom:auto!important;
+  transform:none!important;
+  justify-self:center!important;
+  align-self:start!important;
+  margin:4px 0 0!important;
+  color:rgba(251,249,244,.78)!important;
+  z-index:12!important;
+  white-space:nowrap!important;
+}
+.patient-stories-page .conv-controls,
+.patient-stories-page .conv-swipe-hint{
+  display:none!important;
+}
+
+@media(max-width:700px){
+  .patient-stories-page .story-carousel-viewport{
+    width:100%!important;
+    max-width:100%!important;
+  }
+  .patient-stories-page .story-carousel{gap:14px!important;}
+  .patient-stories-page .conv-stage{
+    min-height:560px!important;
+    padding:0 10px 14px!important;
+    grid-template-columns:minmax(0,1fr) 12px!important;
+    column-gap:6px!important;
+  }
+  .patient-stories-page .conv-carousel-viewport{
+    height:var(--deck-card-h,56svh)!important;
+    min-height:460px!important;
+    max-height:650px!important;
+    border-radius:25px!important;
+  }
+  .patient-stories-page .conv-pair{
+    height:var(--deck-card-h,56svh)!important;
+    min-height:460px!important;
+    max-height:650px!important;
+    padding:4px!important;
+  }
+  .patient-stories-page .conv-card-inner{
+    padding:26px 22px 28px!important;
+    border-radius:22px!important;
+  }
+  .patient-stories-page .conv-pair .q{
+    margin:20px 0 16px!important;
+    max-width:34ch!important;
+    font-size:.9rem!important;
+    line-height:1.48!important;
+  }
+  .patient-stories-page .conv-pair .a{
+    max-width:29ch!important;
+    font-size:clamp(1.12rem,5.1vw,1.62rem)!important;
+    line-height:1.25!important;
+  }
+  .patient-stories-page .conv-card-index{
+    right:20px!important;
+    top:18px!important;
+  }
+}
