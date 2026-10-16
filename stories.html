@@ -13,134 +13,39 @@
 <link rel="stylesheet" href="css/stories.css">
 <link rel="stylesheet" href="css/stories-redesign.css">
 <link rel="stylesheet" href="css/stories-v2.css">
+<link rel="stylesheet" href="css/stories-v3.css">
 <style>
   .patient-stories-page #convPairs{position:relative!important;inset:auto!important;}
 </style>
 </head>
 <body class="patient-stories-page">
-
 <nav class="site-nav">
   <a href="index.html" class="wordmark">Dr. Amogh G<span class="dot">.</span></a>
   <ul class="nav-links">
-    <li><a href="index.html">Home</a></li>
-    <li><a href="index.html#about">About</a></li>
-    <li><a href="index.html#care">Care</a></li>
-    <li><a href="stories.html" aria-current="page">Patient Stories</a></li>
-    <li><a href="index.html#insights">Insights</a></li>
-    <li><a href="index.html#visit">Visit</a></li>
+    <li><a href="index.html">Home</a></li><li><a href="index.html#about">About</a></li><li><a href="index.html#care">Care</a></li><li><a href="stories.html" aria-current="page">Patient Stories</a></li><li><a href="index.html#insights">Insights</a></li><li><a href="index.html#visit">Visit</a></li>
   </ul>
 </nav>
 <nav class="mobile-nav-row" aria-label="Section navigation">
-  <a href="index.html">Home</a>
-  <a href="index.html#about">About</a>
-  <a href="index.html#care">Care</a>
-  <a href="stories.html" aria-current="page">Patient Stories</a>
-  <a href="index.html#insights">Insights</a>
-  <a href="index.html#visit">Visit</a>
+  <a href="index.html">Home</a><a href="index.html#about">About</a><a href="index.html#care">Care</a><a href="stories.html" aria-current="page">Patient Stories</a><a href="index.html#insights">Insights</a><a href="index.html#visit">Visit</a>
 </nav>
-
 <header class="story-header">
   <div class="container">
     <a href="index.html" class="back-link reveal">&larr; Back to home</a>
     <span class="eyebrow reveal">PATIENT STORIES</span>
     <h1 class="reveal">Choose a patient story</h1>
     <p class="subtitle reveal" style="max-width:56ch;">Every story is a conversation. Choose one and follow it from the first question to the final answer.</p>
-    <div class="story-carousel-wrap reveal">
-      <div class="story-carousel-viewport" id="storyCarouselViewport">
-        <div class="story-carousel" id="storyPills" aria-label="Choose a patient story"></div>
-      </div>
-      <div class="story-carousel-cue" aria-hidden="true">Swipe to explore more stories <span>→</span></div>
-    </div>
+    <div class="story-carousel-wrap reveal"><div class="story-carousel-viewport" id="storyCarouselViewport"><div class="story-carousel" id="storyPills" aria-label="Choose a patient story"></div></div><div class="story-carousel-cue" aria-hidden="true">Swipe to explore more stories <span>→</span></div></div>
   </div>
 </header>
-
-<section class="selected-story-heading">
-  <div class="container">
-    <span class="eyebrow" id="selectedStoryLabel">PATIENT STORY 01</span>
-    <h2 id="storyTitle">I thought I was just tired.</h2>
-    <p class="subtitle" id="storyIntro">A patient came in after feeling more tired than usual for a few weeks.</p>
-  </div>
-</section>
-
+<section class="selected-story-heading"><div class="container"><span class="eyebrow" id="selectedStoryLabel">PATIENT STORY 01</span><h2 id="storyTitle">I thought I was just tired.</h2><p class="subtitle" id="storyIntro">A patient came in after feeling more tired than usual for a few weeks.</p></div></section>
 <section class="conv-track" id="conversation">
-  <div class="conv-story-intro container">
-    <span class="eyebrow">STEP INTO THE CONVERSATION</span>
-    <h2>Imagine you're sitting across from Dr. Amogh.</h2>
-    <p>Read this as though you are part of the consultation. Dr. Amogh asks the questions a doctor would normally ask, and the patient answers. As you follow the conversation, you may recognise something familiar in yourself or in someone you know.</p>
-  </div>
-  <div class="conv-stage" id="convStage">
-    <div class="conv-carousel-viewport" id="convViewport">
-      <div class="conv-carousel" id="convPairs"></div>
-    </div>
-    <div class="conv-progress-num" id="convProgressNum">01 / 06</div>
-    <div class="conv-counter" id="convCounter"></div>
-  </div>
+  <div class="conv-story-intro container"><span class="eyebrow">STEP INTO THE CONVERSATION</span><h2>Imagine you're sitting across from Dr. Amogh.</h2><p>Read this as though you are part of the consultation. Dr. Amogh asks the questions a doctor would normally ask, and the patient answers. As you follow the conversation, you may recognise something familiar in yourself or in someone you know.</p></div>
+  <div class="conv-stage" id="convStage"><div class="conv-carousel-viewport" id="convViewport"><div class="conv-carousel" id="convPairs"></div></div><div class="conv-progress-num" id="convProgressNum">01 / 06</div><div class="conv-counter" id="convCounter"></div></div>
 </section>
-
-<section class="section-pad relate-section" id="relate">
-  <div class="container">
-    <div class="section-head reveal">
-      <span class="eyebrow">PAUSE FOR A MOMENT</span>
-      <h2 id="relateHeading">Could these small changes be worth paying attention to?</h2>
-    </div>
-    <p class="relate-intro reveal" id="relateIntro"></p>
-    <ul class="relate-list reveal" id="relateList"></ul>
-    <p class="relate-close reveal" id="relateClose"></p>
-  </div>
-</section>
-
-<section class="section-pad action-panel">
-  <div class="container">
-    <div class="section-head reveal action-section-head">
-      <span class="eyebrow">WHAT YOU CAN DO</span>
-      <h2>Practical things you can do now</h2>
-      <p>Simple, sensible steps you can take while paying attention to what your body is telling you.</p>
-    </div>
-    <ol class="action-list reveal" id="actionList"></ol>
-    <div class="urgent-note reveal" id="urgentNote">
-      <strong>WHEN TO SEEK URGENT CARE</strong>
-      <span id="urgentText"></span>
-    </div>
-  </div>
-</section>
-
-<section class="section-pad clinic-story-bridge">
-  <div class="container">
-    <p class="reveal">If this sounds familiar, <strong>Dr. Amogh is at Pragati Hospital, Mandya.</strong></p>
-    <a class="reveal" href="index.html#visit">View clinic details &rarr;</a>
-  </div>
-</section>
-
-<section class="section-pad other-stories">
-  <div class="container">
-    <div class="section-head reveal">
-      <span class="eyebrow">MORE STORIES</span>
-      <h2>Other conversations from this practice</h2>
-    </div>
-    <div class="other-story-grid reveal" id="otherStories"></div>
-  </div>
-</section>
-
-<footer class="site-footer">
-  <div class="container">
-    <div class="footer-grid">
-      <div><p class="foot-word">Dr. Amogh G</p><p>MBBS, MD General Medicine</p><p>Pragati Hospital, Mandya</p></div>
-      <div><h4>Explore</h4><a href="index.html#about">About</a><a href="index.html#care">Care</a><a href="stories.html">Patient Stories</a><a href="index.html#insights">Insights</a></div>
-      <div><h4>Visit</h4><a href="tel:+917406886226">7406886226</a><a href="index.html#visit">Pragati Hospital, Mandya</a></div>
-    </div>
-    <div class="foot-bottom">
-      <span>&copy; <span id="year"></span> Dr. Amogh G. All rights reserved.</span>
-      <span>This website is informational and does not replace in-person medical advice.</span>
-    </div>
-  </div>
-</footer>
-
-<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="js/supabase-config.js"></script>
-<script src="js/patient-insights-db.js"></script>
-<script src="js/stories-data.js"></script>
-<script src="js/stories.js"></script>
-</body>
-</html>
+<section class="section-pad relate-section" id="relate"><div class="container"><div class="section-head reveal"><span class="eyebrow">PAUSE FOR A MOMENT</span><h2 id="relateHeading">Could these small changes be worth paying attention to?</h2></div><p class="relate-intro reveal" id="relateIntro"></p><ul class="relate-list reveal" id="relateList"></ul><p class="relate-close reveal" id="relateClose"></p></div></section>
+<section class="section-pad action-panel"><div class="container"><div class="section-head reveal action-section-head"><span class="eyebrow">WHAT YOU CAN DO</span><h2>Practical things you can do now</h2><p>Simple, sensible steps you can take while paying attention to what your body is telling you.</p></div><ol class="action-list reveal" id="actionList"></ol><div class="urgent-note reveal" id="urgentNote"><strong>WHEN TO SEEK URGENT CARE</strong><span id="urgentText"></span></div></div></section>
+<section class="section-pad clinic-story-bridge"><div class="container"><p class="reveal">If this sounds familiar, <strong>Dr. Amogh is at Pragati Hospital, Mandya.</strong></p><a class="reveal" href="index.html#visit">View clinic details &rarr;</a></div></section>
+<section class="section-pad other-stories"><div class="container"><div class="section-head reveal"><span class="eyebrow">MORE STORIES</span><h2>Other conversations from this practice</h2></div><div class="other-story-grid reveal" id="otherStories"></div></div></section>
+<footer class="site-footer"><div class="container"><div class="footer-grid"><div><p class="foot-word">Dr. Amogh G</p><p>MBBS, MD General Medicine</p><p>Pragati Hospital, Mandya</p></div><div><h4>Explore</h4><a href="index.html#about">About</a><a href="index.html#care">Care</a><a href="stories.html">Patient Stories</a><a href="index.html#insights">Insights</a></div><div><h4>Visit</h4><a href="tel:+917406886226">7406886226</a><a href="index.html#visit">Pragati Hospital, Mandya</a></div></div><div class="foot-bottom"><span>&copy; <span id="year"></span> Dr. Amogh G. All rights reserved.</span><span>This website is informational and does not replace in-person medical advice.</span></div></div></footer>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script><script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script><script src="js/supabase-config.js"></script><script src="js/patient-insights-db.js"></script><script src="js/stories-data.js"></script><script src="js/stories.js"></script>
+</body></html>
