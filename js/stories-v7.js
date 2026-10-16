@@ -27,15 +27,16 @@
     function navOffset(){
       const nav=document.querySelector(".site-nav");
       const mobile=document.querySelector(".mobile-nav-row");
-      let h=0;
+      let bottom=0;
       [nav,mobile].forEach(el=>{
         if(!el)return;
         const cs=getComputedStyle(el);
         if(cs.display==="none"||cs.visibility==="hidden")return;
         const r=el.getBoundingClientRect();
-        h=Math.max(h,r.height);
+        if(cs.position!=="static")bottom=Math.max(bottom,r.bottom);
+        else bottom=Math.max(bottom,r.height);
       });
-      return Math.min(Math.max(h,0),120);
+      return Math.min(Math.max(bottom,0),140);
     }
 
     function stageHeight(){return Math.max(560,window.innerHeight-navOffset());}
