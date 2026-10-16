@@ -77,7 +77,7 @@
       wrap.appendChild(el);return el;
     });
     const total=slides.length;
-    let active=0,locked=false,touchStartY=0,touchStartX=0,touching=false,wheelAccum=0,wheelTimer=0;
+    let active=0,locked=false,startY=0,startX=0,pointerId=null,wheelTimer=0;
 
     if(counter){
       counter.setAttribute("aria-label","Conversation progress");counter.setAttribute("role","list");
@@ -97,14 +97,14 @@
     function setTrackHeight(){
       const h=stageHeight(),ih=intro?intro.offsetHeight:0;
       track.style.height=(ih+(total+1)*h)+"px";
-      track.style.setProperty("--conversation-height",(ih+(total+1)*h)+"px");
     }
     function updateUI(next,animate){
       active=Math.max(0,Math.min(total-1,next));
-      wrap.style.transition=animate?"transform .48s cubic-bezier(.22,.8,.24,1)":"none";
-      wrap.style.transform="translate3d(0,"+(-active*100)+"%,0)";
+      const distance=Math.max(1,viewport.clientHeight);
+      wrap.style.setProperty("transition",animate?"transform .42s cubic-bezier(.22,.8,.24,1)":"none","important");
+      wrap.style.setProperty("transform","translate3d(0,"+(-active*distance)+"px,0)","important");
       slides.forEach((el,i)=>{el.classList.toggle("is-active",i===active);el.setAttribute("aria-hidden",i===active?"false":"true");});
-      if(progress)progress.textContent=String(active+1)+" / "+String(total);
+      if(progress)progress.textContent=String(active+1).padStart(2,"0")+" / "+String(total).padStart(2,"0");
       if(counter)Array.from(counter.children).forEach((dot,i)=>{dot.classList.toggle("active",i===active);dot.setAttribute("aria-current",i===active?"step":"false");});
     }
     function conversationTop(){return track.getBoundingClientRect().top+window.scrollY;}
@@ -127,7 +127,7 @@
       if(target===active){if(fromDot)centerConversation();return;}
       locked=true;updateUI(target,true);
       if(fromDot)centerConversation();
-      window.setTimeout(()=>{locked=false;},560);
+      window.setTimeout(()=>{locked=false;},480);
     }
     function handleDirection(direction){
       if(locked)return;
@@ -137,24 +137,24 @@
         if(active>0)goTo(active-1,false);else{locked=true;releaseBefore();window.setTimeout(()=>{locked=false;},650);}
       }
     }
-    function handleTouchStart(e){
-      const t=e.touches&&e.touches[0];if(!t||locked)return;
-      touchStartY=t.clientY;touchStartX=t.clientX;touching=true;
+    function pointerDown(e){
+      if(locked||e.pointerType==="mouse")return;
+      pointerId=e.pointerId;startY=e.clientY;startX=e.clientX;
+      try{stage.setPointerCapture(pointerId);}catch(_e){}
     }
-    function handleTouchEnd(e){
-      if(!touching||locked)return;
-      const t=e.changedTouches&&e.changedTouches[0];if(!t)return;
-      const dy=touchStartY-t.clientY,dx=t.clientX-touchStartX;touching=false;
-      if(Math.abs(dy)<42||Math.abs(dy)<Math.abs(dx)*1.12)return;
+    function pointerUp(e){
+      if(pointerId===null||e.pointerId!==pointerId||locked)return;
+      const dy=startY-e.clientY,dx=e.clientX-startX;pointerId=null;
+      try{stage.releasePointerCapture(e.pointerId);}catch(_e){}
+      if(Math.abs(dy)<34||Math.abs(dy)<Math.abs(dx)*1.08)return;
       e.preventDefault();handleDirection(dy>0?1:-1);
     }
+    function pointerCancel(){pointerId=null;}
     function handleWheel(e){
       if(Math.abs(e.deltaY)<4||locked)return;
       e.preventDefault();
-      wheelAccum+=e.deltaY;
-      clearTimeout(wheelTimer);
-      wheelTimer=setTimeout(()=>{wheelAccum=0;},140);
-      if(Math.abs(wheelAccum)>=45){const dir=wheelAccum>0?1:-1;wheelAccum=0;handleDirection(dir);}
+      if(e.deltaY>0)handleDirection(1);else handleDirection(-1);
+      clearTimeout(wheelTimer);wheelTimer=setTimeout(()=>{},80);
     }
     function key(e){
       if(e.key==="ArrowDown"||e.key==="PageDown"||e.key===" "){e.preventDefault();handleDirection(1);}
@@ -162,9 +162,10 @@
     }
 
     setTrackHeight();updateUI(0,false);
-    window.addEventListener("resize",setTrackHeight,{passive:true});
-    stage.addEventListener("touchstart",handleTouchStart,{passive:true});
-    stage.addEventListener("touchend",handleTouchEnd,{passive:false});
+    window.addEventListener("resize",()=>{setTrackHeight();updateUI(active,false);},{passive:true});
+    stage.addEventListener("pointerdown",pointerDown,{passive:true});
+    stage.addEventListener("pointerup",pointerUp,{passive:false});
+    stage.addEventListener("pointercancel",pointerCancel,{passive:true});
     stage.addEventListener("wheel",handleWheel,{passive:false});
     stage.addEventListener("keydown",key);
     stage.tabIndex=0;
