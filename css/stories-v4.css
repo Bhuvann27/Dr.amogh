@@ -1,4 +1,16 @@
-/* Patient Stories v4: deterministic Instagram-style vertical swipe deck */
+/* Patient Stories v4: deterministic vertical swipe deck */
+.patient-stories-page .story-carousel-wrap{overflow:visible!important;}
+.patient-stories-page .story-carousel-viewport{
+  overflow-x:auto!important;overflow-y:hidden!important;
+  margin-left:-8px!important;margin-right:-8px!important;
+  padding:4px 8px 14px!important;
+  scrollbar-width:none!important;
+  -webkit-overflow-scrolling:touch!important;
+}
+.patient-stories-page .story-carousel-viewport::-webkit-scrollbar{display:none!important;}
+.patient-stories-page .story-carousel{padding-left:0!important;}
+.patient-stories-page .story-choice{box-shadow:0 10px 24px rgba(23,19,15,.08);}
+
 .patient-stories-page .conv-stage{
   position:sticky!important;
   top:var(--story-nav-offset,0px)!important;
@@ -24,24 +36,36 @@
   overscroll-behavior:none!important;
 }
 .patient-stories-page .conv-carousel{
+  display:flex!important;
+  flex-direction:column!important;
+  width:100%!important;
   height:100%!important;
   transform:translate3d(0,0,0)!important;
   transition:transform .42s cubic-bezier(.22,.8,.24,1)!important;
+  will-change:transform!important;
 }
 .patient-stories-page .conv-pair{
+  position:relative!important;
+  inset:auto!important;
   flex:0 0 100%!important;
+  width:100%!important;
   height:100%!important;
+  min-height:0!important;
   padding:8px!important;
   display:block!important;
   opacity:1!important;
   visibility:visible!important;
+  transform:none!important;
+  box-sizing:border-box!important;
 }
 .patient-stories-page .conv-pair[aria-hidden="true"]{pointer-events:none!important;}
 .patient-stories-page .conv-card-inner{
   height:100%!important;
+  min-height:0!important;
   padding:clamp(28px,5vw,52px) clamp(24px,5vw,54px)!important;
   justify-content:center!important;
   border-radius:24px!important;
+  box-sizing:border-box!important;
 }
 .patient-stories-page .conv-pair .q{
   margin:clamp(24px,4vw,38px) 0 20px!important;
@@ -70,12 +94,25 @@
   gap:10px!important;
   pointer-events:auto!important;
 }
-.patient-stories-page .conv-progress-dot{display:block!important;position:relative!important;flex:none!important;width:7px!important;height:7px!important;min-width:7px!important;min-height:7px!important;padding:0!important;border:0!important;border-radius:50%!important;background:rgba(251,249,244,.28)!important;}
-.patient-stories-page .conv-progress-dot.active{width:10px!important;height:10px!important;min-width:10px!important;min-height:10px!important;background:var(--orange-soft)!important;box-shadow:0 0 0 4px rgba(242,84,12,.14),0 0 15px rgba(242,84,12,.55)!important;}
-.patient-stories-page .conv-progress-num{position:absolute!important;left:50%!important;bottom:20px!important;transform:translateX(-50%)!important;z-index:9!important;white-space:nowrap!important;}
+.patient-stories-page .conv-progress-dot{
+  display:block!important;position:relative!important;flex:none!important;
+  width:7px!important;height:7px!important;min-width:7px!important;min-height:7px!important;
+  padding:0!important;border:0!important;border-radius:50%!important;
+  background:rgba(251,249,244,.28)!important;
+}
+.patient-stories-page .conv-progress-dot.active{
+  width:10px!important;height:10px!important;min-width:10px!important;min-height:10px!important;
+  background:var(--orange-soft)!important;
+  box-shadow:0 0 0 4px rgba(242,84,12,.14),0 0 15px rgba(242,84,12,.55)!important;
+}
+.patient-stories-page .conv-progress-num{
+  position:absolute!important;left:50%!important;bottom:20px!important;
+  transform:translateX(-50%)!important;z-index:9!important;white-space:nowrap!important;
+}
 .patient-stories-page .conv-controls,.patient-stories-page .conv-swipe-hint{display:none!important;}
 
 @media(max-width:700px){
+  .patient-stories-page .story-carousel-viewport{margin-left:-6px!important;margin-right:-6px!important;padding-left:6px!important;padding-right:6px!important;}
   .patient-stories-page .conv-stage{padding:22px 8px 58px!important;grid-template-columns:minmax(0,1fr) 24px!important;column-gap:6px!important;}
   .patient-stories-page .conv-carousel-viewport{height:min(76svh,620px)!important;max-height:calc(100svh - var(--story-nav-offset,0px) - 78px)!important;}
   .patient-stories-page .conv-pair{padding:5px!important;}
