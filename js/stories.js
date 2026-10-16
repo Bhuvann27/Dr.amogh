@@ -100,11 +100,14 @@
   }
 
   function buildConversation(story){
+    const track=document.getElementById("conversation");
     const stage=document.getElementById("convStage");
     const wrap=document.getElementById("convPairs");
     const counter=document.getElementById("convCounter");
     const progress=document.getElementById("convProgressNum");
-    if(!stage||!wrap)return;
+    const viewport=document.getElementById("convViewport");
+    const intro=document.querySelector(".conv-story-intro");
+    if(!track||!stage||!wrap)return;
 
     const pairs=Array.isArray(story.dialogue)?story.dialogue:[];
     wrap.innerHTML="";
@@ -128,6 +131,10 @@
 
     let active=0;
     const total=slides.length;
+    let scrollFrame=0;
+    let snapTimer=0;
+    let lastDirection=0;
+    let initialized=false;
 
     if(counter){
       counter.setAttribute("aria-label","Conversation progress");
@@ -138,62 +145,96 @@
         dot.className="conv-progress-dot"+(i===0?" active":"");
         dot.setAttribute("role","listitem");
         dot.setAttribute("aria-label","Go to exchange "+(i+1)+" of "+total);
-        dot.addEventListener("click",()=>render(i,true));
+        dot.addEventListener("click",()=>goTo(i,true));
         counter.appendChild(dot);
       });
     }
 
-    function render(next,focus){
-      active=Math.max(0,Math.min(total-1,next));
-      wrap.style.transform="translate3d(0,"+(-active*100)+"%,0)";
+    function stageStart(){return stage.getBoundingClientRect().top+window.scrollY;}
+    function viewportHeight(){return Math.max(window.innerHeight,1);}
+
+    function setTrackHeight(){
+      const h=viewportHeight();
+      const introHeight=intro?intro.offsetHeight:0;
+      track.style.setProperty("--conversation-height",(introHeight+(total*h))+"px");
+      track.style.height=(introHeight+(total*h))+"px";
+    }
+
+    function updateActive(next){
+      const clamped=Math.max(0,Math.min(total-1,next));
+      if(clamped===active&&!initialized)return;
+      active=clamped;
       slides.forEach((el,i)=>el.classList.toggle("is-active",i===active));
       if(progress)progress.textContent=String(active+1)+" / "+String(total);
       if(counter)Array.from(counter.children).forEach((d,i)=>{
         d.classList.toggle("active",i===active);
         d.setAttribute("aria-current",i===active?"step":"false");
       });
-      if(focus){const viewport=document.getElementById("convViewport");if(viewport)viewport.focus({preventScroll:true});}
+      initialized=true;
     }
 
-    let startX=0,startY=0,dragging=false;
-    let wheelLock=false;
-    const viewport=document.getElementById("convViewport");
-    if(viewport){
-      viewport.addEventListener("touchstart",e=>{
-        const t=e.changedTouches[0];startX=t.clientX;startY=t.clientY;dragging=true;
-      },{passive:true});
-      viewport.addEventListener("touchend",e=>{
-        if(!dragging)return;
-        dragging=false;
-        const t=e.changedTouches[0],dx=t.clientX-startX,dy=t.clientY-startY;
-        if(Math.abs(dy)>48&&Math.abs(dy)>Math.abs(dx)*1.15)render(active+(dy<0?1:-1));
-      },{passive:true});
-      viewport.addEventListener("pointerdown",e=>{
-        if(e.pointerType==="touch")return;
-        startX=e.clientX;startY=e.clientY;dragging=true;
-      });
-      viewport.addEventListener("pointerup",e=>{
-        if(!dragging||e.pointerType==="touch")return;
-        dragging=false;
-        const dx=e.clientX-startX,dy=e.clientY-startY;
-        if(Math.abs(dy)>60&&Math.abs(dy)>Math.abs(dx)*1.15)render(active+(dy<0?1:-1));
-      });
-      viewport.addEventListener("wheel",e=>{
-        if(Math.abs(e.deltaY)<=Math.abs(e.deltaX)||Math.abs(e.deltaY)<18)return;
-        e.preventDefault();
-        if(wheelLock)return;
-        wheelLock=true;
-        render(active+(e.deltaY>0?1:-1));
-        window.setTimeout(()=>{wheelLock=false;},520);
-      },{passive:false});
-      viewport.tabIndex=0;
-      viewport.setAttribute("aria-label","Patient and doctor conversation. Swipe up for the next exchange.");
-      viewport.addEventListener("keydown",e=>{
-        if(e.key==="ArrowDown"||e.key==="PageDown"||e.key===" "){e.preventDefault();render(active+1,true);}
-        if(e.key==="ArrowUp"||e.key==="PageUp"){e.preventDefault();render(active-1,true);}
+    function syncFromScroll(){
+      const start=stageStart();
+      const distance=Math.max(viewportHeight(),1);
+      const raw=(window.scrollY-start)/distance;
+      const next=Math.round(raw);
+      updateActive(next);
+      if(Math.abs(raw-next)<0.18 && next>=0 && next<total){
+        lastDirection=0;
+      }
+    }
+
+    function snapCurrent(){
+      const start=stageStart();
+      const h=viewportHeight();
+      const raw=(window.scrollY-start)/h;
+      if(raw<=0||raw>=total-1)return;
+      const target=Math.max(0,Math.min(total-1,Math.round(raw)));
+      if(Math.abs(raw-target)<0.06)return;
+      window.scrollTo({top:start+target*h,behavior:"smooth"});
+    }
+
+    function goTo(next,focus){
+      const target=Math.max(0,Math.min(total-1,next));
+      const top=stageStart()+target*viewportHeight();
+      updateActive(target);
+      window.scrollTo({top,behavior:"smooth"});
+      if(focus&&viewport){
+        viewport.focus({preventScroll:true});
+      }
+    }
+
+    function onScroll(){
+      if(scrollFrame)return;
+      scrollFrame=requestAnimationFrame(()=>{
+        scrollFrame=0;
+        syncFromScroll();
+        window.clearTimeout(snapTimer);
+        snapTimer=window.setTimeout(snapCurrent,120);
       });
     }
-    render(0,false);
+
+    setTrackHeight();
+    updateActive(0);
+    window.addEventListener("resize",()=>{
+      setTrackHeight();
+      syncFromScroll();
+    },{passive:true});
+    window.addEventListener("scroll",onScroll,{passive:true});
+
+    if(viewport){
+      viewport.tabIndex=0;
+      viewport.setAttribute("aria-label","Patient and doctor conversation. Scroll up for the next exchange.");
+      viewport.addEventListener("keydown",e=>{
+        if(e.key==="ArrowDown"||e.key==="PageDown"||e.key===" "){e.preventDefault();goTo(active+1,true);}
+        if(e.key==="ArrowUp"||e.key==="PageUp"){e.preventDefault();goTo(active-1,true);}
+      });
+    }
+
+    if("ResizeObserver" in window){
+      const ro=new ResizeObserver(()=>setTrackHeight());
+      ro.observe(track);
+    }
   }
 
   function buildOtherStories(stories,selected){
