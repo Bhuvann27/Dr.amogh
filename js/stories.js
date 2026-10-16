@@ -31,7 +31,6 @@
   }
 
   function categoryFor(story){return String(story.category||inferCategory(story)).trim()||"General medicine";}
-
   loadStories().then(init);
 
   function init(stories){
@@ -80,7 +79,6 @@
     }
     const urgent=document.getElementById("urgentText");
     if(urgent)urgent.textContent=story.urgent||"If symptoms are sudden, severe, or getting worse, seek medical attention promptly.";
-
     buildOtherStories(stories,story);
     setupReveals();
   }
@@ -113,28 +111,21 @@
     wrap.innerHTML="";
     if(counter)counter.innerHTML="";
 
-    const slides=pairs.map((pair,i)=>{
+    const slides=(pairs.length?pairs:[{q:"",a:"This story is being prepared."}]).map((pair,i)=>{
       const el=document.createElement("article");
       el.className="conv-pair"+(i===0?" is-active":"");
-      el.innerHTML='<div class="conv-card-glow" aria-hidden="true"></div><div class="conv-card-inner"><span class="conv-speaker"><span>PATIENT</span><b>↔</b><span>DOCTOR</span></span><span class="conv-card-index">'+String(i+1).padStart(2,"0")+'</span><p class="q">'+esc(pair.q)+'</p><p class="a">'+esc(pair.a)+'</p></div>';
+      el.innerHTML='<div class="conv-card-glow" aria-hidden="true"></div><div class="conv-card-inner"><span class="conv-speaker"><span>PATIENT</span><b>↔</b><span>DOCTOR</span></span><span class="conv-card-index">'+String(i+1).padStart(2,"0")+'</span><p class="q">'+esc(pair.q||"")+'</p><p class="a">'+esc(pair.a||"")+'</p></div>';
       wrap.appendChild(el);
       return el;
     });
 
-    if(!slides.length){
-      const el=document.createElement("article");
-      el.className="conv-pair is-active";
-      el.innerHTML='<div class="conv-card-inner"><span class="conv-speaker"><span>PATIENT</span><b>↔</b><span>DOCTOR</span></span><p class="a">This story is being prepared.</p></div>';
-      wrap.appendChild(el);
-      slides.push(el);
-    }
-
     let active=0;
     const total=slides.length;
-    let scrollFrame=0;
-    let snapTimer=0;
-    let initialized=false;
-    let baseStageTop=0;
+    let locked=false;
+    let touchStartY=0;
+    let touchStartX=0;
+    let touchHandled=false;
+    let wheelLocked=false;
 
     if(counter){
       counter.setAttribute("aria-label","Conversation progress");
@@ -145,92 +136,101 @@
         dot.className="conv-progress-dot"+(i===0?" active":"");
         dot.setAttribute("role","listitem");
         dot.setAttribute("aria-label","Go to exchange "+(i+1)+" of "+total);
-        dot.addEventListener("click",()=>goTo(i,true));
+        dot.addEventListener("click",()=>goTo(i));
         counter.appendChild(dot);
       });
     }
 
-    function viewportHeight(){return Math.max(window.innerHeight,1);}
-
-    function refreshStageTop(){
-      baseStageTop=track.getBoundingClientRect().top+window.scrollY+(intro?intro.offsetHeight:0);
-    }
-
     function setTrackHeight(){
-      const h=viewportHeight();
+      const h=Math.max(window.innerHeight,1);
       const introHeight=intro?intro.offsetHeight:0;
-      track.style.setProperty("--conversation-height",(introHeight+(total*h))+"px");
-      track.style.height=(introHeight+(total*h))+"px";
-      refreshStageTop();
+      track.style.height=(introHeight+(total+0.9)*h)+"px";
+      track.style.setProperty("--conversation-height",(introHeight+(total+0.9)*h)+"px");
     }
 
-    function updateActive(next){
-      const clamped=Math.max(0,Math.min(total-1,next));
-      if(clamped===active&&initialized)return;
-      active=clamped;
-      slides.forEach((el,i)=>el.classList.toggle("is-active",i===active));
+    function updateUI(next,animate){
+      active=Math.max(0,Math.min(total-1,next));
+      wrap.style.transform="translate3d(0,"+(-active*100)+"%,0)";
+      wrap.classList.toggle("is-animating",animate!==false);
+      slides.forEach((el,i)=>{
+        el.classList.toggle("is-active",i===active);
+        el.setAttribute("aria-hidden",i===active?"false":"true");
+      });
       if(progress)progress.textContent=String(active+1)+" / "+String(total);
-      if(counter)Array.from(counter.children).forEach((d,i)=>{
-        d.classList.toggle("active",i===active);
-        d.setAttribute("aria-current",i===active?"step":"false");
+      if(counter)Array.from(counter.children).forEach((dot,i)=>{
+        dot.classList.toggle("active",i===active);
+        dot.setAttribute("aria-current",i===active?"step":"false");
       });
-      initialized=true;
     }
 
-    function syncFromScroll(){
-      const distance=viewportHeight();
-      const raw=(window.scrollY-baseStageTop)/distance;
-      const next=Math.round(raw);
-      updateActive(next);
+    function atConversationPosition(){
+      const rect=stage.getBoundingClientRect();
+      return Math.abs(rect.top)<=3;
     }
 
-    function snapCurrent(){
-      const h=viewportHeight();
-      const raw=(window.scrollY-baseStageTop)/h;
-      if(raw<=0||raw>=total-1)return;
-      const target=Math.max(0,Math.min(total-1,Math.round(raw)));
-      if(Math.abs(raw-target)<0.06)return;
-      window.scrollTo({top:baseStageTop+target*h,behavior:"smooth"});
-    }
-
-    function goTo(next,focus){
+    function goTo(next){
+      if(locked)return;
       const target=Math.max(0,Math.min(total-1,next));
-      const top=baseStageTop+target*viewportHeight();
-      updateActive(target);
-      window.scrollTo({top,behavior:"smooth"});
-      if(focus&&viewport)viewport.focus({preventScroll:true});
+      if(target===active)return;
+      locked=true;
+      updateUI(target,true);
+      window.setTimeout(()=>{locked=false;},560);
     }
 
-    function onScroll(){
-      if(scrollFrame)return;
-      scrollFrame=requestAnimationFrame(()=>{
-        scrollFrame=0;
-        syncFromScroll();
-        window.clearTimeout(snapTimer);
-        snapTimer=window.setTimeout(snapCurrent,140);
-      });
+    function handleWheel(e){
+      if(!atConversationPosition()||locked)return;
+      const delta=e.deltaY;
+      if(Math.abs(delta)<8)return;
+      if(delta>0&&active<total-1){
+        e.preventDefault();
+        if(!wheelLocked){wheelLocked=true;goTo(active+1);window.setTimeout(()=>wheelLocked=false,620);}
+      }else if(delta<0&&active>0){
+        e.preventDefault();
+        if(!wheelLocked){wheelLocked=true;goTo(active-1);window.setTimeout(()=>wheelLocked=false,620);}
+      }
     }
+
+    function touchStart(e){
+      if(!atConversationPosition()||locked)return;
+      const t=e.changedTouches[0];
+      touchStartY=t.clientY;touchStartX=t.clientX;touchHandled=false;
+    }
+
+    function touchMove(e){
+      if(!atConversationPosition()||locked||touchHandled)return;
+      const t=e.changedTouches[0];
+      const dy=touchStartY-t.clientY;
+      const dx=t.clientX-touchStartX;
+      if(Math.abs(dy)<28||Math.abs(dy)<Math.abs(dx)*1.15)return;
+      if(dy>0&&active<total-1){
+        e.preventDefault();
+        touchHandled=true;
+        goTo(active+1);
+      }else if(dy<0&&active>0){
+        e.preventDefault();
+        touchHandled=true;
+        goTo(active-1);
+      }
+    }
+
+    function touchEnd(){touchStartY=0;touchStartX=0;touchHandled=false;}
 
     setTrackHeight();
-    updateActive(0);
-    window.addEventListener("resize",()=>{
-      setTrackHeight();
-      syncFromScroll();
-    },{passive:true});
-    window.addEventListener("scroll",onScroll,{passive:true});
+    updateUI(0,false);
+    window.addEventListener("resize",setTrackHeight,{passive:true});
 
     if(viewport){
       viewport.tabIndex=0;
-      viewport.setAttribute("aria-label","Patient and doctor conversation. Scroll up for the next exchange.");
+      viewport.setAttribute("aria-label","Patient and doctor conversation. Swipe up for the next exchange.");
+      viewport.addEventListener("wheel",handleWheel,{passive:false});
+      viewport.addEventListener("touchstart",touchStart,{passive:true});
+      viewport.addEventListener("touchmove",touchMove,{passive:false});
+      viewport.addEventListener("touchend",touchEnd,{passive:true});
+      viewport.addEventListener("touchcancel",touchEnd,{passive:true});
       viewport.addEventListener("keydown",e=>{
-        if(e.key==="ArrowDown"||e.key==="PageDown"||e.key===" "){e.preventDefault();goTo(active+1,true);}
-        if(e.key==="ArrowUp"||e.key==="PageUp"){e.preventDefault();goTo(active-1,true);}
+        if(e.key==="ArrowDown"||e.key==="PageDown"||e.key===" "){e.preventDefault();goTo(active+1);}
+        if(e.key==="ArrowUp"||e.key==="PageUp"){e.preventDefault();goTo(active-1);}
       });
-    }
-
-    if("ResizeObserver" in window){
-      const ro=new ResizeObserver(()=>setTrackHeight());
-      ro.observe(track);
     }
   }
 
