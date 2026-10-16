@@ -133,8 +133,8 @@
     const total=slides.length;
     let scrollFrame=0;
     let snapTimer=0;
-    let lastDirection=0;
     let initialized=false;
+    let baseStageTop=0;
 
     if(counter){
       counter.setAttribute("aria-label","Conversation progress");
@@ -150,19 +150,23 @@
       });
     }
 
-    function stageStart(){return stage.getBoundingClientRect().top+window.scrollY;}
     function viewportHeight(){return Math.max(window.innerHeight,1);}
+
+    function refreshStageTop(){
+      baseStageTop=track.getBoundingClientRect().top+window.scrollY+(intro?intro.offsetHeight:0);
+    }
 
     function setTrackHeight(){
       const h=viewportHeight();
       const introHeight=intro?intro.offsetHeight:0;
       track.style.setProperty("--conversation-height",(introHeight+(total*h))+"px");
       track.style.height=(introHeight+(total*h))+"px";
+      refreshStageTop();
     }
 
     function updateActive(next){
       const clamped=Math.max(0,Math.min(total-1,next));
-      if(clamped===active&&!initialized)return;
+      if(clamped===active&&initialized)return;
       active=clamped;
       slides.forEach((el,i)=>el.classList.toggle("is-active",i===active));
       if(progress)progress.textContent=String(active+1)+" / "+String(total);
@@ -174,34 +178,27 @@
     }
 
     function syncFromScroll(){
-      const start=stageStart();
-      const distance=Math.max(viewportHeight(),1);
-      const raw=(window.scrollY-start)/distance;
+      const distance=viewportHeight();
+      const raw=(window.scrollY-baseStageTop)/distance;
       const next=Math.round(raw);
       updateActive(next);
-      if(Math.abs(raw-next)<0.18 && next>=0 && next<total){
-        lastDirection=0;
-      }
     }
 
     function snapCurrent(){
-      const start=stageStart();
       const h=viewportHeight();
-      const raw=(window.scrollY-start)/h;
+      const raw=(window.scrollY-baseStageTop)/h;
       if(raw<=0||raw>=total-1)return;
       const target=Math.max(0,Math.min(total-1,Math.round(raw)));
       if(Math.abs(raw-target)<0.06)return;
-      window.scrollTo({top:start+target*h,behavior:"smooth"});
+      window.scrollTo({top:baseStageTop+target*h,behavior:"smooth"});
     }
 
     function goTo(next,focus){
       const target=Math.max(0,Math.min(total-1,next));
-      const top=stageStart()+target*viewportHeight();
+      const top=baseStageTop+target*viewportHeight();
       updateActive(target);
       window.scrollTo({top,behavior:"smooth"});
-      if(focus&&viewport){
-        viewport.focus({preventScroll:true});
-      }
+      if(focus&&viewport)viewport.focus({preventScroll:true});
     }
 
     function onScroll(){
@@ -210,7 +207,7 @@
         scrollFrame=0;
         syncFromScroll();
         window.clearTimeout(snapTimer);
-        snapTimer=window.setTimeout(snapCurrent,120);
+        snapTimer=window.setTimeout(snapCurrent,140);
       });
     }
 
