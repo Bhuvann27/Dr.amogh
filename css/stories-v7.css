@@ -1,5 +1,5 @@
 /* Patient Stories v7
-   One controller, one vertical deck, no nested scroll surface. */
+   Conversation lock point + one-card-per-scroll interaction. */
 
 html,
 body{
@@ -11,12 +11,9 @@ body{
   overflow-x:clip!important;
   scrollbar-width:none;
 }
-body::-webkit-scrollbar{
-  width:0;
-  height:0;
-}
+body::-webkit-scrollbar{width:0;height:0;}
 
-/* Full-width story chooser without the phantom right gutter. */
+/* Story chooser: remove the phantom horizontal gutter. */
 .patient-stories-page .story-carousel-viewport{
   width:100%!important;
   max-width:100%!important;
@@ -35,7 +32,8 @@ body::-webkit-scrollbar{
   flex:0 0 clamp(230px,31vw,310px)!important;
 }
 
-/* Full-bleed conversation stage. */
+/* The light introduction scrolls normally. The dark stage is the only
+   section that becomes sticky, and only when it reaches the navigation. */
 .patient-stories-page .conv-track{
   position:relative!important;
   width:100vw!important;
@@ -71,8 +69,9 @@ body::-webkit-scrollbar{
   line-height:1.62!important;
 }
 
-/* One sticky stage. The document stops moving while the conversation
-   changes, then releases only after the sixth card. */
+/* This is the actual lock frame. Its top edge is pinned to the bottom of
+   the fixed navigation. The parent has N full stage-heights, so all N
+   cards can be consumed before the page is released. */
 .patient-stories-page .conv-stage{
   position:sticky!important;
   top:var(--story-nav-offset,0px)!important;
@@ -80,18 +79,13 @@ body::-webkit-scrollbar{
   width:100%!important;
   height:var(--deck-stage-h,100svh)!important;
   min-height:560px!important;
-  padding:0 14px 16px!important;
-  display:grid!important;
-  grid-template-columns:minmax(0,1fr) 14px!important;
-  grid-template-rows:1fr auto!important;
-  column-gap:8px!important;
-  align-items:center!important;
-  justify-content:center!important;
+  padding:0 22px 18px!important;
+  display:block!important;
   box-sizing:border-box!important;
   overflow:visible!important;
   background:#0d0b09!important;
   color:var(--paper)!important;
-  touch-action:none!important;
+  touch-action:auto!important;
   overscroll-behavior:contain!important;
 }
 .patient-stories-page .conv-stage::before{
@@ -102,29 +96,32 @@ body::-webkit-scrollbar{
   pointer-events:none!important;
   background:radial-gradient(85% 70% at 50% 44%,rgba(242,84,12,.10),transparent 68%)!important;
 }
-.patient-stories-page .conv-stage::after{
-  display:none!important;
+.patient-stories-page .conv-stage.is-engaged{
+  touch-action:none!important;
 }
 
-/* Smaller than the viewport so the rounded card is never cut at the
-   browser chrome or bottom edge. */
+/* The card is centered against the complete viewport width. The dots are
+   an overlay rail, not a grid column, so they cannot create a right-side
+   gutter or shift the card left. */
 .patient-stories-page .conv-carousel-viewport{
-  grid-column:1!important;
-  grid-row:1!important;
-  align-self:center!important;
-  width:100%!important;
-  height:var(--deck-card-h,56svh)!important;
+  position:relative!important;
+  z-index:2!important;
+  width:min(100%,760px)!important;
+  height:var(--deck-card-h,60svh)!important;
   min-height:460px!important;
   max-height:680px!important;
-  margin:0!important;
+  margin:0 auto!important;
   padding:0!important;
-  position:relative!important;
+  top:50%!important;
+  transform:translateY(-50%)!important;
   overflow:hidden!important;
   border-radius:28px!important;
   box-sizing:border-box!important;
-  z-index:2!important;
-  touch-action:none!important;
+  touch-action:auto!important;
   overscroll-behavior:none!important;
+}
+.patient-stories-page .conv-stage.is-engaged .conv-carousel-viewport{
+  touch-action:none!important;
 }
 .patient-stories-page .conv-carousel{
   position:relative!important;
@@ -138,12 +135,12 @@ body::-webkit-scrollbar{
   transition:none!important;
 }
 
-/* Every conversation slide is one complete card. */
+/* Every conversation slide occupies the exact same viewport slot. */
 .patient-stories-page .conv-pair{
   position:absolute!important;
   inset:0!important;
   width:100%!important;
-  height:var(--deck-card-h,56svh)!important;
+  height:var(--deck-card-h,60svh)!important;
   min-height:460px!important;
   max-height:680px!important;
   margin:0!important;
@@ -153,17 +150,15 @@ body::-webkit-scrollbar{
   visibility:visible!important;
   box-sizing:border-box!important;
   will-change:transform!important;
-  transition:transform .52s cubic-bezier(.22,.8,.22,1)!important;
+  transition:transform .48s cubic-bezier(.22,.8,.22,1)!important;
   z-index:1!important;
 }
-.patient-stories-page .conv-pair.is-active{
-  z-index:3!important;
-}
+.patient-stories-page .conv-pair.is-active{z-index:3!important;}
 .patient-stories-page .conv-card-inner{
   width:100%!important;
   height:100%!important;
   min-height:0!important;
-  padding:clamp(26px,4vw,44px) clamp(22px,4.5vw,48px)!important;
+  padding:clamp(28px,4vw,46px) clamp(24px,4.5vw,48px)!important;
   border-radius:24px!important;
   box-sizing:border-box!important;
   display:flex!important;
@@ -183,14 +178,14 @@ body::-webkit-scrollbar{
   line-height:1.25!important;
 }
 
-/* Dedicated progress rail. */
+/* Progress dots float at the right edge and never participate in card
+   centering. */
 .patient-stories-page .conv-counter{
-  grid-column:2!important;
-  grid-row:1!important;
-  align-self:center!important;
-  justify-self:center!important;
-  position:relative!important;
-  width:14px!important;
+  position:absolute!important;
+  top:50%!important;
+  right:clamp(10px,2.2vw,28px)!important;
+  transform:translateY(-50%)!important;
+  width:12px!important;
   height:auto!important;
   margin:0!important;
   display:flex!important;
@@ -222,45 +217,34 @@ body::-webkit-scrollbar{
   box-shadow:0 0 0 3px rgba(242,84,12,.12),0 0 10px rgba(242,84,12,.4)!important;
 }
 .patient-stories-page .conv-progress-num{
-  grid-column:1/3!important;
-  grid-row:2!important;
-  position:relative!important;
-  left:auto!important;
-  right:auto!important;
-  bottom:auto!important;
-  transform:none!important;
-  justify-self:center!important;
-  align-self:start!important;
-  margin:4px 0 0!important;
+  position:absolute!important;
+  left:50%!important;
+  bottom:22px!important;
+  transform:translateX(-50%)!important;
+  margin:0!important;
   color:rgba(251,249,244,.78)!important;
   z-index:12!important;
   white-space:nowrap!important;
 }
 .patient-stories-page .conv-controls,
-.patient-stories-page .conv-swipe-hint{
-  display:none!important;
-}
+.patient-stories-page .conv-swipe-hint{display:none!important;}
 
 @media(max-width:700px){
-  .patient-stories-page .story-carousel-viewport{
-    width:100%!important;
-    max-width:100%!important;
-  }
+  .patient-stories-page .story-carousel-viewport{width:100%!important;max-width:100%!important;}
   .patient-stories-page .story-carousel{gap:14px!important;}
   .patient-stories-page .conv-stage{
     min-height:560px!important;
-    padding:0 10px 14px!important;
-    grid-template-columns:minmax(0,1fr) 12px!important;
-    column-gap:6px!important;
+    padding:0 12px 16px!important;
   }
   .patient-stories-page .conv-carousel-viewport{
-    height:var(--deck-card-h,56svh)!important;
+    width:calc(100% - 30px)!important;
+    height:var(--deck-card-h,60svh)!important;
     min-height:460px!important;
     max-height:650px!important;
     border-radius:25px!important;
   }
   .patient-stories-page .conv-pair{
-    height:var(--deck-card-h,56svh)!important;
+    height:var(--deck-card-h,60svh)!important;
     min-height:460px!important;
     max-height:650px!important;
     padding:4px!important;
@@ -280,8 +264,10 @@ body::-webkit-scrollbar{
     font-size:clamp(1.12rem,5.1vw,1.62rem)!important;
     line-height:1.25!important;
   }
-  .patient-stories-page .conv-card-index{
-    right:20px!important;
-    top:18px!important;
+  .patient-stories-page .conv-counter{
+    right:6px!important;
+  }
+  .patient-stories-page .conv-progress-num{
+    bottom:20px!important;
   }
 }
