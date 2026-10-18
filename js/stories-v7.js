@@ -12,17 +12,19 @@
     if(!stage||!track||!viewport||!deck){setTimeout(boot,80);return;}
     const slides=Array.from(deck.querySelectorAll(".conv-pair"));
     if(!slides.length){setTimeout(boot,80);return;}
-    if(stage.dataset.v7Ready==="1")return;
-    stage.dataset.v7Ready="1";
+    if(stage.dataset.v8Ready==="1")return;
+    stage.dataset.v8Ready="1";
 
     const total=slides.length;
     let active=0;
-    let locked=false;
+    let transitioning=false;
     let pointerId=null;
     let startX=0;
     let startY=0;
+    let lastWheel=0;
 
     const clamp=(n,min,max)=>Math.max(min,Math.min(max,n));
+    const viewportHeight=()=>window.visualViewport?.height||window.innerHeight;
 
     function navOffset(){
       const nav=document.querySelector(".site-nav");
@@ -33,14 +35,29 @@
         const cs=getComputedStyle(el);
         if(cs.display==="none"||cs.visibility==="hidden")return;
         const r=el.getBoundingClientRect();
-        if(cs.position!=="static")bottom=Math.max(bottom,r.bottom);
-        else bottom=Math.max(bottom,r.height);
+        bottom=Math.max(bottom,cs.position!=="static"?r.bottom:r.height);
       });
-      return Math.min(Math.max(bottom,0),140);
+      return Math.min(Math.max(bottom,0),150);
     }
 
-    function stageHeight(){return Math.max(560,window.innerHeight-navOffset());}
-    function cardHeight(){return clamp(window.innerHeight*0.56,460,680);}
+    function stageHeight(){
+      return Math.max(560,viewportHeight()-navOffset());
+    }
+
+    function cardHeight(){
+      return clamp(viewportHeight()*0.60,460,680);
+    }
+
+    function atConversationLockPoint(){
+      const r=stage.getBoundingClientRect();
+      const offset=navOffset();
+      return r.top<=offset+2 && r.bottom>offset+20;
+    }
+
+    function setEngaged(on){
+      stage.classList.toggle("is-engaged",!!on);
+      stage.setAttribute("aria-busy",on?"true":"false");
+    }
 
     function applySlideTransforms(animate){
       deck.classList.toggle("is-animating",!!animate);
@@ -78,56 +95,53 @@
         slide.style.height=ch+"px";
         slide.style.minHeight=ch+"px";
       });
+
+      /* The stage must have one full viewport of travel for every card.
+         The sticky element itself occupies one viewport, so N cards need
+         N stage-heights in the parent track. This is what keeps the page
+         locked from card 01 through card N instead of releasing early. */
       const ih=intro?intro.offsetHeight:0;
-      track.style.height=(ih+sh+2)+"px";
+      track.style.height=(ih+(total*sh)+2)+"px";
       applySlideTransforms(false);
       setProgress();
     }
 
-    function conversationStart(){
-      return stage.getBoundingClientRect().top+window.scrollY-navOffset();
-    }
-
-    function lock(ms){
-      locked=true;
-      window.setTimeout(()=>{locked=false;},ms);
-    }
-
-    function goTo(next){
-      if(locked)return;
-      const target=clamp(next,0,total-1);
-      if(target===active)return;
+    function moveByCard(direction){
+      if(transitioning||!atConversationLockPoint())return false;
+      const target=clamp(active+direction,0,total-1);
+      if(target===active)return false;
       active=target;
+      transitioning=true;
       applySlideTransforms(true);
       setProgress();
-      lock(560);
+      window.setTimeout(()=>{transitioning=false;},520);
+      return true;
     }
 
-    function releaseAfter(){
-      const target=track.getBoundingClientRect().bottom+window.scrollY+4;
-      window.scrollTo({top:target,behavior:"smooth"});
-      lock(700);
+    function release(direction){
+      if(transitioning)return;
+      setEngaged(false);
+      const amount=Math.max(180,Math.min(stageHeight()*0.78,stageHeight()-40));
+      window.scrollBy({top:direction>0?amount:-amount,behavior:"smooth"});
     }
 
-    function releaseBefore(){
-      const target=Math.max(0,conversationStart()-18);
-      window.scrollTo({top:target,behavior:"smooth"});
-      lock(700);
-    }
-
-    function move(direction){
-      if(locked)return;
+    function handleDirection(direction){
+      if(!atConversationLockPoint())return false;
+      setEngaged(true);
       if(direction>0){
-        if(active<total-1)goTo(active+1);
-        else releaseAfter();
-      }else{
-        if(active>0)goTo(active-1);
-        else releaseBefore();
+        if(active<total-1)return moveByCard(1);
+        release(1);
+        return true;
       }
+      if(active>0)return moveByCard(-1);
+      release(-1);
+      return true;
     }
 
     function pointerDown(e){
-      if(locked||e.pointerType==="mouse")return;
+      if(!atConversationLockPoint()||e.pointerType==="mouse")return;
+      setEngaged(true);
+      if(transitioning)return;
       pointerId=e.pointerId;
       startX=e.clientX;
       startY=e.clientY;
@@ -142,24 +156,29 @@
       try{stage.releasePointerCapture(e.pointerId);}catch(_e){}
       if(Math.abs(dy)<42||Math.abs(dy)<Math.abs(dx)*1.12)return;
       e.preventDefault();
-      move(dy<0?1:-1);
+      handleDirection(dy<0?1:-1);
     }
 
     function pointerCancel(){pointerId=null;}
 
     function wheel(e){
-      if(locked||Math.abs(e.deltaY)<12)return;
+      if(!atConversationLockPoint())return;
+      if(Math.abs(e.deltaY)<12)return;
+      const now=performance.now();
+      if(now-lastWheel<90){e.preventDefault();return;}
+      lastWheel=now;
       e.preventDefault();
-      move(e.deltaY>0?1:-1);
+      handleDirection(e.deltaY>0?1:-1);
     }
 
     function key(e){
+      if(!atConversationLockPoint())return;
       if(e.key==="ArrowDown"||e.key==="PageDown"||e.key===" "){
         e.preventDefault();
-        move(1);
+        handleDirection(1);
       }else if(e.key==="ArrowUp"||e.key==="PageUp"){
         e.preventDefault();
-        move(-1);
+        handleDirection(-1);
       }
     }
 
@@ -176,12 +195,13 @@
         dot.addEventListener("click",e=>{
           e.preventDefault();
           e.stopPropagation();
-          if(!locked){
-            active=i;
-            applySlideTransforms(true);
-            setProgress();
-            lock(560);
-          }
+          if(!atConversationLockPoint()||transitioning)return;
+          setEngaged(true);
+          active=i;
+          transitioning=true;
+          applySlideTransforms(true);
+          setProgress();
+          window.setTimeout(()=>{transitioning=false;},520);
         });
         dots.appendChild(dot);
       });
@@ -193,10 +213,28 @@
     stage.addEventListener("wheel",wheel,{passive:false});
     stage.addEventListener("keydown",key);
     stage.tabIndex=0;
-    stage.setAttribute("aria-label","Patient and doctor conversation. Swipe up for the next exchange.");
+    stage.setAttribute("aria-label","Patient and doctor conversation. Scroll or swipe up for the next exchange.");
 
     window.addEventListener("resize",layout,{passive:true});
-    requestAnimationFrame(()=>requestAnimationFrame(layout));
+    window.visualViewport?.addEventListener("resize",layout,{passive:true});
+
+    /* Keep the stage visually ready, but do not engage it until its dark
+       section has actually reached the fixed navigation. */
+    window.addEventListener("scroll",()=>{
+      if(atConversationLockPoint()){
+        /* Sticky positioning handles the actual lock. This class only
+           enables touch capture once the trigger point has been reached. */
+        stage.classList.add("at-lock-point");
+      }else{
+        stage.classList.remove("at-lock-point");
+      }
+    },{passive:true});
+
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{
+      setEngaged(false);
+      stage.classList.remove("at-lock-point");
+      layout();
+    }));
   }
 
   if(document.readyState==="loading"){
