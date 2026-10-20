@@ -10,6 +10,13 @@
   const source = footer && footer.querySelector(".btn-primary");
   if(!section || !footer || !source) return;
 
+  /* Make the section identity explicit without changing its layout. */
+  const headingLabel = section.querySelector(".stories-focus-head .eyebrow");
+  if(headingLabel){
+    headingLabel.textContent = "PATIENT INSIGHTS";
+    headingLabel.classList.add("patient-insights-heading-label");
+  }
+
   let floating = null;
   let raf = 0;
   let passed = false;
@@ -22,11 +29,20 @@
     floating.className = "patient-insights-float";
     floating.href = source.getAttribute("href") || "stories.html";
     floating.setAttribute("aria-label", "Open Patient Insights. Something here may feel familiar.");
-    floating.innerHTML = '<span class="patient-insights-float-copy">SOMETHING HERE MAY FEEL FAMILIAR</span><span class="patient-insights-float-arrow" aria-hidden="true">↗</span>';
+    floating.innerHTML = [
+      '<span class="patient-insights-float-text">',
+        '<span class="patient-insights-float-kicker">PATIENT INSIGHTS</span>',
+        '<span class="patient-insights-float-copy">SOMETHING HERE MAY FEEL FAMILIAR</span>',
+      '</span>',
+      '<span class="patient-insights-float-arrow" aria-hidden="true">↗</span>'
+    ].join("");
     document.body.appendChild(floating);
 
     floating.addEventListener("click", function(){
       floating.classList.add("is-tapped");
+      window.setTimeout(function(){
+        if(floating) floating.classList.remove("is-tapped");
+      }, 320);
     });
 
     return floating;
