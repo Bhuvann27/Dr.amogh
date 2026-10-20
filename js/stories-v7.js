@@ -21,6 +21,7 @@
     let locked=false;
     let changing=false;
     let touchStartY=null;
+    let touchStartX=null;
     let wheelLockUntil=0;
 
     const clamp=(n,min,max)=>Math.max(min,Math.min(max,n));
@@ -45,7 +46,7 @@
 
     /* The lock begins only when the dark conversation stage reaches the
        bottom edge of the fixed navigation. Everything before this point is
-       ordinary page scrolling. */
+       ordinary page scrolling, including a finger starting on the card. */
     function lockY(){
       const trackTop=track.getBoundingClientRect().top+window.scrollY;
       const introHeight=intro?intro.offsetHeight:0;
@@ -102,6 +103,7 @@
       locked=false;
       stage.classList.remove("is-engaged","at-lock-point");
       stage.style.touchAction="auto";
+      viewport.style.touchAction="auto";
       const destination=direction>0
         ? lockY()+total*stageHeight()+4
         : Math.max(0,lockY()-2);
@@ -122,19 +124,14 @@
       go.timer=window.setTimeout(()=>{changing=false;},500);
     }
 
-    function engageIfAtLock(){
+    function engage(){
+      if(locked)return;
       const y=lockY();
-      const delta=window.scrollY-y;
-      if(Math.abs(delta)<=8){
-        if(!locked){
-          locked=true;
-          stage.classList.add("is-engaged","at-lock-point");
-          stage.style.touchAction="none";
-          window.scrollTo(0,y);
-        }
-        return true;
-      }
-      return false;
+      locked=true;
+      stage.classList.add("is-engaged","at-lock-point");
+      stage.style.touchAction="none";
+      viewport.style.touchAction="none";
+      window.scrollTo(0,y);
     }
 
     function onScroll(){
@@ -146,18 +143,14 @@
       /* If native scrolling has just brought the dark stage to its trigger,
          pin it exactly there. */
       const y=lockY();
-      if(window.scrollY>=y-3 && window.scrollY<=y+8){
-        window.scrollTo(0,y);
-        locked=true;
-        stage.classList.add("is-engaged","at-lock-point");
-        stage.style.touchAction="none";
-      }
+      if(window.scrollY>=y-3 && window.scrollY<=y+8)engage();
     }
 
     function touchStart(e){
       if(!locked)return;
       if(e.touches&&e.touches.length===1){
         touchStartY=e.touches[0].clientY;
+        touchStartX=e.touches[0].clientX;
         e.preventDefault();
       }
     }
@@ -169,10 +162,14 @@
 
     function touchEnd(e){
       if(!locked||touchStartY===null)return;
-      const endY=e.changedTouches&&e.changedTouches[0]?e.changedTouches[0].clientY:touchStartY;
+      const point=e.changedTouches&&e.changedTouches[0];
+      const endY=point?point.clientY:touchStartY;
+      const endX=point?point.clientX:touchStartX;
       const dy=endY-touchStartY;
+      const dx=endX-touchStartX;
       touchStartY=null;
-      if(Math.abs(dy)<34)return;
+      touchStartX=null;
+      if(Math.abs(dy)<34||Math.abs(dy)<=Math.abs(dx))return;
       go(dy<0?1:-1);
     }
 
