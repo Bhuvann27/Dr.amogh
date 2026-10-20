@@ -1,10 +1,9 @@
-/* Patient Stories v7.1
-   Native-scroll conversation lock with one-card snapping. */
+/* Patient Stories v7.2
+   Native page scroll until the dark-stage lock, then true vertical card swiping. */
 
 html,body{width:100%;max-width:100%;}
 body{overflow-x:hidden!important;}
 
-/* Story chooser: horizontal overflow belongs only to its own viewport. */
 .patient-stories-page .story-carousel-viewport{
   width:100%!important;max-width:100%!important;margin-left:0!important;margin-right:0!important;
   padding-left:0!important;padding-right:0!important;overflow-x:auto!important;
@@ -12,7 +11,6 @@ body{overflow-x:hidden!important;}
 .patient-stories-page .story-carousel{padding-left:0!important;padding-right:0!important;gap:16px!important;}
 .patient-stories-page .story-choice{flex:0 0 clamp(230px,31vw,310px)!important;}
 
-/* The light introduction is ordinary page content. */
 .patient-stories-page .conv-track{
   position:relative!important;width:100%!important;max-width:100%!important;margin:0!important;
   overflow:visible!important;background:var(--stone)!important;
@@ -25,43 +23,38 @@ body{overflow-x:hidden!important;}
 .patient-stories-page .conv-story-intro h2{max-width:24ch!important;margin:10px auto 0!important;color:var(--ink)!important;font-size:clamp(1.65rem,4vw,2.65rem)!important;line-height:1.03!important;}
 .patient-stories-page .conv-story-intro p{max-width:58ch!important;margin:14px auto 0!important;color:var(--text-dim)!important;font-size:.92rem!important;line-height:1.62!important;}
 
-/*
-   The dark section is the scroll lock frame. It becomes sticky only when its
-   top reaches the fixed header. Before that point the page scrolls normally.
-   Its parent has one full stage-height for every conversation exchange.
-*/
+/* The dark section is sticky only at its natural trigger position. The
+   document scrolls normally until its top reaches the fixed navigation. */
 .patient-stories-page .conv-stage{
   position:sticky!important;top:var(--story-nav-offset,0px)!important;z-index:20!important;
   width:100%!important;height:var(--deck-stage-h,100svh)!important;min-height:1px!important;
   padding:0!important;display:block!important;box-sizing:border-box!important;overflow:visible!important;
-  background:#0d0b09!important;color:var(--paper)!important;
-  touch-action:auto!important;overscroll-behavior:auto!important;
+  background:#0d0b09!important;color:var(--paper)!important;touch-action:auto!important;
 }
+.patient-stories-page .conv-stage.is-engaged{touch-action:none!important;}
 .patient-stories-page .conv-stage::before{
   content:""!important;position:absolute!important;inset:0!important;z-index:0!important;pointer-events:none!important;
   background:radial-gradient(85% 70% at 50% 44%,rgba(242,84,12,.10),transparent 68%)!important;
 }
 
-/* Card is centered in the whole dark frame. No grid column is reserved for dots. */
+/* The card is centered against the full dark viewport. */
 .patient-stories-page .conv-carousel-viewport{
   position:absolute!important;z-index:2!important;
   width:min(760px,calc(100% - 54px))!important;
   height:var(--deck-card-h,60svh)!important;min-height:460px!important;max-height:680px!important;
   left:50%!important;top:50%!important;transform:translate(-50%,-50%)!important;
   margin:0!important;padding:0!important;overflow:hidden!important;border-radius:28px!important;box-sizing:border-box!important;
-  touch-action:auto!important;overscroll-behavior:auto!important;
+  touch-action:none!important;overscroll-behavior:none!important;
 }
-
 .patient-stories-page .conv-carousel{
   position:relative!important;width:100%!important;height:100%!important;margin:0!important;padding:0!important;
   display:block!important;overflow:visible!important;transform:none!important;transition:none!important;
 }
-
 .patient-stories-page .conv-pair{
   position:absolute!important;inset:0!important;width:100%!important;height:var(--deck-card-h,60svh)!important;
   min-height:460px!important;max-height:680px!important;margin:0!important;padding:5px!important;display:block!important;
   opacity:1!important;visibility:visible!important;box-sizing:border-box!important;will-change:transform!important;
-  transition:transform .48s cubic-bezier(.22,.8,.22,1)!important;z-index:1!important;
+  transition:transform .44s cubic-bezier(.22,.8,.24,1)!important;z-index:1!important;
 }
 .patient-stories-page .conv-pair.is-active{z-index:3!important;}
 .patient-stories-page .conv-card-inner{
@@ -72,7 +65,7 @@ body{overflow-x:hidden!important;}
 .patient-stories-page .conv-pair .q{margin:clamp(20px,4vw,32px) 0 17px!important;max-width:40ch!important;font-size:clamp(.9rem,2vw,1.04rem)!important;line-height:1.48!important;}
 .patient-stories-page .conv-pair .a{max-width:31ch!important;font-size:clamp(1.16rem,3.1vw,1.86rem)!important;line-height:1.25!important;}
 
-/* Dots sit outside the card, vertically centered beside it. */
+/* Progress dots sit immediately beside the card, vertically centered. */
 .patient-stories-page .conv-counter{
   position:absolute!important;z-index:12!important;top:50%!important;right:9px!important;left:auto!important;
   transform:translateY(-50%)!important;width:10px!important;height:auto!important;margin:0!important;
@@ -88,10 +81,10 @@ body{overflow-x:hidden!important;}
   background:#ffd9c5!important;box-shadow:0 0 0 3px rgba(242,84,12,.12),0 0 10px rgba(242,84,12,.4)!important;
 }
 
-/* Number is below the card, not below the entire dark viewport. */
+/* The numeric progress is deliberately under the card itself. */
 .patient-stories-page .conv-progress-num{
   position:absolute!important;z-index:12!important;left:50%!important;
-  top:calc(50% + var(--deck-card-half-gap,80px) + 12px)!important;bottom:auto!important;
+  top:calc(50% + var(--deck-card-half-gap,80px) + 14px)!important;bottom:auto!important;
   transform:translateX(-50%)!important;margin:0!important;color:rgba(251,249,244,.78)!important;
   white-space:nowrap!important;font-family:var(--font-display)!important;font-size:.76rem!important;font-weight:800!important;letter-spacing:.06em!important;
 }
@@ -109,5 +102,5 @@ body{overflow-x:hidden!important;}
   .patient-stories-page .conv-pair .q{margin:20px 0 16px!important;max-width:34ch!important;font-size:.9rem!important;line-height:1.48!important;}
   .patient-stories-page .conv-pair .a{max-width:29ch!important;font-size:clamp(1.12rem,5.1vw,1.62rem)!important;line-height:1.25!important;}
   .patient-stories-page .conv-counter{right:9px!important;gap:6px!important;}
-  .patient-stories-page .conv-progress-num{top:calc(50% + var(--deck-card-half-gap,70px) + 10px)!important;}
+  .patient-stories-page .conv-progress-num{top:calc(50% + var(--deck-card-half-gap,70px) + 12px)!important;}
 }
