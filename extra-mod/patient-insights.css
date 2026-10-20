@@ -1,13 +1,14 @@
-/* Extra Mod: Patient Insights CTA. Keep the story cards and their interaction untouched. */
+/* Extra Mod: Patient Insights CTA.
+   The source CTA stays in normal document flow. The floating control is a
+   separate fixed element created only after the section has been passed. */
 
-/* The larger doorway remains intentionally hidden so Patient Insights stays compact. */
+/* Keep the Patient Insights doorway out of this focused homepage treatment. */
 .stories-conversation-doorway{display:none !important;}
 
-/* Keep the original CTA completely normal inside Patient Insights. */
-.stories-focus-footer.is-visible{transform:none !important;}
+/* Never let the floating treatment change the source CTA's layout. */
 #stories .stories-focus-footer .btn-primary{
   position:relative;
-  z-index:1001;
+  z-index:2;
   min-height:48px;
   min-width:min(292px,100%);
   padding:13px 20px;
@@ -15,218 +16,92 @@
   touch-action:manipulation;
   -webkit-tap-highlight-color:transparent;
   cursor:pointer;
+  text-decoration:none;
 }
 
-@supports (animation-timeline:view()){
-  #stories{
-    view-timeline-name:--patient-insights-section;
-    view-timeline-axis:block;
-  }
+/* The floating control is deliberately independent of the source CTA.
+   This prevents fixed-position animation from affecting the header or
+   causing the source button to travel through the page. */
+.patient-insights-float{
+  position:fixed;
+  z-index:1200;
+  left:16px;
+  bottom:max(18px,env(safe-area-inset-bottom));
+  width:52px;
+  height:52px;
+  display:grid;
+  place-items:center;
+  border-radius:50%;
+  background:var(--orange);
+  color:#fff;
+  text-decoration:none;
+  opacity:0;
+  pointer-events:none;
+  transform:translate3d(0,12px,0) scale(.78);
+  transform-origin:center;
+  box-shadow:0 10px 28px rgba(23,19,15,.20),0 0 0 1px rgba(242,84,12,.16);
+  transition:
+    opacity .22s ease,
+    transform .38s cubic-bezier(.22,1,.36,1),
+    box-shadow .25s ease;
+  isolation:isolate;
+}
 
-  /* The CTA only becomes floating at the actual end of the section.
-     This prevents it appearing over the last story/footer content. */
-  #stories .stories-focus-footer .btn-primary{
-    animation:patientInsightsCtaState 1ms linear both;
-    animation-timeline:--patient-insights-section;
-    animation-range:0% 100%;
-  }
+.patient-insights-float.is-visible{
+  opacity:1;
+  pointer-events:auto;
+  transform:translate3d(0,0,0) scale(1);
+}
 
-  @keyframes patientInsightsCtaState{
-    0%,96%{
-      position:relative;
-      opacity:1;
-      transform:translate3d(0,0,0) scale(1);
-      background:var(--orange);
-      color:#fff;
-      font-size:inherit;
-      line-height:inherit;
-      min-height:48px;
-      width:auto;
-      min-width:min(292px,100%);
-      left:auto;
-      bottom:auto;
-      margin:inherit;
-      box-shadow:0 10px 24px rgba(23,19,15,.10),0 0 0 1px rgba(242,84,12,.08);
-      pointer-events:auto;
-    }
-    98%{
-      position:relative;
-      opacity:.35;
-      transform:translate3d(0,3px,0) scale(.98);
-      background:var(--orange);
-      color:transparent;
-      font-size:inherit;
-      box-shadow:0 8px 18px rgba(23,19,15,.06);
-      pointer-events:none;
-    }
-    99.5%{
-      position:fixed;
-      left:16px;
-      right:auto;
-      bottom:max(18px,env(safe-area-inset-bottom));
-      width:52px;
-      min-width:52px;
-      max-width:52px;
-      height:52px;
-      min-height:52px;
-      margin:0;
-      padding:0;
-      opacity:0;
-      transform:translate3d(0,10px,0) scale(.72);
-      transform-origin:center;
-      background:var(--orange);
-      color:transparent;
-      font-size:0;
-      line-height:0;
-      overflow:visible;
-      border-radius:50%;
-      box-shadow:0 10px 28px rgba(23,19,15,.18),0 0 0 1px rgba(242,84,12,.16),0 0 0 0 rgba(242,84,12,0);
-      pointer-events:none;
-    }
-    100%{
-      position:fixed;
-      left:16px;
-      right:auto;
-      bottom:max(18px,env(safe-area-inset-bottom));
-      width:52px;
-      min-width:52px;
-      max-width:52px;
-      height:52px;
-      min-height:52px;
-      margin:0;
-      padding:0;
-      opacity:1;
-      transform:translate3d(0,0,0) scale(1);
-      transform-origin:center;
-      background:var(--orange);
-      color:transparent;
-      font-size:0;
-      line-height:0;
-      overflow:visible;
-      border-radius:50%;
-      box-shadow:0 10px 28px rgba(23,19,15,.18),0 0 0 1px rgba(242,84,12,.16),0 0 22px rgba(242,84,12,.16);
-      pointer-events:auto;
-    }
-  }
+.patient-insights-float.is-leaving{
+  opacity:0;
+  pointer-events:none;
+  transform:translate3d(0,8px,0) scale(.82);
+}
 
-  /* In-section CTA: keep the real text. Floating state: hide that text and
-     replace it with a compact navigation mark, so nothing overlaps the phone control. */
-  #stories .stories-focus-footer .btn-primary::after{
-    content:"";
-    position:absolute;
-    inset:0;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    border-radius:inherit;
-    color:#fff;
-    font-size:0;
-    font-weight:800;
-    line-height:1;
-    pointer-events:none;
-    opacity:0;
-    transform:scale(.7);
-    transition:opacity .22s ease,transform .3s cubic-bezier(.22,1,.36,1);
-  }
+.patient-insights-float span{
+  position:relative;
+  z-index:2;
+  display:block;
+  font-size:21px;
+  line-height:1;
+  font-weight:800;
+  transform:translateY(-1px);
+  transition:transform .25s cubic-bezier(.22,1,.36,1);
+}
 
-  /* Small ambient glow behind the floating control. */
-  #stories .stories-focus-footer .btn-primary::before{
-    content:"";
-    position:absolute;
-    width:100%;
-    height:100%;
-    inset:0;
-    border-radius:50%;
-    background:rgba(242,84,12,.18);
-    box-shadow:0 0 0 0 rgba(242,84,12,.22);
-    opacity:0;
-    pointer-events:none;
-    transform:scale(.9);
-  }
+/* Quiet ambient glow. It never changes layout and cannot cover the phone icon. */
+.patient-insights-float::before{
+  content:"";
+  position:absolute;
+  inset:-5px;
+  z-index:-1;
+  border-radius:50%;
+  background:rgba(242,84,12,.16);
+  box-shadow:0 0 0 0 rgba(242,84,12,.20);
+  animation:patientInsightsFloatGlow 2.8s ease-out infinite;
+  pointer-events:none;
+}
 
-  @keyframes patientInsightsGlow{
-    0%,100%{box-shadow:0 0 0 0 rgba(242,84,12,.18);transform:scale(.96);opacity:.7;}
-    50%{box-shadow:0 0 0 9px rgba(242,84,12,0);transform:scale(1.12);opacity:0;}
-  }
+@keyframes patientInsightsFloatGlow{
+  0%,100%{opacity:.62;transform:scale(.92);box-shadow:0 0 0 0 rgba(242,84,12,.16);}
+  48%{opacity:0;transform:scale(1.16);box-shadow:0 0 0 9px rgba(242,84,12,0);}
+}
 
-  @keyframes patientInsightsTap{
-    0%{transform:scale(1);}
-    35%{transform:scale(.86);}
-    70%{transform:scale(1.08);}
-    100%{transform:scale(1);}
-  }
+/* Small, immediate tactile response when the user taps. */
+.patient-insights-float:active{
+  transform:translate3d(0,0,0) scale(.88);
+  box-shadow:0 7px 20px rgba(23,19,15,.22),0 0 0 7px rgba(242,84,12,.12),0 0 28px rgba(242,84,12,.28);
+}
 
-  /* Floating state icon. The actual <a> remains the clickable element. */
-  @keyframes patientInsightsFloatingIcon{
-    from{opacity:0;transform:scale(.72) rotate(-8deg);}
-    to{opacity:1;transform:scale(1) rotate(0deg);}
-  }
+.patient-insights-float:active span,
+.patient-insights-float:focus-visible span{
+  transform:translateY(-1px) scale(1.08);
+}
 
-  #stories .stories-focus-footer .btn-primary:hover,
-  #stories .stories-focus-footer .btn-primary:focus-visible,
-  #stories .stories-focus-footer .btn-primary:active{
-    background:var(--orange-deep);
-  }
-
-  /* The icon is deliberately not shown during the normal CTA state. */
-  #stories .stories-focus-footer .btn-primary:where(:hover,:focus-visible)::after{
-    opacity:0;
-  }
-
-  /* At the end of the timeline the real link is the compact floating control. */
-  #stories .stories-focus-footer .btn-primary::after{
-    content:"↗";
-  }
-
-  /* The timeline controls the geometry. These styles supply the icon/glow. */
-  #stories .stories-focus-footer .btn-primary:where(:focus-visible)::after,
-  #stories .stories-focus-footer .btn-primary:where(:active)::after{
-    opacity:1;
-    transform:scale(1.05);
-    font-size:21px;
-  }
-
-  /* A pressed floating control gives immediate tactile feedback before the
-     browser follows the real stories.html link. */
-  #stories .stories-focus-footer .btn-primary:active{
-    animation:patientInsightsTap .24s cubic-bezier(.22,1,.36,1);
-    box-shadow:0 8px 20px rgba(23,19,15,.20),0 0 0 7px rgba(242,84,12,.12),0 0 28px rgba(242,84,12,.28);
-  }
-
-  /* The glow is always subtle, never a distracting beacon. */
-  #stories .stories-focus-footer .btn-primary::before{
-    animation:patientInsightsGlow 2.8s ease-out infinite;
-  }
-
-  /* Only expose the floating visual treatment once the view-timeline reaches
-     the end. Before that, the pseudo-elements remain visually absent. */
-  @keyframes patientInsightsPseudoState{
-    0%,99%{opacity:0;}
-    100%{opacity:1;}
-  }
-
-  #stories .stories-focus-footer .btn-primary::after,
-  #stories .stories-focus-footer .btn-primary::before{
-    animation-name:patientInsightsPseudoState;
-    animation-duration:1ms;
-    animation-fill-mode:both;
-    animation-timeline:--patient-insights-section;
-    animation-range:99% 100%;
-  }
-
-  /* The pseudo icon itself is the only visible content in floating mode. */
-  #stories .stories-focus-footer .btn-primary::after{
-    font-size:0;
-  }
-
-  /* The source CTA text must disappear completely once the anchor becomes fixed. */
-  #stories .stories-focus-footer .btn-primary{
-    text-decoration:none;
-  }
-
-  @media (prefers-reduced-motion:reduce){
-    #stories .stories-focus-footer .btn-primary::before{animation:none;}
-  }
+.patient-insights-float:focus-visible{
+  outline:2px solid rgba(255,255,255,.92);
+  outline-offset:3px;
 }
 
 @media(max-width:700px){
@@ -236,40 +111,19 @@
     padding:13px 16px;
   }
 
-  @supports (animation-timeline:view()){
-    @keyframes patientInsightsCtaStateMobile{
-      0%,96%{
-        position:relative;opacity:1;transform:translate3d(0,0,0) scale(1);
-        background:var(--orange);color:#fff;font-size:inherit;line-height:inherit;
-        min-height:48px;min-width:min(292px,100%);width:auto;left:auto;bottom:auto;margin:inherit;
-        box-shadow:0 10px 24px rgba(23,19,15,.10),0 0 0 1px rgba(242,84,12,.08);pointer-events:auto;
-      }
-      98%{
-        position:relative;opacity:.35;transform:translate3d(0,3px,0) scale(.98);
-        background:var(--orange);color:transparent;pointer-events:none;
-      }
-      99.5%,100%{
-        position:fixed;left:14px;right:auto;bottom:max(18px,env(safe-area-inset-bottom));
-        width:52px;min-width:52px;max-width:52px;height:52px;min-height:52px;margin:0;padding:0;
-        opacity:1;transform:translate3d(0,0,0) scale(1);transform-origin:center;
-        background:var(--orange);color:transparent;font-size:0;line-height:0;overflow:visible;
-        border-radius:50%;box-shadow:0 10px 28px rgba(23,19,15,.18),0 0 0 1px rgba(242,84,12,.16),0 0 22px rgba(242,84,12,.16);
-        pointer-events:auto;
-      }
-    }
-
-    #stories .stories-focus-footer .btn-primary{
-      animation-name:patientInsightsCtaStateMobile;
-    }
-
-    #stories .stories-focus-footer .btn-primary::after{
-      padding:0;
-    }
+  .patient-insights-float{
+    left:14px;
+    bottom:max(18px,env(safe-area-inset-bottom));
+    width:52px;
+    height:52px;
   }
 }
 
 @media(prefers-reduced-motion:reduce){
-  #stories .stories-focus-footer .btn-primary{animation:none;}
-  #stories .stories-focus-footer .btn-primary::before{animation:none !important;}
-  #stories .stories-focus-footer .btn-primary::after{opacity:1;transform:none;font-size:21px;content:"↗";}
+  .patient-insights-float{
+    transition:opacity .01ms linear;
+  }
+  .patient-insights-float::before{
+    animation:none;
+  }
 }
