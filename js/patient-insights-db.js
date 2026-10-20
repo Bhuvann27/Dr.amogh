@@ -36,10 +36,13 @@ window.PatientInsightsDB = (function(){
       urgentReviewed: !!row.urgent_reviewed,
       status: row.status,
       consentConfirmed: !!row.consent_confirmed,
+      anonymousConfirmed: !!row.anonymous_confirmed,
       identifiersRemoved: !!row.identifiers_removed,
       privacyReviewed: !!row.privacy_reviewed,
       noIdentifyingDetails: !!row.no_identifying_details,
       medicalReviewed: !!row.medical_reviewed,
+      finalReviewed: !!row.final_reviewed,
+      finalReviewedAt: row.final_reviewed_at,
       createdAt: row.created_at,
       updatedAt: row.updated_at,
       publishedAt: row.published_at,
@@ -62,10 +65,12 @@ window.PatientInsightsDB = (function(){
       urgent: story.urgent || "",
       urgent_reviewed: !!story.urgentReviewed,
       consent_confirmed: !!story.consentConfirmed,
+      anonymous_confirmed: !!story.anonymousConfirmed,
       identifiers_removed: !!story.identifiersRemoved,
       privacy_reviewed: !!story.privacyReviewed,
       no_identifying_details: !!story.noIdentifyingDetails,
       medical_reviewed: !!story.medicalReviewed,
+      final_reviewed: !!story.finalReviewed,
       status: story.status || "draft",
     };
     if(story.id) row.id = story.id;
@@ -170,7 +175,16 @@ window.PatientInsightsDB = (function(){
     copy.title = original.title ? `${original.title} (copy)` : "Untitled (copy)";
     copy.slug = slugify(original.slug || original.title);
     copy.status = "draft";
+    copy.anonymousConfirmed = false;
+    copy.consentConfirmed = false;
+    copy.identifiersRemoved = false;
+    copy.privacyReviewed = false;
+    copy.noIdentifyingDetails = false;
+    copy.medicalReviewed = false;
+    copy.urgentReviewed = false;
+    copy.finalReviewed = false;
     delete copy.publishedAt;
+    delete copy.finalReviewedAt;
     return save(copy);
   }
 
