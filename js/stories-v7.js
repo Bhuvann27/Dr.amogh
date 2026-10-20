@@ -23,6 +23,7 @@
     let changing=false;
     let touchStartY=null;
     let touchStartX=null;
+    let touchSessionLocked=false;
     let wheelLockUntil=0;
     let lastScrollY=window.scrollY;
     let releaseGuardUntil=0;
@@ -108,6 +109,9 @@
     function release(direction){
       locked=false;
       lockedY=null;
+      touchSessionLocked=false;
+      touchStartY=null;
+      touchStartX=null;
       stage.classList.remove("is-engaged","at-lock-point");
       stage.style.touchAction="auto";
       viewport.style.touchAction="auto";
@@ -169,8 +173,8 @@
 
       if(locked){
         /* Keep the exact boundary at which this engagement began. This is
-           essential when re-entering from below: Card 6 must lock at the
-           bottom boundary, not jump back to the top boundary. */
+           essential when re-entering from below: the last card must lock at
+           the bottom boundary, not jump back to the top boundary. */
         const y=lockedY==null?topY:lockedY;
         if(Math.abs(current-y)>2)window.scrollTo({top:y,behavior:"auto"});
         lastScrollY=y;
@@ -205,31 +209,54 @@
       lastScrollY=current;
     }
 
+    /* Touch is intentionally treated as a gesture session. A gesture that
+       starts before the lock remains a native page-scroll gesture even if the
+       scroll position crosses the lock boundary during that same finger drag.
+       A gesture that starts after lock is the only one captured for cards. */
     function touchStart(e){
-      if(!locked)return;
+      touchSessionLocked=locked;
+      touchStartY=null;
+      touchStartX=null;
+      if(!touchSessionLocked)return;
       if(e.touches&&e.touches.length===1){
         touchStartY=e.touches[0].clientY;
         touchStartX=e.touches[0].clientX;
-        e.preventDefault();
+        /* Do not preventDefault here. The browser must be allowed to own any
+           gesture that is not ultimately a locked card swipe. */
       }
     }
 
     function touchMove(e){
-      if(!locked||touchStartY===null)return;
+      if(!touchSessionLocked||touchStartY===null)return;
+      /* Once the conversation was locked before this gesture began, the card
+         stage owns the gesture. Native page movement is already disabled by
+         touch-action:none on the engaged stage. */
       e.preventDefault();
     }
 
     function touchEnd(e){
-      if(!locked||touchStartY===null)return;
+      if(!touchSessionLocked||touchStartY===null){
+        touchSessionLocked=false;
+        touchStartY=null;
+        touchStartX=null;
+        return;
+      }
       const point=e.changedTouches&&e.changedTouches[0];
       const endY=point?point.clientY:touchStartY;
       const endX=point?point.clientX:touchStartX;
       const dy=endY-touchStartY;
       const dx=endX-touchStartX;
+      touchSessionLocked=false;
       touchStartY=null;
       touchStartX=null;
       if(Math.abs(dy)<34||Math.abs(dy)<=Math.abs(dx))return;
       go(dy<0?1:-1);
+    }
+
+    function touchCancel(){
+      touchSessionLocked=false;
+      touchStartY=null;
+      touchStartX=null;
     }
 
     function wheel(e){
@@ -277,6 +304,7 @@
     stage.addEventListener("touchstart",touchStart,{passive:false});
     stage.addEventListener("touchmove",touchMove,{passive:false});
     stage.addEventListener("touchend",touchEnd,{passive:false});
+    stage.addEventListener("touchcancel",touchCancel,{passive:true});
     stage.addEventListener("wheel",wheel,{passive:false});
     stage.addEventListener("keydown",key);
     stage.tabIndex=0;
