@@ -83,12 +83,11 @@ body{overflow-x:hidden!important;}
   background:#ffd9c5!important;box-shadow:0 0 0 3px rgba(242,84,12,.12),0 0 10px rgba(242,84,12,.4)!important;
 }
 
-/* Numeric progress is below the card, never over its text. Moved slightly
-   lower so the card and the 01 / 06 indicator have a cleaner separation. */
+/* Numeric progress sits at the bottom-center of the card, inside its lower edge. */
 .patient-stories-page .conv-progress-num{
   position:absolute!important;z-index:12!important;left:50%!important;
-  top:calc(50% + var(--deck-card-half-gap,80px) + 36px)!important;bottom:auto!important;
-  transform:translateX(-50%)!important;margin:0!important;color:rgba(251,249,244,.78)!important;
+  top:calc(50% + (var(--deck-card-h,60svh) / 2) - 24px)!important;bottom:auto!important;
+  transform:translate(-50%,-100%)!important;margin:0!important;color:rgba(251,249,244,.78)!important;
   white-space:nowrap!important;font-family:var(--font-display)!important;font-size:.76rem!important;font-weight:800!important;letter-spacing:.06em!important;
 }
 .patient-stories-page .conv-controls,.patient-stories-page .conv-swipe-hint{display:none!important;}
@@ -104,5 +103,5 @@ body{overflow-x:hidden!important;}
   .patient-stories-page .conv-pair .q{margin:20px 0 16px!important;max-width:34ch!important;font-size:.9rem!important;line-height:1.48!important;}
   .patient-stories-page .conv-pair .a{max-width:29ch!important;font-size:clamp(1.12rem,5.1vw,1.62rem)!important;line-height:1.25!important;}
   .patient-stories-page .conv-counter{right:9px!important;gap:6px!important;}
-  .patient-stories-page .conv-progress-num{top:calc(50% + var(--deck-card-half-gap,70px) + 30px)!important;}
+  .patient-stories-page .conv-progress-num{top:calc(50% + (var(--deck-card-h,60svh) / 2) - 24px)!important;}
 }
