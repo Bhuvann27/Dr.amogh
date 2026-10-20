@@ -19,6 +19,7 @@
     const total=slides.length;
     let active=0;
     let locked=false;
+    let lockedY=null;
     let changing=false;
     let touchStartY=null;
     let touchStartX=null;
@@ -47,15 +48,14 @@
     function stageHeight(){return Math.max(1,viewportHeight()-navOffset());}
     function cardHeight(){return clamp(viewportHeight()*0.60,460,680);}
 
-    /* The interaction starts only when the dark conversation stage reaches
-       the fixed header. Before that point the page remains completely native,
-       including touches that begin directly on the card. */
+    /* Top boundary: entering the conversation while scrolling down. */
     function lockY(){
       const trackTop=track.getBoundingClientRect().top+window.scrollY;
       const introHeight=intro?intro.offsetHeight:0;
       return Math.max(0,trackTop+introHeight-navOffset());
     }
 
+    /* Bottom boundary: re-entering the conversation while scrolling back up. */
     function conversationEndY(){
       const trackBottom=track.getBoundingClientRect().bottom+window.scrollY;
       return Math.max(lockY(),trackBottom-viewportHeight());
@@ -99,9 +99,6 @@
         slide.style.minHeight=ch+"px";
       });
 
-      /* Keep one stage-height of scroll space per exchange. The browser owns
-         the page before/after this zone; only the card sequence consumes the
-         gesture while it is engaged. */
       const ih=intro?intro.offsetHeight:0;
       track.style.height=(ih+(total*sh)+2)+"px";
       applySlides(false);
@@ -110,20 +107,20 @@
 
     function release(direction){
       locked=false;
+      lockedY=null;
       stage.classList.remove("is-engaged","at-lock-point");
       stage.style.touchAction="auto";
       viewport.style.touchAction="auto";
 
-      /* Do not let the scroll listener immediately re-lock the section while
-         the release animation crosses the lock boundary. The guard is only
-         temporary; once the page is clearly outside the boundary, normal
-         direction-aware entry works again. */
+      /* Give the page enough distance to leave the boundary before another
+         gesture is allowed to re-enter the card sequence. */
       releaseDirection=direction;
       releaseGuardUntil=performance.now()+850;
 
       let destination;
       if(direction<0){
-        destination=Math.max(0,lockY()-Math.max(140,viewportHeight()*0.42));
+        const top=lockY();
+        destination=Math.max(0,top-Math.max(140,viewportHeight()*0.42));
       }else{
         const end=conversationEndY();
         const maxScroll=Math.max(0,document.documentElement.scrollHeight-viewportHeight());
@@ -151,10 +148,11 @@
       go.timer=window.setTimeout(()=>{changing=false;},500);
     }
 
-    function engage(){
+    function engage(boundaryY){
       if(locked)return;
-      const y=lockY();
+      const y=typeof boundaryY==="number"?boundaryY:lockY();
       locked=true;
+      lockedY=y;
       releaseDirection=0;
       releaseGuardUntil=0;
       stage.classList.add("is-engaged","at-lock-point");
@@ -166,11 +164,14 @@
 
     function onScroll(){
       const current=window.scrollY;
-      const y=lockY();
+      const topY=lockY();
+      const bottomY=conversationEndY();
 
       if(locked){
-        /* While engaged, the section owns the page position. This is the
-           intentional lock that turns vertical gestures into card swipes. */
+        /* Keep the exact boundary at which this engagement began. This is
+           essential when re-entering from below: Card 6 must lock at the
+           bottom boundary, not jump back to the top boundary. */
+        const y=lockedY==null?topY:lockedY;
         if(Math.abs(current-y)>2)window.scrollTo({top:y,behavior:"auto"});
         lastScrollY=y;
         return;
@@ -184,16 +185,22 @@
         return;
       }
 
-      /* A release must be allowed to travel away from the boundary before a
-         later gesture can re-enter the card zone. This prevents the exact
-         first-card trap caused by the old implementation. */
-      if(releaseDirection<0 && current<y-24)releaseDirection=0;
-      if(releaseDirection>0 && current>y+24)releaseDirection=0;
+      /* A release must travel clearly away from its boundary before a new
+         engagement is permitted. */
+      if(releaseDirection<0 && current<topY-24)releaseDirection=0;
+      if(releaseDirection>0 && current>bottomY+24)releaseDirection=0;
 
-      const crossedDown=lastScrollY<y-2 && current>=y-2 && delta>0;
-      const crossedUp=lastScrollY>y+2 && current<=y+2 && delta<0;
+      /* There are deliberately TWO entry points:
+         - topY when approaching from above while scrolling down
+         - bottomY when approaching from below while scrolling up
+         This keeps the active card intact in both directions. */
+      const crossedDownTop=lastScrollY<topY-2 && current>=topY-2 && delta>0;
+      const crossedUpBottom=lastScrollY>bottomY+2 && current<=bottomY+2 && delta<0;
 
-      if(releaseDirection===0 && (crossedDown||crossedUp))engage();
+      if(releaseDirection===0){
+        if(crossedDownTop)engage(topY);
+        else if(crossedUpBottom)engage(bottomY);
+      }
 
       lastScrollY=current;
     }
