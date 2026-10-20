@@ -23,6 +23,25 @@ body{overflow-x:hidden!important;}
 .patient-stories-page .conv-story-intro h2{max-width:24ch!important;margin:10px auto 0!important;color:var(--ink)!important;font-size:clamp(1.65rem,4vw,2.65rem)!important;line-height:1.03!important;}
 .patient-stories-page .conv-story-intro p{max-width:58ch!important;margin:14px auto 0!important;color:var(--text-dim)!important;font-size:.92rem!important;line-height:1.62!important;}
 
+/* Small consultation cue that belongs to the dark card stage itself. It stays
+   above the cards while the cards change, without changing their dimensions. */
+.patient-stories-page .conv-consultation-cue{
+  position:absolute!important;z-index:4!important;left:50%!important;top:clamp(26px,6.2vh,58px)!important;
+  width:min(760px,calc(100% - 54px))!important;transform:translateX(-50%)!important;
+  display:flex!important;flex-direction:column!important;align-items:center!important;text-align:center!important;
+  pointer-events:none!important;color:rgba(251,249,244,.86)!important;
+}
+.patient-stories-page .conv-consultation-cue span{
+  display:block!important;font-family:var(--font-display)!important;font-size:clamp(.64rem,1.5vw,.78rem)!important;
+  line-height:1.2!important;font-weight:800!important;letter-spacing:.16em!important;text-transform:uppercase!important;
+  color:rgba(251,249,244,.62)!important;
+}
+.patient-stories-page .conv-consultation-cue strong{
+  display:block!important;margin-top:6px!important;font-family:var(--font-display)!important;
+  font-size:clamp(.88rem,2vw,1.08rem)!important;line-height:1.35!important;font-weight:600!important;
+  color:rgba(251,249,244,.9)!important;
+}
+
 /* Normal document scrolling continues until the dark stage reaches the
    fixed header. Only then does the conversation become an interaction zone. */
 .patient-stories-page .conv-stage{
@@ -104,4 +123,6 @@ body{overflow-x:hidden!important;}
   .patient-stories-page .conv-pair .a{max-width:29ch!important;font-size:clamp(1.12rem,5.1vw,1.62rem)!important;line-height:1.25!important;}
   .patient-stories-page .conv-counter{right:9px!important;gap:6px!important;}
   .patient-stories-page .conv-progress-num{top:calc(50% + (var(--deck-card-h,60svh) / 2) - 24px)!important;}
+  .patient-stories-page .conv-consultation-cue{top:clamp(24px,5.2vh,46px)!important;width:calc(100% - 54px)!important;}
+  .patient-stories-page .conv-consultation-cue strong{margin-top:5px!important;}
 }
