@@ -23,6 +23,9 @@
     let touchStartY=null;
     let touchStartX=null;
     let wheelLockUntil=0;
+    let lastScrollY=window.scrollY;
+    let releaseGuardUntil=0;
+    let releaseDirection=0;
 
     const clamp=(n,min,max)=>Math.max(min,Math.min(max,n));
     const viewportHeight=()=>window.visualViewport?.height||window.innerHeight;
@@ -44,13 +47,18 @@
     function stageHeight(){return Math.max(1,viewportHeight()-navOffset());}
     function cardHeight(){return clamp(viewportHeight()*0.60,460,680);}
 
-    /* The lock begins only when the dark conversation stage reaches the
-       bottom edge of the fixed navigation. Everything before this point is
-       ordinary page scrolling, including a finger starting on the card. */
+    /* The interaction starts only when the dark conversation stage reaches
+       the fixed header. Before that point the page remains completely native,
+       including touches that begin directly on the card. */
     function lockY(){
       const trackTop=track.getBoundingClientRect().top+window.scrollY;
       const introHeight=intro?intro.offsetHeight:0;
       return Math.max(0,trackTop+introHeight-navOffset());
+    }
+
+    function conversationEndY(){
+      const trackBottom=track.getBoundingClientRect().bottom+window.scrollY;
+      return Math.max(lockY(),trackBottom-viewportHeight());
     }
 
     function applySlides(animate){
@@ -91,8 +99,9 @@
         slide.style.minHeight=ch+"px";
       });
 
-      /* One full stage-height of document space per card. The user reaches
-         the lock point normally, then the stage consumes gestures itself. */
+      /* Keep one stage-height of scroll space per exchange. The browser owns
+         the page before/after this zone; only the card sequence consumes the
+         gesture while it is engaged. */
       const ih=intro?intro.offsetHeight:0;
       track.style.height=(ih+(total*sh)+2)+"px";
       applySlides(false);
@@ -104,15 +113,33 @@
       stage.classList.remove("is-engaged","at-lock-point");
       stage.style.touchAction="auto";
       viewport.style.touchAction="auto";
-      const destination=direction>0
-        ? lockY()+total*stageHeight()+4
-        : Math.max(0,lockY()-2);
+
+      /* Do not let the scroll listener immediately re-lock the section while
+         the release animation crosses the lock boundary. The guard is only
+         temporary; once the page is clearly outside the boundary, normal
+         direction-aware entry works again. */
+      releaseDirection=direction;
+      releaseGuardUntil=performance.now()+850;
+
+      let destination;
+      if(direction<0){
+        destination=Math.max(0,lockY()-Math.max(140,viewportHeight()*0.42));
+      }else{
+        const end=conversationEndY();
+        const maxScroll=Math.max(0,document.documentElement.scrollHeight-viewportHeight());
+        destination=Math.min(maxScroll,end+Math.max(90,viewportHeight()*0.16));
+      }
+
+      lastScrollY=window.scrollY;
       window.scrollTo({top:destination,behavior:"smooth"});
     }
 
     function go(direction){
       if(changing||!locked)return;
       const next=active+direction;
+
+      /* First card: upward movement gives the page back to the browser.
+         Last card: downward movement gives the page back to the browser. */
       if(next<0){release(-1);return;}
       if(next>=total){release(1);return;}
 
@@ -128,22 +155,47 @@
       if(locked)return;
       const y=lockY();
       locked=true;
+      releaseDirection=0;
+      releaseGuardUntil=0;
       stage.classList.add("is-engaged","at-lock-point");
       stage.style.touchAction="none";
       viewport.style.touchAction="none";
-      window.scrollTo(0,y);
+      window.scrollTo({top:y,behavior:"auto"});
+      lastScrollY=y;
     }
 
     function onScroll(){
+      const current=window.scrollY;
+      const y=lockY();
+
       if(locked){
-        const y=lockY();
-        if(Math.abs(window.scrollY-y)>2)window.scrollTo(0,y);
+        /* While engaged, the section owns the page position. This is the
+           intentional lock that turns vertical gestures into card swipes. */
+        if(Math.abs(current-y)>2)window.scrollTo({top:y,behavior:"auto"});
+        lastScrollY=y;
         return;
       }
-      /* If native scrolling has just brought the dark stage to its trigger,
-         pin it exactly there. */
-      const y=lockY();
-      if(window.scrollY>=y-3 && window.scrollY<=y+8)engage();
+
+      const now=performance.now();
+      const delta=current-lastScrollY;
+
+      if(now<releaseGuardUntil){
+        lastScrollY=current;
+        return;
+      }
+
+      /* A release must be allowed to travel away from the boundary before a
+         later gesture can re-enter the card zone. This prevents the exact
+         first-card trap caused by the old implementation. */
+      if(releaseDirection<0 && current<y-24)releaseDirection=0;
+      if(releaseDirection>0 && current>y+24)releaseDirection=0;
+
+      const crossedDown=lastScrollY<y-2 && current>=y-2 && delta>0;
+      const crossedUp=lastScrollY>y+2 && current<=y+2 && delta<0;
+
+      if(releaseDirection===0 && (crossedDown||crossedUp))engage();
+
+      lastScrollY=current;
     }
 
     function touchStart(e){
@@ -229,6 +281,7 @@
 
     requestAnimationFrame(()=>requestAnimationFrame(()=>{
       layout();
+      lastScrollY=window.scrollY;
       onScroll();
     }));
   }
