@@ -41,17 +41,21 @@
     }
 
     function stageHeight(){
-      return Math.max(560,viewportHeight()-navOffset());
+      return Math.max(1,viewportHeight()-navOffset());
     }
 
     function cardHeight(){
       return clamp(viewportHeight()*0.60,460,680);
     }
 
+    /* The browser owns normal page scrolling until the dark stage reaches
+       the bottom edge of the fixed header. At that exact point the sticky
+       stage occupies the viewport and the six-card interaction takes over. */
     function atConversationLockPoint(){
       const r=stage.getBoundingClientRect();
       const offset=navOffset();
-      return r.top<=offset+2 && r.bottom>offset+20;
+      const h=stageHeight();
+      return r.top<=offset+2 && r.bottom>=offset+h-2;
     }
 
     function setEngaged(on){
@@ -96,10 +100,9 @@
         slide.style.minHeight=ch+"px";
       });
 
-      /* The stage must have one full viewport of travel for every card.
-         The sticky element itself occupies one viewport, so N cards need
-         N stage-heights in the parent track. This is what keeps the page
-         locked from card 01 through card N instead of releasing early. */
+      /* Intro scrolls normally. Once the stage reaches the header it stays
+         pinned for exactly N viewport-heights, one complete height per card.
+         That is the actual lock, not a timer or a guessed scroll distance. */
       const ih=intro?intro.offsetHeight:0;
       track.style.height=(ih+(total*sh)+2)+"px";
       applySlideTransforms(false);
@@ -114,14 +117,18 @@
       transitioning=true;
       applySlideTransforms(true);
       setProgress();
-      window.setTimeout(()=>{transitioning=false;},520);
+      window.setTimeout(()=>{transitioning=false;},500);
       return true;
     }
 
     function release(direction){
       if(transitioning)return;
       setEngaged(false);
-      const amount=Math.max(180,Math.min(stageHeight()*0.78,stageHeight()-40));
+      stage.classList.remove("at-lock-point");
+
+      /* Move exactly one stage-height so the sticky frame can finish and the
+         following section becomes the natural next viewport. */
+      const amount=stageHeight()+Math.max(24,Math.round(navOffset()*0.15));
       window.scrollBy({top:direction>0?amount:-amount,behavior:"smooth"});
     }
 
@@ -140,12 +147,19 @@
 
     function pointerDown(e){
       if(!atConversationLockPoint()||e.pointerType==="mouse")return;
-      setEngaged(true);
       if(transitioning)return;
+      setEngaged(true);
       pointerId=e.pointerId;
       startX=e.clientX;
       startY=e.clientY;
       try{stage.setPointerCapture(pointerId);}catch(_e){}
+    }
+
+    function pointerMove(e){
+      if(pointerId===null||e.pointerId!==pointerId)return;
+      const dx=e.clientX-startX;
+      const dy=e.clientY-startY;
+      if(Math.abs(dy)>8&&Math.abs(dy)>Math.abs(dx)*1.08)e.preventDefault();
     }
 
     function pointerUp(e){
@@ -164,8 +178,23 @@
     function wheel(e){
       if(!atConversationLockPoint())return;
       if(Math.abs(e.deltaY)<12)return;
+
+      /* At the last card, do not cancel the browser's final upward scroll.
+         The document is deliberately long enough for the sticky stage to
+         release naturally into the next section. */
+      if(e.deltaY>0&&active===total-1){
+        setEngaged(false);
+        stage.classList.remove("at-lock-point");
+        return;
+      }
+      if(e.deltaY<0&&active===0){
+        setEngaged(false);
+        stage.classList.remove("at-lock-point");
+        return;
+      }
+
       const now=performance.now();
-      if(now-lastWheel<90){e.preventDefault();return;}
+      if(now-lastWheel<140){e.preventDefault();return;}
       lastWheel=now;
       e.preventDefault();
       handleDirection(e.deltaY>0?1:-1);
@@ -174,9 +203,11 @@
     function key(e){
       if(!atConversationLockPoint())return;
       if(e.key==="ArrowDown"||e.key==="PageDown"||e.key===" "){
+        if(active===total-1)return;
         e.preventDefault();
         handleDirection(1);
       }else if(e.key==="ArrowUp"||e.key==="PageUp"){
+        if(active===0)return;
         e.preventDefault();
         handleDirection(-1);
       }
@@ -201,13 +232,14 @@
           transitioning=true;
           applySlideTransforms(true);
           setProgress();
-          window.setTimeout(()=>{transitioning=false;},520);
+          window.setTimeout(()=>{transitioning=false;},500);
         });
         dots.appendChild(dot);
       });
     }
 
     stage.addEventListener("pointerdown",pointerDown,{passive:true});
+    stage.addEventListener("pointermove",pointerMove,{passive:false});
     stage.addEventListener("pointerup",pointerUp,{passive:false});
     stage.addEventListener("pointercancel",pointerCancel,{passive:true});
     stage.addEventListener("wheel",wheel,{passive:false});
@@ -215,25 +247,21 @@
     stage.tabIndex=0;
     stage.setAttribute("aria-label","Patient and doctor conversation. Scroll or swipe up for the next exchange.");
 
+    function syncLockState(){
+      const locked=atConversationLockPoint();
+      stage.classList.toggle("at-lock-point",locked);
+      if(!locked)setEngaged(false);
+    }
+
     window.addEventListener("resize",layout,{passive:true});
     window.visualViewport?.addEventListener("resize",layout,{passive:true});
-
-    /* Keep the stage visually ready, but do not engage it until its dark
-       section has actually reached the fixed navigation. */
-    window.addEventListener("scroll",()=>{
-      if(atConversationLockPoint()){
-        /* Sticky positioning handles the actual lock. This class only
-           enables touch capture once the trigger point has been reached. */
-        stage.classList.add("at-lock-point");
-      }else{
-        stage.classList.remove("at-lock-point");
-      }
-    },{passive:true});
+    window.addEventListener("scroll",syncLockState,{passive:true});
 
     requestAnimationFrame(()=>requestAnimationFrame(()=>{
       setEngaged(false);
       stage.classList.remove("at-lock-point");
       layout();
+      syncLockState();
     }));
   }
 
