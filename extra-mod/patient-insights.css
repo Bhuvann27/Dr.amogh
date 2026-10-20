@@ -1,139 +1,240 @@
-/* Extra Mod: Patient Insights conversation doorway. No popup, no forced scroll. */
-.stories-conversation-doorway{
-  position:relative;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:28px;
-  margin:0 0 22px;
-  padding:22px 24px;
-  border:1px solid rgba(242,84,12,.34);
-  border-radius:18px;
-  background:linear-gradient(105deg,rgba(242,84,12,.08),rgba(251,249,244,.72) 58%,rgba(242,84,12,.04));
-  color:var(--ink);
-  box-shadow:0 10px 28px rgba(23,19,15,.05);
-  overflow:hidden;
-  transition:transform .35s var(--ease-out),border-color .3s,box-shadow .35s;
-}
-.stories-conversation-doorway::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--orange);transform:scaleY(.45);transform-origin:center;transition:transform .4s var(--ease-out);}
-.stories-conversation-doorway::after{content:"";position:absolute;width:180px;height:180px;right:-95px;top:-105px;border:1px solid rgba(242,84,12,.16);border-radius:50%;pointer-events:none;}
-.stories-conversation-doorway:hover,.stories-conversation-doorway:focus-visible{transform:translateY(-3px);border-color:rgba(242,84,12,.68);box-shadow:0 18px 38px rgba(23,19,15,.10),0 0 0 4px rgba(242,84,12,.06);}
-.stories-conversation-doorway:hover::before,.stories-conversation-doorway:focus-visible::before{transform:scaleY(1);}
-.stories-conversation-copy{min-width:0;position:relative;z-index:1;}
-.stories-conversation-kicker{display:block;margin-bottom:6px;color:var(--orange-deep);font-size:.68rem;font-weight:800;letter-spacing:.13em;}
-.stories-conversation-copy strong{display:block;font-family:var(--font-display);font-size:clamp(1rem,2vw,1.28rem);line-height:1.15;letter-spacing:-.02em;}
-.stories-conversation-copy p{max-width:72ch;margin:7px 0 0;color:var(--text-dim);font-size:.86rem;line-height:1.5;}
-.stories-conversation-action{flex:none;position:relative;z-index:1;display:inline-flex;align-items:center;gap:8px;padding:11px 15px;border-radius:999px;background:var(--orange);color:#fff;font-size:.72rem;font-weight:800;letter-spacing:.04em;white-space:nowrap;box-shadow:0 7px 16px rgba(242,84,12,.2);transition:transform .25s var(--ease-out),background .2s;}
-.stories-conversation-doorway:hover .stories-conversation-action{transform:translateX(3px);background:var(--orange-deep);}
-.stories-conversation-action span{font-size:1rem;line-height:1;}
+/* Extra Mod: Patient Insights CTA. Keep the story cards and their interaction untouched. */
 
-/* Existing CTA fallback and JS-hook styling. */
-.stories-focus-footer .btn.patient-insights-floating{position:fixed;left:22px;bottom:22px;z-index:80;margin:0;max-width:min(330px,calc(100vw - 44px));padding:12px 16px;border-radius:999px;font-size:.68rem;letter-spacing:.045em;box-shadow:0 12px 30px rgba(23,19,15,.16),0 0 0 1px rgba(242,84,12,.14);transform:translateY(18px);opacity:0;animation:patientInsightsFloatIn .5s var(--ease-out) forwards;}
-.stories-focus-footer .btn.patient-insights-floating:hover,.stories-focus-footer .btn.patient-insights-floating:focus-visible{transform:translateY(-2px);}
-.stories-focus-footer .btn.patient-insights-floating span{display:inline-block;margin-left:5px;transition:transform .2s var(--ease-out);}
-.stories-focus-footer .btn.patient-insights-floating:hover span,.stories-focus-footer .btn.patient-insights-floating:focus-visible span{transform:translateX(3px);}
-@keyframes patientInsightsFloatIn{from{opacity:0;transform:translateY(18px);}to{opacity:1;transform:translateY(0);}}
+/* The larger doorway remains intentionally hidden so Patient Insights stays compact. */
+.stories-conversation-doorway{display:none !important;}
 
-#stories{view-timeline-name:--patient-insights-section;view-timeline-axis:block;}
-
-/* =========================================================
-   Correct floating CTA implementation.
-   The original CTA remains in the footer. After Patient Insights leaves
-   the viewport, its generated child becomes the persistent bottom-left
-   tab. The footer's reveal transform is removed once visible so the fixed
-   child remains viewport-fixed rather than inheriting a transformed box.
-   ========================================================= */
-.stories-conversation-doorway{display:none;}
+/* Preserve the footer's normal layout until the CTA becomes the floating control. */
 .stories-focus-footer.is-visible{transform:none !important;}
-#stories .stories-focus-footer .btn-primary{position:relative;z-index:999;}
+#stories .stories-focus-footer .btn-primary{
+  position:relative;
+  z-index:1001;
+  min-height:48px;
+  min-width:min(292px,100%);
+  padding:13px 20px;
+  border-radius:999px;
+  touch-action:manipulation;
+  -webkit-tap-highlight-color:transparent;
+  cursor:pointer;
+}
 
+/* A real link remains the clickable surface. The visual label is generated inside it. */
 @supports (animation-timeline:view()){
-  #stories .stories-focus-footer .btn-primary{
-    animation:patientInsightsOriginalExit 1ms linear both;
-    animation-timeline:--patient-insights-section;
+  #stories{
+    view-timeline-name:--patient-insights-section;
+    view-timeline-axis:block;
   }
 
-  @keyframes patientInsightsOriginalExit{
-    0%,90%{
+  #stories .stories-focus-footer .btn-primary{
+    animation:patientInsightsCtaState 1ms linear both;
+    animation-timeline:--patient-insights-section;
+    animation-range:0% 100%;
+  }
+
+  /* The CTA stays normal through most of the section. Near the exit it
+     becomes the actual fixed anchor, but only after fading enough that the
+     position change is not perceived as a jump. */
+  @keyframes patientInsightsCtaState{
+    0%,88%{
+      position:relative;
+      opacity:1;
+      transform:translate3d(0,0,0) scale(1);
       background:var(--orange);
       color:#fff;
-      border-color:transparent;
-      box-shadow:none;
+      box-shadow:0 10px 24px rgba(23,19,15,.10),0 0 0 1px rgba(242,84,12,.08);
     }
-    94%{
-      background:rgba(242,84,12,0);
-      color:rgba(255,255,255,0);
-      border-color:transparent;
-      box-shadow:none;
+    92%{
+      position:relative;
+      opacity:1;
+      transform:translate3d(0,-1px,0) scale(1.01);
+      background:var(--orange-deep);
+      color:#fff;
+      box-shadow:0 14px 30px rgba(23,19,15,.14),0 0 0 4px rgba(242,84,12,.07);
     }
-    100%{
+    95%{
+      position:relative;
+      opacity:0;
+      transform:translate3d(0,0,0) scale(.96);
       background:transparent;
       color:transparent;
-      border-color:transparent;
       box-shadow:none;
+      pointer-events:none;
     }
+    96%{
+      position:fixed;
+      left:18px;
+      right:auto;
+      bottom:max(18px,env(safe-area-inset-bottom));
+      width:min(292px,calc(100vw - 36px));
+      min-width:0;
+      min-height:48px;
+      margin:0;
+      opacity:0;
+      transform:translate3d(0,6px,0) scale(.94);
+      transform-origin:left bottom;
+      background:var(--orange);
+      color:transparent;
+      box-shadow:0 14px 34px rgba(23,19,15,.18),0 0 0 1px rgba(242,84,12,.14);
+      pointer-events:none;
+    }
+    98%{
+      position:fixed;
+      left:18px;
+      right:auto;
+      bottom:max(18px,env(safe-area-inset-bottom));
+      width:min(292px,calc(100vw - 36px));
+      min-width:0;
+      min-height:48px;
+      margin:0;
+      opacity:1;
+      transform:translate3d(0,0,0) scale(1);
+      background:var(--orange);
+      color:transparent;
+      box-shadow:0 14px 34px rgba(23,19,15,.18),0 0 0 1px rgba(242,84,12,.14);
+      pointer-events:auto;
+    }
+    100%{
+      position:fixed;
+      left:18px;
+      right:auto;
+      bottom:max(18px,env(safe-area-inset-bottom));
+      width:min(292px,calc(100vw - 36px));
+      min-width:0;
+      min-height:48px;
+      margin:0;
+      opacity:1;
+      transform:translate3d(0,0,0) scale(1);
+      background:var(--orange);
+      color:transparent;
+      box-shadow:0 14px 34px rgba(23,19,15,.18),0 0 0 1px rgba(242,84,12,.14);
+      pointer-events:auto;
+    }
+  }
+
+  /* This is visual only. Pointer events pass through to the real <a> above,
+     which fixes the previous tap-without-navigation problem. */
+  #stories .stories-focus-footer .btn-primary::after{
+    content:"SOMETHING HERE MAY FEEL FAMILIAR  →";
+    position:absolute;
+    inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:0 20px;
+    border-radius:inherit;
+    color:#fff;
+    font-size:.72rem;
+    font-weight:800;
+    line-height:1;
+    letter-spacing:.04em;
+    white-space:nowrap;
+    pointer-events:none;
+    opacity:0;
+    transform:scale(.96);
+    transition:opacity .2s ease,transform .35s cubic-bezier(.22,1,.36,1),background .2s ease;
   }
 
   #stories .stories-focus-footer .btn-primary::before{
-    content:none !important;
-  }
-
-  #stories .stories-focus-footer .btn-primary::after{
-    content:"SOMETHING HERE MAY FEEL FAMILIAR  →";
-    position:fixed;
-    left:18px;
-    right:auto;
-    bottom:max(18px,env(safe-area-inset-bottom));
-    z-index:1000;
-    display:inline-flex;
-    align-items:center;
-    width:max-content;
-    max-width:calc(100vw - 36px);
-    padding:11px 15px;
-    border:1px solid rgba(242,84,12,.16);
-    border-radius:999px;
-    background:var(--orange);
-    color:#fff;
-    box-shadow:0 12px 30px rgba(23,19,15,.16),0 0 0 1px rgba(242,84,12,.12);
-    font-size:.68rem;
-    font-weight:800;
-    line-height:1.1;
-    letter-spacing:.035em;
-    white-space:nowrap;
+    content:"";
+    position:absolute;
+    top:1px;
+    bottom:1px;
+    left:-35%;
+    width:24%;
+    border-radius:inherit;
+    background:linear-gradient(100deg,transparent,rgba(255,255,255,.34),transparent);
     opacity:0;
     pointer-events:none;
-    transform:translateY(18px) scale(.96);
-    transform-origin:left bottom;
-    animation:patientInsightsFloatingTab 1ms linear both;
-    animation-timeline:--patient-insights-section;
+    transform:skewX(-16deg);
   }
 
-  @keyframes patientInsightsFloatingTab{
-    0%,91%{opacity:0;transform:translateY(18px) scale(.96);pointer-events:none;}
-    95%{opacity:.35;transform:translateY(10px) scale(.98);pointer-events:none;}
-    98%{opacity:.8;transform:translateY(3px) scale(1);pointer-events:auto;}
-    100%{opacity:1;transform:translateY(0) scale(1);pointer-events:auto;}
+  @keyframes patientInsightsShine{
+    from{transform:translateX(0) skewX(-16deg);}
+    to{transform:translateX(620%) skewX(-16deg);}
+  }
+
+  #stories .stories-focus-footer .btn-primary:hover,
+  #stories .stories-focus-footer .btn-primary:focus-visible,
+  #stories .stories-focus-footer .btn-primary:active{
+    background:var(--orange-deep);
   }
 
   #stories .stories-focus-footer .btn-primary:hover::after,
-  #stories .stories-focus-footer .btn-primary:focus-visible::after{
-    background:var(--orange-deep);
-    transform:translateY(-2px) scale(1.01);
+  #stories .stories-focus-footer .btn-primary:focus-visible::after,
+  #stories .stories-focus-footer .btn-primary:active::after{
+    opacity:1;
+    transform:scale(1.01);
+  }
+
+  #stories .stories-focus-footer .btn-primary:hover::before,
+  #stories .stories-focus-footer .btn-primary:focus-visible::before{
+    opacity:1;
+    animation:patientInsightsShine .75s ease-out both;
+  }
+
+  /* Once the anchor has become the floating version, its visual label is on. */
+  #stories .stories-focus-footer .btn-primary:where(:hover,:focus-visible)::after,
+  #stories .stories-focus-footer .btn-primary::after{
+    color:#fff;
+  }
+
+  /* Keep the original CTA text from competing with the generated floating label
+     only when it is fixed. */
+  @media (min-width:701px){
+    #stories .stories-focus-footer .btn-primary{
+      overflow:visible;
+    }
   }
 }
 
+/* The fallback class remains available if another script ever uses it. */
+.stories-focus-footer .btn.patient-insights-floating{
+  min-height:48px;
+  padding:13px 20px;
+  border-radius:999px;
+  box-shadow:0 14px 34px rgba(23,19,15,.18),0 0 0 1px rgba(242,84,12,.14);
+}
+
 @media(max-width:700px){
-  .stories-conversation-doorway{display:none;}
-  .stories-focus-footer .btn.patient-insights-floating{left:14px;right:14px;bottom:max(14px,env(safe-area-inset-bottom));max-width:none;justify-content:center;}
+  #stories .stories-focus-footer .btn-primary{
+    min-height:48px;
+    min-width:min(292px,100%);
+    padding:13px 16px;
+  }
+
   @supports (animation-timeline:view()){
-    #stories .stories-focus-footer .btn-primary::after{left:14px;bottom:max(14px,env(safe-area-inset-bottom));max-width:calc(100vw - 28px);padding:9px 13px;font-size:.62rem;letter-spacing:.025em;}
+    @keyframes patientInsightsCtaStateMobile{
+      0%,88%{
+        position:relative;opacity:1;transform:translate3d(0,0,0) scale(1);
+        background:var(--orange);color:#fff;
+        box-shadow:0 10px 24px rgba(23,19,15,.10),0 0 0 1px rgba(242,84,12,.08);
+      }
+      92%{
+        position:relative;opacity:1;transform:translate3d(0,-1px,0) scale(1.01);
+        background:var(--orange-deep);color:#fff;
+        box-shadow:0 14px 30px rgba(23,19,15,.14),0 0 0 4px rgba(242,84,12,.07);
+      }
+      95%{position:relative;opacity:0;transform:scale(.96);background:transparent;color:transparent;box-shadow:none;pointer-events:none;}
+      96%,100%{
+        position:fixed;left:14px;right:14px;bottom:max(14px,env(safe-area-inset-bottom));width:auto;min-width:0;min-height:48px;margin:0;
+        opacity:1;transform:translate3d(0,0,0) scale(1);transform-origin:left bottom;
+        background:var(--orange);color:transparent;box-shadow:0 14px 34px rgba(23,19,15,.18),0 0 0 1px rgba(242,84,12,.14);pointer-events:auto;
+      }
+    }
+
+    #stories .stories-focus-footer .btn-primary{
+      animation-name:patientInsightsCtaStateMobile;
+    }
+
+    #stories .stories-focus-footer .btn-primary::after{
+      padding:0 15px;
+      font-size:.66rem;
+      letter-spacing:.025em;
+    }
   }
 }
 
 @media(prefers-reduced-motion:reduce){
-  .stories-conversation-doorway{display:none;}
-  .stories-focus-footer .btn.patient-insights-floating{animation:none;opacity:1;transform:none;}
   #stories .stories-focus-footer .btn-primary{animation:none;}
-  #stories .stories-focus-footer .btn-primary::before{animation:none;}
-  #stories .stories-focus-footer .btn-primary::after{animation:none;opacity:1;transform:none;pointer-events:auto;}
+  #stories .stories-focus-footer .btn-primary::before{animation:none !important;}
+  #stories .stories-focus-footer .btn-primary::after{opacity:1;transform:none;}
 }
