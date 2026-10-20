@@ -93,7 +93,7 @@ window.PatientInsightsDB = (function(){
     try {
       const { data, error } = await c
         .from("patient_insights")
-        .select("*")
+        .select("id,slug,title,subtitle,intro,topic,dialogue,relate_intro,relate_points,relate_close,action_points,urgent,status,published_at")
         .eq("status", "published")
         .order("published_at", { ascending: true });
       if(error || !data) return [];
