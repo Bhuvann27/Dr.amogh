@@ -7,9 +7,7 @@ body{
   max-width:100%;
 }
 
-body{
-  overflow-x:hidden!important;
-}
+body{overflow-x:hidden!important;}
 
 /* Story chooser: the viewport itself owns the horizontal overflow. */
 .patient-stories-page .story-carousel-viewport{
@@ -21,17 +19,11 @@ body{
   padding-right:0!important;
   overflow-x:auto!important;
 }
-.patient-stories-page .story-carousel{
-  padding-left:0!important;
-  padding-right:0!important;
-  gap:16px!important;
-}
-.patient-stories-page .story-choice{
-  flex:0 0 clamp(230px,31vw,310px)!important;
-}
+.patient-stories-page .story-carousel{padding-left:0!important;padding-right:0!important;gap:16px!important;}
+.patient-stories-page .story-choice{flex:0 0 clamp(230px,31vw,310px)!important;}
 
-/* The light introduction scrolls normally. The dark section is full width,
-   without the 100vw calculation that can create a one-sided gutter. */
+/* The light introduction and the beginning of the dark section scroll
+   normally. Avoid 100vw here because it can create a one-sided gutter. */
 .patient-stories-page .conv-track{
   position:relative!important;
   width:100%!important;
@@ -66,7 +58,7 @@ body{
   line-height:1.62!important;
 }
 
-/* Actual lock frame. It becomes sticky only when its top reaches the fixed
+/* Actual lock frame. It becomes sticky when its top reaches the fixed
    header. JS gives the parent one complete stage-height per card. */
 .patient-stories-page .conv-stage{
   position:sticky!important;
@@ -93,19 +85,13 @@ body{
   background:radial-gradient(85% 70% at 50% 44%,rgba(242,84,12,.10),transparent 68%)!important;
 }
 
-/* Before the trigger point, normal page scrolling remains untouched.
-   Once the dark frame touches the header, touch scrolling is handed to the
-   one-card interaction instead of letting the document drift underneath it. */
-.patient-stories-page .conv-stage.at-lock-point{
-  touch-action:none!important;
-}
-.patient-stories-page .conv-stage.is-engaged{
-  touch-action:none!important;
-}
+/* Before the trigger point, normal page scrolling remains untouched. Once
+   the dark frame touches the header, the whole frame captures the gesture. */
+.patient-stories-page .conv-stage.at-lock-point,
+.patient-stories-page .conv-stage.is-engaged{touch-action:none!important;}
 
-/* The card is centered against the whole available stage. Progress dots
-   float independently, so they cannot create a right-side gutter or shift
-   the card left. */
+/* The card is centered against the whole available stage. Dots float
+   independently and therefore cannot create the old right-side gutter. */
 .patient-stories-page .conv-carousel-viewport{
   position:relative!important;
   z-index:2!important;
@@ -120,9 +106,11 @@ body{
   overflow:hidden!important;
   border-radius:28px!important;
   box-sizing:border-box!important;
-  touch-action:none!important;
+  touch-action:auto!important;
   overscroll-behavior:none!important;
 }
+.patient-stories-page .conv-stage.at-lock-point .conv-carousel-viewport,
+.patient-stories-page .conv-stage.is-engaged .conv-carousel-viewport{touch-action:none!important;}
 
 .patient-stories-page .conv-carousel{
   position:relative!important;
@@ -179,8 +167,7 @@ body{
   line-height:1.25!important;
 }
 
-/* Progress dots are a floating rail. They never participate in card
-   centering and therefore cannot create the old right-side imbalance. */
+/* Progress dots are a floating rail. They never participate in centering. */
 .patient-stories-page .conv-counter{
   position:absolute!important;
   top:50%!important;
@@ -233,9 +220,7 @@ body{
 @media(max-width:700px){
   .patient-stories-page .story-carousel-viewport{width:100%!important;max-width:100%!important;}
   .patient-stories-page .story-carousel{gap:14px!important;}
-  .patient-stories-page .conv-stage{
-    padding:0 10px 16px!important;
-  }
+  .patient-stories-page .conv-stage{padding:0 10px 16px!important;}
   .patient-stories-page .conv-carousel-viewport{
     width:calc(100% - 20px)!important;
     height:var(--deck-card-h,60svh)!important;
@@ -249,25 +234,9 @@ body{
     max-height:650px!important;
     padding:4px!important;
   }
-  .patient-stories-page .conv-card-inner{
-    padding:26px 22px 28px!important;
-    border-radius:22px!important;
-  }
-  .patient-stories-page .conv-pair .q{
-    margin:20px 0 16px!important;
-    max-width:34ch!important;
-    font-size:.9rem!important;
-    line-height:1.48!important;
-  }
-  .patient-stories-page .conv-pair .a{
-    max-width:29ch!important;
-    font-size:clamp(1.12rem,5.1vw,1.62rem)!important;
-    line-height:1.25!important;
-  }
-  .patient-stories-page .conv-counter{
-    right:2px!important;
-  }
-  .patient-stories-page .conv-progress-num{
-    bottom:20px!important;
-  }
+  .patient-stories-page .conv-card-inner{padding:26px 22px 28px!important;border-radius:22px!important;}
+  .patient-stories-page .conv-pair .q{margin:20px 0 16px!important;max-width:34ch!important;font-size:.9rem!important;line-height:1.48!important;}
+  .patient-stories-page .conv-pair .a{max-width:29ch!important;font-size:clamp(1.12rem,5.1vw,1.62rem)!important;line-height:1.25!important;}
+  .patient-stories-page .conv-counter{right:2px!important;}
+  .patient-stories-page .conv-progress-num{bottom:20px!important;}
 }
