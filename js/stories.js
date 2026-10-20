@@ -6,7 +6,7 @@
     if(typeof value==="string"||typeof value==="number")return String(value);
     if(Array.isArray(value))return value.map(textValue).filter(Boolean).join(" ");
     if(typeof value==="object"){
-      for(const key of ["text","value","point","label","content","answer","q","a"]){
+      for(const key of ["text","value","point","label","content","answer","question","description","name","title","q","a"]){
         if(value[key]!=null){const v=textValue(value[key]);if(v)return v;}
       }
       return "";
@@ -59,7 +59,7 @@
     const relateList=document.getElementById("relateList");
     if(relateList){relateList.innerHTML="";story.relatePoints.forEach(point=>{const li=document.createElement("li");li.innerHTML='<span class="dot"></span><span>'+esc(point)+'</span>';relateList.appendChild(li);});}
     const actionList=document.getElementById("actionList");
-    if(actionList){actionList.innerHTML="";story.actionPoints.forEach(point=>{const li=document.createElement("li");li.textContent=point;actionList.appendChild(li);});}
+    if(actionList){actionList.innerHTML="";story.actionPoints.forEach(point=>{const li=document.createElement("li");li.textContent=textValue(point);actionList.appendChild(li);});}
     const urgent=document.getElementById("urgentText");if(urgent)urgent.textContent=story.urgent||"If symptoms are sudden, severe, or getting worse, seek medical attention promptly.";
     buildOtherStories(stories,story);setupReveals();
   }
