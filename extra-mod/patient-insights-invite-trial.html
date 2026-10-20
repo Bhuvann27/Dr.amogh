@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Patient Insights — Extra Mod Trial</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#17130F;--paper:#FBF9F4;--stone:#EFE8DA;--line:rgba(23,19,15,.12);--orange:#F2540C;--text-dim:#6B6259;--ease:cubic-bezier(.16,1,.3,1)}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--paper);color:var(--ink);font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.6}a{color:inherit;text-decoration:none}.wrap{max-width:1180px;margin:auto;padding:0 clamp(20px,5vw,64px)}
+.demo-nav{position:fixed;top:0;left:0;right:0;z-index:10;padding:20px clamp(20px,5vw,64px);background:rgba(251,249,244,.84);backdrop-filter:blur(14px);border-bottom:1px solid var(--line);font-weight:800}.demo-nav span{color:var(--orange)}
+.spacer{height:100vh;display:grid;place-items:center}.spacer-inner{max-width:720px}.eyebrow{font-size:.75rem;font-weight:700;letter-spacing:.08em;color:var(--orange);text-transform:uppercase}.spacer h1{font-size:clamp(3rem,8vw,7rem);line-height:.95;letter-spacing:-.05em;margin:18px 0}.spacer p{max-width:55ch;color:var(--text-dim);font-size:1.05rem}
+.trial-section{padding:clamp(100px,14vw,180px) 0;background:var(--stone)}.trial-head{display:grid;grid-template-columns:1.1fr .8fr;gap:60px;align-items:end}.trial-head h2{font-size:clamp(2.4rem,6vw,5.5rem);line-height:.96;letter-spacing:-.045em;margin:16px 0 0}.trial-head p{color:var(--text-dim);max-width:38ch}.story-card{margin-top:70px;max-width:720px;padding:clamp(30px,5vw,56px);background:var(--ink);color:var(--paper);border-radius:2px}.story-card small{color:#FBD9C6;letter-spacing:.1em;font-weight:700}.story-card h3{font-size:clamp(2rem,5vw,4.5rem);line-height:1;letter-spacing:-.04em;margin:24px 0}.story-card p{color:rgba(251,249,244,.72);max-width:55ch}.story-card a{display:inline-flex;margin-top:25px;color:#fff;font-weight:700;letter-spacing:.04em}
+/* The actual trial: quiet, one-time invitation. It does not block scrolling. */
+.insight-invite{position:fixed;right:clamp(16px,3vw,36px);bottom:clamp(16px,3vw,30px);z-index:20;width:min(390px,calc(100vw - 32px));padding:20px 20px 18px;background:var(--ink);color:var(--paper);border:1px solid rgba(251,249,244,.16);box-shadow:0 18px 50px rgba(23,19,15,.2);transform:translateY(28px);opacity:0;visibility:hidden;pointer-events:none;transition:transform .6s var(--ease),opacity .4s ease,visibility .4s ease}.insight-invite.is-visible{transform:translateY(0);opacity:1;visibility:visible;pointer-events:auto}.insight-invite .invite-kicker{font-size:.68rem;letter-spacing:.12em;color:#FBD9C6;font-weight:800}.insight-invite strong{display:block;font-size:1.12rem;line-height:1.2;margin:8px 28px 5px 0}.insight-invite p{margin:0;color:rgba(251,249,244,.68);font-size:.88rem}.insight-invite a{display:inline-flex;margin-top:13px;color:#fff;font-size:.78rem;font-weight:800;letter-spacing:.08em}.invite-close{position:absolute;top:10px;right:11px;width:30px;height:30px;border:0;background:transparent;color:var(--paper);font-size:20px;cursor:pointer;opacity:.7}.invite-close:hover{opacity:1}.invite-close:focus-visible{outline:2px solid var(--orange);outline-offset:2px}
+@media(max-width:760px){.trial-head{grid-template-columns:1fr;gap:16px}.insight-invite{bottom:14px}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.insight-invite{transition:none}}
+</style>
+</head>
+<body>
+<nav class="demo-nav">Dr. Amogh G<span>.</span> <small style="font-weight:500;color:#6B6259">/ Extra Mod Trial</small></nav>
+<main>
+<section class="spacer"><div class="wrap spacer-inner"><span class="eyebrow">TRIAL — PATIENT INSIGHTS</span><h1>Let the visitor discover the story.</h1><p>This is a trial of the one-time floating invitation. It waits until the visitor has already explored the page, then quietly points them toward Patient Insights. No popup wall. No forced scroll. Humanity survives another UI decision.</p></div></section>
+<section class="trial-section" id="patient-insights"><div class="wrap"><div class="trial-head"><div><span class="eyebrow">PATIENT STORIES</span><h2>Sometimes, someone else's story sounds familiar.</h2></div><p>Real experiences, shared anonymously with appropriate consent. The invitation is designed to create curiosity without interrupting the visitor's reading.</p></div><article class="story-card"><small>PATIENT STORY 01</small><h3>“I thought I was just tired.”</h3><p>A patient shares how feeling tired slowly started affecting everyday life, and why it became worth looking into.</p><a href="../stories.html?story=fatigue">STEP INTO THE STORY&nbsp; ↗</a></article></div></section>
+</main>
+
+<aside class="insight-invite" id="insightInvite" aria-label="Patient Insights invitation" aria-hidden="true">
+  <button class="invite-close" id="inviteClose" type="button" aria-label="Dismiss Patient Insights invitation">×</button>
+  <span class="invite-kicker">A STORY MAY FEEL FAMILIAR</span>
+  <strong>Before you move on, there may be something worth reading.</strong>
+  <p>Explore an anonymous patient story and step into the consultation.</p>
+  <a href="../stories.html">EXPLORE PATIENT INSIGHTS&nbsp; →</a>
+</aside>
+
+<script>
+(() => {
+  const invite = document.getElementById('insightInvite');
+  const close = document.getElementById('inviteClose');
+  if (!invite || !close) return;
+  const key = 'drAmoghPatientInsightsInviteSeen';
+  if (sessionStorage.getItem(key)) return;
+  let shown = false;
+  const reveal = () => {
+    if (shown) return;
+    shown = true;
+    invite.classList.add('is-visible');
+    invite.setAttribute('aria-hidden','false');
+    sessionStorage.setItem(key,'1');
+  };
+  const onScroll = () => {
+    const depth = window.scrollY / Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+    if (depth >= .22) reveal();
+  };
+  window.addEventListener('scroll', onScroll, {passive:true});
+  close.addEventListener('click', () => {
+    invite.classList.remove('is-visible');
+    invite.setAttribute('aria-hidden','true');
+  });
+})();
+</script>
+</body>
+</html>
