@@ -4,7 +4,7 @@
   const app=document.getElementById("app");
   let client=null,story=null,dirty=false;
   const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-  const text=v=>{if(v==null)return "";if(typeof v==="string"||typeof v==="number")return String(v);if(Array.isArray(v))return v.map(text).filter(Boolean).join(" ");if(typeof v==="object"){for(const k of ["text","value","point","label","content","answer","q","a"]){if(v[k]!=null){const x=text(v[k]);if(x)return x;}}}return "";};
+  const text=v=>{if(v==null)return "";if(typeof v==="string"||typeof v==="number")return String(v);if(Array.isArray(v))return v.map(text).filter(Boolean).join(" ");if(typeof v==="object"){for(const k of ["text","value","point","label","content","answer","question","q","a"]){if(v[k]!=null){const x=text(v[k]);if(x)return x;}}}return "";};
   const arr=v=>Array.isArray(v)?v.map(text).map(x=>x.trim()).filter(Boolean):[];
   const dialogue=v=>Array.isArray(v)?v.map(x=>({q:text(x?.q??x?.question??""),a:text(x?.a??x?.answer??x?.text??"")})).filter(x=>x.q||x.a):[];
   function normalise(s){return Object.assign({},s,{title:text(s.title),subtitle:text(s.subtitle),intro:text(s.intro),relateIntro:text(s.relateIntro),relatePoints:arr(s.relatePoints),relateClose:text(s.relateClose),actionPoints:arr(s.actionPoints),urgent:text(s.urgent),dialogue:dialogue(s.dialogue)});}
@@ -32,26 +32,30 @@
         <label><input type="checkbox" id="chkUrgent" ${story.urgentReviewed?'checked':''} ${story.urgent?'':'disabled'}><span>${story.urgent?'I have reviewed the urgent-care / red-flag guidance for this story.':'No urgent-care guidance is present, so no urgent-care review is required.'}</span></label>
         <label><input type="checkbox" id="chkPrivacy" ${story.privacyReviewed?'checked':''}><span>I have completed a final privacy review of the entire patient-facing story.</span></label>
         <label><input type="checkbox" id="chkNoDetails" ${story.noIdentifyingDetails?'checked':''}><span>I confirm there are no unnecessary identifying details anywhere in the final version, including the conversation and related sections.</span></label>
-        <label><input type="checkbox" id="chkFinal"><span>I have read the final version as it will appear to patients and approve this exact version for publication.</span></label>
-      </div><p class="fr-note">The system records the final-review state before publication. If any content is changed later, the final approval must be completed again.</p><div class="fr-actions"><span></span><button class="fr-publish" id="publishBtn" type="button" disabled>Publish this exact version</button></div><div id="publishStatus" class="fr-status"></div></div>
+        <label><input type="checkbox" id="chkFinal" ${story.finalReviewed?'checked':''}><span>I have read the final version as it will appear to patients and approve this exact version for publication.</span></label>
+      </div><p class="fr-note">Any content edit, AI revision, addition, or removal resets the approval gate. The exact version must be reviewed again before publishing.</p><div class="fr-actions"><span></span><button class="fr-publish" id="publishBtn" type="button" disabled>Publish this exact version</button></div><div id="publishStatus" class="fr-status"></div></div>
     </section>
     <aside class="fr-preview"><span class="fr-kicker" style="color:#ffd0ba">LIVE PATIENT PREVIEW</span><h2>What patients will see</h2><p class="muted">This preview updates from the editable fields. Review it before checking the final approval box.</p><div id="preview"></div></aside></div>`;
     bindDynamic();updatePreview();updatePublishState();
   }
   function pairEditor(p,i){return `<div class="fr-pair"><div class="fr-pair-head"><strong>Exchange ${String(i+1).padStart(2,"0")}</strong><button class="fr-remove" type="button" data-remove-pair="${i}">Remove</button></div><div class="fr-field"><label>Patient question</label><textarea data-pair-q="${i}">${esc(p.q)}</textarea></div><div class="fr-field" style="margin-bottom:0"><label>Answer / patient voice</label><textarea data-pair-a="${i}">${esc(p.a)}</textarea></div></div>`;}
   function pointEditor(value,i,type){return `<div class="fr-pair"><div class="fr-pair-head"><strong>${type} ${String(i+1).padStart(2,"0")}</strong><button class="fr-remove" type="button" data-remove-${type.toLowerCase()}="${i}">Remove</button></div><textarea data-${type.toLowerCase()}="${i}">${esc(value)}</textarea></div>`;}
+  function invalidateApproval(){
+    story.consentConfirmed=false;story.anonymousConfirmed=false;story.identifiersRemoved=false;story.privacyReviewed=false;story.noIdentifyingDetails=false;story.medicalReviewed=false;story.urgentReviewed=false;story.finalReviewed=false;
+    ["chkConsent","chkAnon","chkIdentifiers","chkMedical","chkUrgent","chkPrivacy","chkNoDetails","chkFinal"].forEach(id=>{const el=document.getElementById(id);if(el)el.checked=false;});
+  }
   function bindDynamic(){
     const pairs=document.getElementById("pairs"),relate=document.getElementById("relate"),actions=document.getElementById("actions");
     function renderLists(){pairs.innerHTML=story.dialogue.map(pairEditor).join("");relate.innerHTML=story.relatePoints.map((x,i)=>pointEditor(x,i,"Relate")).join("");actions.innerHTML=story.actionPoints.map((x,i)=>pointEditor(x,i,"Action")).join("");}
     renderLists();
-    document.getElementById("addPair").onclick=()=>{story.dialogue.push({q:"",a:""});renderLists();dirty=true;updatePreview();};
-    document.getElementById("addRelate").onclick=()=>{story.relatePoints.push("");renderLists();dirty=true;updatePreview();};
-    document.getElementById("addAction").onclick=()=>{story.actionPoints.push("");renderLists();dirty=true;updatePreview();};
-    app.addEventListener("input",e=>{const k=e.target.dataset.key;if(k)story[k]=e.target.value;const q=e.target.dataset.pairQ;if(q!==undefined)story.dialogue[Number(q)].q=e.target.value;const a=e.target.dataset.pairA;if(a!==undefined)story.dialogue[Number(a)].a=e.target.value;const r=e.target.dataset.relate;if(r!==undefined)story.relatePoints[Number(r)]=e.target.value;const ac=e.target.dataset.action;if(ac!==undefined)story.actionPoints[Number(ac)]=e.target.value;dirty=true;updatePreview();updatePublishState();});
-    app.addEventListener("click",e=>{const rp=e.target.closest("[data-remove-pair]");if(rp){story.dialogue.splice(Number(rp.dataset.removePair),1);renderLists();dirty=true;updatePreview();}const rr=e.target.closest("[data-remove-relate]");if(rr){story.relatePoints.splice(Number(rr.dataset.removeRelate),1);renderLists();dirty=true;updatePreview();}const ra=e.target.closest("[data-remove-action]");if(ra){story.actionPoints.splice(Number(ra.dataset.removeAction),1);renderLists();dirty=true;updatePreview();}});
+    document.getElementById("addPair").onclick=()=>{story.dialogue.push({q:"",a:""});invalidateApproval();renderLists();dirty=true;updatePreview();updatePublishState();};
+    document.getElementById("addRelate").onclick=()=>{story.relatePoints.push("");invalidateApproval();renderLists();dirty=true;updatePreview();updatePublishState();};
+    document.getElementById("addAction").onclick=()=>{story.actionPoints.push("");invalidateApproval();renderLists();dirty=true;updatePreview();updatePublishState();};
+    app.addEventListener("input",e=>{const k=e.target.dataset.key;const q=e.target.dataset.pairQ;const a=e.target.dataset.pairA;const r=e.target.dataset.relate;const ac=e.target.dataset.action;const contentChanged=!!(k||q!==undefined||a!==undefined||r!==undefined||ac!==undefined);if(k)story[k]=e.target.value;if(q!==undefined)story.dialogue[Number(q)].q=e.target.value;if(a!==undefined)story.dialogue[Number(a)].a=e.target.value;if(r!==undefined)story.relatePoints[Number(r)]=e.target.value;if(ac!==undefined)story.actionPoints[Number(ac)]=e.target.value;if(contentChanged){invalidateApproval();dirty=true;updatePreview();updatePublishState();}});
+    app.addEventListener("click",e=>{const rp=e.target.closest("[data-remove-pair]");if(rp){story.dialogue.splice(Number(rp.dataset.removePair),1);invalidateApproval();renderLists();dirty=true;updatePreview();updatePublishState();}const rr=e.target.closest("[data-remove-relate]");if(rr){story.relatePoints.splice(Number(rr.dataset.removeRelate),1);invalidateApproval();renderLists();dirty=true;updatePreview();updatePublishState();}const ra=e.target.closest("[data-remove-action]");if(ra){story.actionPoints.splice(Number(ra.dataset.removeAction),1);invalidateApproval();renderLists();dirty=true;updatePreview();updatePublishState();}});
     document.getElementById("saveBtn").onclick=saveStory;
     document.getElementById("publishBtn").onclick=publishStory;
-    document.querySelectorAll(".fr-checks input").forEach(el=>el.addEventListener("change",()=>{if(el.id!=="chkFinal")dirty=true;updatePublishState();}));
+    document.querySelectorAll(".fr-checks input").forEach(el=>el.addEventListener("change",()=>updatePublishState()));
     document.getElementById("aiBtn").onclick=aiTweak;
   }
   function updatePreview(){
@@ -60,14 +64,14 @@
   }
   function updatePublishState(){
     const final=document.getElementById("chkFinal"),urgentOk=!story.urgent||document.getElementById("chkUrgent")?.checked;
-    const ok=["chkConsent","chkAnon","chkIdentifiers","chkMedical","chkPrivacy","chkNoDetails"].every(id=>document.getElementById(id)?.checked)&&urgentOk&&final?.checked;
+    const ok=["chkConsent","chkAnon","chkIdentifiers","chkMedical","chkPrivacy","chkNoDetails"].every(id=>document.getElementById(id)?.checked)&&urgentOk&&final?.checked&&!dirty;
     const btn=document.getElementById("publishBtn");if(btn)btn.disabled=!ok;
     if(final)final.parentElement.classList.toggle("fr-danger",dirty&&!final.checked);
   }
   function readChecks(){return {consentConfirmed:document.getElementById("chkConsent").checked,anonymousConfirmed:document.getElementById("chkAnon").checked,identifiersRemoved:document.getElementById("chkIdentifiers").checked,medicalReviewed:document.getElementById("chkMedical").checked,urgentReviewed:document.getElementById("chkUrgent")?.checked||false,privacyReviewed:document.getElementById("chkPrivacy").checked,noIdentifyingDetails:document.getElementById("chkNoDetails").checked,finalReviewed:document.getElementById("chkFinal").checked};}
   async function saveStory(show=true){
     const status=document.getElementById("saveStatus");status.textContent="Saving…";status.className="fr-status";
-    try{Object.assign(story,readChecks(),{status:"draft",dialogue:dialogue(story.dialogue),relatePoints:arr(story.relatePoints),actionPoints:arr(story.actionPoints),finalReviewed:false});story=normalise(await window.PatientInsightsDB.save(story));dirty=false;document.getElementById("chkFinal").checked=false;updatePublishState();if(show){status.textContent="Saved as a draft. Final approval has been reset because content changed.";status.className="fr-status success";}}catch(e){status.textContent=e.message;status.className="fr-status error";}}
+    try{invalidateApproval();Object.assign(story,{status:"draft",dialogue:dialogue(story.dialogue),relatePoints:arr(story.relatePoints),actionPoints:arr(story.actionPoints),finalReviewed:false});story=normalise(await window.PatientInsightsDB.save(story));dirty=false;render();if(show){document.getElementById("saveStatus").textContent="Saved as a draft. All approval checks were reset because the draft was edited.";document.getElementById("saveStatus").className="fr-status success";}}catch(e){status.textContent=e.message;status.className="fr-status error";}}
   async function aiTweak(){
     const instruction=document.getElementById("aiInstruction").value.trim(),status=document.getElementById("aiStatus");if(!instruction){status.textContent="Describe the change you want first.";return;}
     status.textContent="AI is reviewing the requested change…";
@@ -75,11 +79,11 @@
       const session=await window.PatientInsightsDB.getSession();
       const payload={mode:"draft",notes:`CURRENT PATIENT STORY JSON:\n${JSON.stringify({title:story.title,subtitle:story.subtitle,intro:story.intro,dialogue:story.dialogue,relateIntro:story.relateIntro,relatePoints:story.relatePoints,relateClose:story.relateClose,actionPoints:story.actionPoints,urgent:story.urgent})}\n\nDOCTOR'S FINAL EDIT INSTRUCTION:\n${instruction}\n\nRewrite the same story with ONLY the requested editorial change. Preserve every supplied medical fact and privacy constraint. Never add facts. Return the normal JSON story format.`};
       const r=await fetch(window.SUPABASE_CONFIG.url+"/functions/v1/patient-insight-ai",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+session.access_token,"apikey":window.SUPABASE_CONFIG.anonKey},body:JSON.stringify(payload)});const d=await r.json();if(!r.ok)throw Error(d.error||"AI tweak failed.");
-      story=normalise(Object.assign({},story,d));story.status="draft";dirty=true;render();document.getElementById("aiStatus").textContent="AI revision applied. Review every field before saving or approving.";document.getElementById("aiStatus").className="fr-status success";
+      story=normalise(Object.assign({},story,d));invalidateApproval();story.status="draft";dirty=true;render();
     }catch(e){status.textContent=e.message;status.className="fr-status error";}
   }
   async function publishStory(){
-    const checks=readChecks();if(!checks.finalReviewed)return;
+    const checks=readChecks();if(!checks.finalReviewed||dirty)return;
     const status=document.getElementById("publishStatus");status.textContent="Publishing…";status.className="fr-status";
     try{
       Object.assign(story,checks,{status:"published"});
@@ -88,5 +92,5 @@
     }catch(e){status.textContent=e.message;status.className="fr-status error";Object.assign(story,checks,{status:"draft"});}
   }
   document.getElementById("logoutBtn").onclick=()=>window.AdminAuth.logout();
-  load().catch(e=>{app.innerHTML=`<div class="fr-card"><h2>Final review could not be opened</h2><p class="fr-danger">${esc(e.message)}</p><a href="index.html">Return to dashboard</a></div>`;});
+  load().catch(e=>{app.innerHTML=`<div class="fr-card"><h2>Final review could not be loaded.</h2><p class="fr-danger">${esc(e.message)}</p><a class="fr-save" href="index.html">Back to dashboard</a></div>`;});
 })();
