@@ -90,6 +90,38 @@
 .stories-conversation-doorway:hover .stories-conversation-action{transform:translateX(3px);background:var(--orange-deep);}
 .stories-conversation-action span{font-size:1rem;line-height:1;}
 
+/* The existing Patient Insights CTA becomes the persistent invitation after the section ends. */
+.stories-focus-footer .btn.patient-insights-floating{
+  position:fixed;
+  left:22px;
+  bottom:22px;
+  z-index:80;
+  margin:0;
+  max-width:min(330px,calc(100vw - 44px));
+  padding:12px 16px;
+  border-radius:999px;
+  font-size:.68rem;
+  letter-spacing:.045em;
+  box-shadow:0 12px 30px rgba(23,19,15,.16),0 0 0 1px rgba(242,84,12,.14);
+  transform:translateY(18px);
+  opacity:0;
+  animation:patientInsightsFloatIn .5s var(--ease-out) forwards;
+}
+.stories-focus-footer .btn.patient-insights-floating:hover,
+.stories-focus-footer .btn.patient-insights-floating:focus-visible{
+  transform:translateY(-2px);
+}
+.stories-focus-footer .btn.patient-insights-floating span{
+  display:inline-block;
+  margin-left:5px;
+  transition:transform .2s var(--ease-out);
+}
+.stories-focus-footer .btn.patient-insights-floating:hover span,
+.stories-focus-footer .btn.patient-insights-floating:focus-visible span{transform:translateX(3px);}
+@keyframes patientInsightsFloatIn{
+  from{opacity:0;transform:translateY(18px);}
+  to{opacity:1;transform:translateY(0);}
+}
 @media(max-width:700px){
   .stories-conversation-doorway{
     align-items:flex-start;
@@ -100,8 +132,16 @@
   }
   .stories-conversation-copy p{font-size:.82rem;}
   .stories-conversation-action{width:100%;justify-content:center;}
+  .stories-focus-footer .btn.patient-insights-floating{
+    left:14px;
+    right:14px;
+    bottom:max(14px,env(safe-area-inset-bottom));
+    max-width:none;
+    justify-content:center;
+  }
 }
 @media(prefers-reduced-motion:reduce){
   .stories-conversation-doorway{transition:none;}
   .stories-conversation-doorway::before{transition:none;}
+  .stories-focus-footer .btn.patient-insights-floating{animation:none;opacity:1;transform:none;}
 }
