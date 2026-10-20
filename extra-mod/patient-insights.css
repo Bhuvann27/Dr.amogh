@@ -90,7 +90,7 @@
 .stories-conversation-doorway:hover .stories-conversation-action{transform:translateX(3px);background:var(--orange-deep);}
 .stories-conversation-action span{font-size:1rem;line-height:1;}
 
-/* The existing Patient Insights CTA becomes the persistent invitation after the section ends. */
+/* Existing CTA fallback and JS-hook styling. */
 .stories-focus-footer .btn.patient-insights-floating{
   position:fixed;
   left:22px;
@@ -108,20 +108,106 @@
   animation:patientInsightsFloatIn .5s var(--ease-out) forwards;
 }
 .stories-focus-footer .btn.patient-insights-floating:hover,
-.stories-focus-footer .btn.patient-insights-floating:focus-visible{
-  transform:translateY(-2px);
-}
-.stories-focus-footer .btn.patient-insights-floating span{
-  display:inline-block;
-  margin-left:5px;
-  transition:transform .2s var(--ease-out);
-}
+.stories-focus-footer .btn.patient-insights-floating:focus-visible{transform:translateY(-2px);}
+.stories-focus-footer .btn.patient-insights-floating span{display:inline-block;margin-left:5px;transition:transform .2s var(--ease-out);}
 .stories-focus-footer .btn.patient-insights-floating:hover span,
 .stories-focus-footer .btn.patient-insights-floating:focus-visible span{transform:translateX(3px);}
-@keyframes patientInsightsFloatIn{
-  from{opacity:0;transform:translateY(18px);}
-  to{opacity:1;transform:translateY(0);}
+@keyframes patientInsightsFloatIn{from{opacity:0;transform:translateY(18px);}to{opacity:1;transform:translateY(0);}}
+
+/* The real CTA stays exactly where it is while Patient Insights is on screen.
+   When the section itself finishes leaving the viewport, that same button
+   switches to fixed positioning and settles at the bottom-left. */
+#stories{
+  view-timeline-name:--patient-insights-section;
+  view-timeline-axis:block;
 }
+@supports (animation-timeline:view()){
+  #stories .stories-focus-footer .btn-primary{
+    animation:patientInsightsSectionExit 1ms linear both;
+    animation-timeline:--patient-insights-section;
+    z-index:999;
+  }
+
+  @keyframes patientInsightsSectionExit{
+    0%,91%{
+      position:relative;
+      left:auto;
+      right:auto;
+      bottom:auto;
+      width:auto;
+      max-width:none;
+      opacity:1;
+      transform:none;
+      padding:initial;
+      border-radius:initial;
+      box-shadow:initial;
+      font-size:initial;
+      letter-spacing:initial;
+      background:initial;
+      color:initial;
+    }
+    94%{
+      position:relative;
+      left:auto;
+      bottom:auto;
+      opacity:0;
+      transform:translateY(8px);
+    }
+    97%{
+      position:fixed;
+      left:18px;
+      right:auto;
+      bottom:max(18px,env(safe-area-inset-bottom));
+      width:auto;
+      max-width:calc(100vw - 36px);
+      opacity:0;
+      transform:translateY(12px);
+      padding:10px 14px;
+      border-radius:999px;
+      background:var(--orange);
+      color:#fff;
+      box-shadow:0 12px 28px rgba(23,19,15,.16),0 0 0 1px rgba(242,84,12,.14);
+      font-size:0;
+      letter-spacing:0;
+    }
+    100%{
+      position:fixed;
+      left:18px;
+      right:auto;
+      bottom:max(18px,env(safe-area-inset-bottom));
+      width:auto;
+      max-width:calc(100vw - 36px);
+      opacity:1;
+      transform:translateY(0);
+      padding:10px 14px;
+      border-radius:999px;
+      background:var(--orange);
+      color:#fff;
+      box-shadow:0 12px 28px rgba(23,19,15,.16),0 0 0 1px rgba(242,84,12,.14);
+      font-size:0;
+      letter-spacing:0;
+    }
+  }
+
+  #stories .stories-focus-footer .btn-primary::before{
+    content:"PATIENT INSIGHTS  ·  SOMETHING HERE MAY FEEL FAMILIAR  →";
+    display:inline-block;
+    font-size:.68rem;
+    line-height:1.1;
+    font-weight:800;
+    letter-spacing:.035em;
+    white-space:nowrap;
+    opacity:0;
+    transform:translateY(5px);
+    animation:patientInsightsLabel 1ms linear both;
+    animation-timeline:--patient-insights-section;
+  }
+  @keyframes patientInsightsLabel{
+    0%,94%{opacity:0;transform:translateY(5px);}
+    100%{opacity:1;transform:translateY(0);}
+  }
+}
+
 @media(max-width:700px){
   .stories-conversation-doorway{
     align-items:flex-start;
@@ -139,9 +225,20 @@
     max-width:none;
     justify-content:center;
   }
+  @supports (animation-timeline:view()){
+    @keyframes patientInsightsSectionExit{
+      0%,91%{position:relative;left:auto;bottom:auto;right:auto;width:auto;max-width:none;opacity:1;transform:none;padding:initial;border-radius:initial;box-shadow:initial;font-size:initial;letter-spacing:initial;background:initial;color:initial;}
+      94%{position:relative;left:auto;bottom:auto;opacity:0;transform:translateY(8px);}
+      97%,100%{position:fixed;left:14px;right:auto;bottom:max(14px,env(safe-area-inset-bottom));width:auto;max-width:calc(100vw - 28px);opacity:1;transform:translateY(0);padding:9px 13px;border-radius:999px;background:var(--orange);color:#fff;box-shadow:0 10px 24px rgba(23,19,15,.16),0 0 0 1px rgba(242,84,12,.14);font-size:0;letter-spacing:0;}
+    }
+    #stories .stories-focus-footer .btn-primary::before{font-size:.62rem;letter-spacing:.025em;}
+  }
 }
+
 @media(prefers-reduced-motion:reduce){
   .stories-conversation-doorway{transition:none;}
   .stories-conversation-doorway::before{transition:none;}
   .stories-focus-footer .btn.patient-insights-floating{animation:none;opacity:1;transform:none;}
+  #stories .stories-focus-footer .btn-primary{animation:none;}
+  #stories .stories-focus-footer .btn-primary::before{animation:none;}
 }
