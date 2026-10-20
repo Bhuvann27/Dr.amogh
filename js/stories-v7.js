@@ -10,17 +10,18 @@
     const dots=document.getElementById("convCounter");
     const intro=document.querySelector(".conv-story-intro");
     if(!stage||!track||!viewport||!deck){setTimeout(boot,80);return;}
+
     const slides=Array.from(deck.querySelectorAll(".conv-pair"));
     if(!slides.length){setTimeout(boot,80);return;}
-    if(stage.dataset.v8Ready==="1")return;
-    stage.dataset.v8Ready="1";
+    if(stage.dataset.v9Ready==="1")return;
+    stage.dataset.v9Ready="1";
 
     const total=slides.length;
     let active=0;
     let transitioning=false;
-    let pointerId=null;
-    let startX=0;
-    let startY=0;
+    let touchStartY=null;
+    let touchStartScroll=0;
+    let snapTimer=0;
     let lastWheel=0;
 
     const clamp=(n,min,max)=>Math.max(min,Math.min(max,n));
@@ -35,7 +36,7 @@
         const cs=getComputedStyle(el);
         if(cs.display==="none"||cs.visibility==="hidden")return;
         const r=el.getBoundingClientRect();
-        bottom=Math.max(bottom,cs.position!=="static"?r.bottom:r.height);
+        bottom=Math.max(bottom,cs.position!=="static"?Math.max(0,r.bottom):r.height);
       });
       return Math.min(Math.max(bottom,0),150);
     }
@@ -48,19 +49,24 @@
       return clamp(viewportHeight()*0.60,460,680);
     }
 
-    /* The browser owns normal page scrolling until the dark stage reaches
-       the bottom edge of the fixed header. At that exact point the sticky
-       stage occupies the viewport and the six-card interaction takes over. */
-    function atConversationLockPoint(){
-      const r=stage.getBoundingClientRect();
-      const offset=navOffset();
-      const h=stageHeight();
-      return r.top<=offset+2 && r.bottom>=offset+h-2;
+    /* This is the one real trigger. Before this Y position the page is
+       completely normal. The conversation only becomes a six-card reader
+       after the dark stage reaches the fixed navigation. */
+    function lockY(){
+      const trackTop=track.getBoundingClientRect().top+window.scrollY;
+      const introHeight=intro?intro.offsetHeight:0;
+      return Math.max(0,trackTop+introHeight-navOffset());
     }
 
-    function setEngaged(on){
-      stage.classList.toggle("is-engaged",!!on);
-      stage.setAttribute("aria-busy",on?"true":"false");
+    function conversationProgress(){
+      const start=lockY();
+      const step=stageHeight();
+      return (window.scrollY-start)/step;
+    }
+
+    function isInsideConversation(){
+      const p=conversationProgress();
+      return p>=-0.02 && p<=total+0.02;
     }
 
     function applySlideTransforms(animate){
@@ -87,9 +93,11 @@
       const sh=stageHeight();
       const ch=cardHeight();
       const offset=navOffset();
+      const halfGap=Math.max(0,(sh-ch)/2);
       stage.style.setProperty("--story-nav-offset",offset+"px");
       stage.style.setProperty("--deck-stage-h",sh+"px");
       stage.style.setProperty("--deck-card-h",ch+"px");
+      stage.style.setProperty("--deck-card-half-gap",halfGap+"px");
       stage.style.height=sh+"px";
       stage.style.top=offset+"px";
       viewport.style.height=ch+"px";
@@ -100,116 +108,127 @@
         slide.style.minHeight=ch+"px";
       });
 
-      /* Intro scrolls normally. Once the stage reaches the header it stays
-         pinned for exactly N viewport-heights, one complete height per card.
-         That is the actual lock, not a timer or a guessed scroll distance. */
+      /* Intro + N full stage steps. The browser's native scroll is now the
+         driver, so touch scrolling works exactly like ordinary page scroll.
+         The JS only snaps the conversation to one card at a time. */
       const ih=intro?intro.offsetHeight:0;
       track.style.height=(ih+(total*sh)+2)+"px";
       applySlideTransforms(false);
       setProgress();
     }
 
-    function moveByCard(direction){
-      if(transitioning||!atConversationLockPoint())return false;
-      const target=clamp(active+direction,0,total-1);
-      if(target===active)return false;
+    function setActive(next,animate){
+      const target=clamp(next,0,total-1);
+      if(target===active){setProgress();return;}
       active=target;
-      transitioning=true;
-      applySlideTransforms(true);
+      transitioning=!!animate;
+      applySlideTransforms(!!animate);
       setProgress();
-      window.setTimeout(()=>{transitioning=false;},500);
-      return true;
+      window.clearTimeout(setActive.timer);
+      setActive.timer=window.setTimeout(()=>{transitioning=false;},480);
     }
 
-    function release(direction){
-      if(transitioning)return;
-      setEngaged(false);
-      stage.classList.remove("at-lock-point");
-
-      /* Move exactly one stage-height so the sticky frame can finish and the
-         following section becomes the natural next viewport. */
-      const amount=stageHeight()+Math.max(24,Math.round(navOffset()*0.15));
-      window.scrollBy({top:direction>0?amount:-amount,behavior:"smooth"});
+    function scrollToCard(index,behavior){
+      const target=lockY()+clamp(index,0,total)*stageHeight();
+      window.scrollTo({top:Math.max(0,target),behavior:behavior||"smooth"});
     }
 
-    function handleDirection(direction){
-      if(!atConversationLockPoint())return false;
-      setEngaged(true);
-      if(direction>0){
-        if(active<total-1)return moveByCard(1);
-        release(1);
-        return true;
+    function syncFromScroll(){
+      const p=conversationProgress();
+      if(p<0){
+        stage.classList.remove("at-lock-point","is-engaged");
+        return;
       }
-      if(active>0)return moveByCard(-1);
-      release(-1);
-      return true;
+      if(p<=total){
+        stage.classList.add("at-lock-point");
+        const index=clamp(Math.round(p),0,total-1);
+        if(!transitioning||index!==active)setActive(index,false);
+      }else{
+        stage.classList.remove("at-lock-point","is-engaged");
+      }
     }
 
-    function pointerDown(e){
-      if(!atConversationLockPoint()||e.pointerType==="mouse")return;
-      if(transitioning)return;
-      setEngaged(true);
-      pointerId=e.pointerId;
-      startX=e.clientX;
-      startY=e.clientY;
-      try{stage.setPointerCapture(pointerId);}catch(_e){}
+    function scheduleSnap(directionHint){
+      window.clearTimeout(snapTimer);
+      snapTimer=window.setTimeout(()=>{
+        const p=conversationProgress();
+        if(p<-0.05||p>total+0.05)return;
+
+        const current=clamp(active,0,total-1);
+        let target=current;
+        if(directionHint>0)target=current+1;
+        else if(directionHint<0)target=current-1;
+        else target=Math.round(p);
+
+        if(target<0){
+          window.scrollTo({top:Math.max(0,lockY()-1),behavior:"smooth"});
+          return;
+        }
+        if(target>=total){
+          window.scrollTo({top:lockY()+total*stageHeight()+2,behavior:"smooth"});
+          return;
+        }
+        scrollToCard(target,"smooth");
+      },90);
     }
 
-    function pointerMove(e){
-      if(pointerId===null||e.pointerId!==pointerId)return;
-      const dx=e.clientX-startX;
-      const dy=e.clientY-startY;
-      if(Math.abs(dy)>8&&Math.abs(dy)>Math.abs(dx)*1.08)e.preventDefault();
+    function touchStart(e){
+      if(!isInsideConversation())return;
+      if(e.touches&&e.touches.length){
+        touchStartY=e.touches[0].clientY;
+        touchStartScroll=window.scrollY;
+      }
     }
 
-    function pointerUp(e){
-      if(pointerId===null||e.pointerId!==pointerId)return;
-      const dx=e.clientX-startX;
-      const dy=e.clientY-startY;
-      pointerId=null;
-      try{stage.releasePointerCapture(e.pointerId);}catch(_e){}
-      if(Math.abs(dy)<42||Math.abs(dy)<Math.abs(dx)*1.12)return;
-      e.preventDefault();
-      handleDirection(dy<0?1:-1);
-    }
+    function touchEnd(e){
+      if(touchStartY===null)return;
+      const endY=e.changedTouches&&e.changedTouches[0]?e.changedTouches[0].clientY:touchStartY;
+      const dy=endY-touchStartY;
+      touchStartY=null;
+      if(Math.abs(dy)<18)return;
+      if(!isInsideConversation())return;
 
-    function pointerCancel(){pointerId=null;}
+      /* Native scrolling has already happened. We do not fight it. At the
+         end of the gesture we choose exactly one adjacent card based on the
+         swipe direction, then snap there. */
+      const direction=dy<0?1:-1;
+      scheduleSnap(direction);
+    }
 
     function wheel(e){
-      if(!atConversationLockPoint())return;
-      if(Math.abs(e.deltaY)<12)return;
-
-      /* At the last card, do not cancel the browser's final upward scroll.
-         The document is deliberately long enough for the sticky stage to
-         release naturally into the next section. */
-      if(e.deltaY>0&&active===total-1){
-        setEngaged(false);
-        stage.classList.remove("at-lock-point");
-        return;
-      }
-      if(e.deltaY<0&&active===0){
-        setEngaged(false);
-        stage.classList.remove("at-lock-point");
-        return;
-      }
+      if(!isInsideConversation())return;
+      if(Math.abs(e.deltaY)<8)return;
+      e.preventDefault();
 
       const now=performance.now();
-      if(now-lastWheel<140){e.preventDefault();return;}
+      if(now-lastWheel<240)return;
       lastWheel=now;
-      e.preventDefault();
-      handleDirection(e.deltaY>0?1:-1);
+      const direction=e.deltaY>0?1:-1;
+      const target=active+direction;
+
+      if(target<0){
+        scrollToCard(-0.001,"smooth");
+        return;
+      }
+      if(target>=total){
+        window.scrollTo({top:lockY()+total*stageHeight()+2,behavior:"smooth"});
+        return;
+      }
+      scrollToCard(target,"smooth");
     }
 
     function key(e){
-      if(!atConversationLockPoint())return;
+      if(!isInsideConversation())return;
       if(e.key==="ArrowDown"||e.key==="PageDown"||e.key===" "){
-        if(active===total-1)return;
         e.preventDefault();
-        handleDirection(1);
+        const target=active+1;
+        if(target>=total)window.scrollTo({top:lockY()+total*stageHeight()+2,behavior:"smooth"});
+        else scrollToCard(target,"smooth");
       }else if(e.key==="ArrowUp"||e.key==="PageUp"){
-        if(active===0)return;
         e.preventDefault();
-        handleDirection(-1);
+        const target=active-1;
+        if(target<0)window.scrollTo({top:Math.max(0,lockY()-1),behavior:"smooth"});
+        else scrollToCard(target,"smooth");
       }
     }
 
@@ -226,42 +245,27 @@
         dot.addEventListener("click",e=>{
           e.preventDefault();
           e.stopPropagation();
-          if(!atConversationLockPoint()||transitioning)return;
-          setEngaged(true);
-          active=i;
-          transitioning=true;
-          applySlideTransforms(true);
-          setProgress();
-          window.setTimeout(()=>{transitioning=false;},500);
+          if(!isInsideConversation())return;
+          scrollToCard(i,"smooth");
         });
         dots.appendChild(dot);
       });
     }
 
-    stage.addEventListener("pointerdown",pointerDown,{passive:true});
-    stage.addEventListener("pointermove",pointerMove,{passive:false});
-    stage.addEventListener("pointerup",pointerUp,{passive:false});
-    stage.addEventListener("pointercancel",pointerCancel,{passive:true});
+    stage.addEventListener("touchstart",touchStart,{passive:true});
+    stage.addEventListener("touchend",touchEnd,{passive:true});
     stage.addEventListener("wheel",wheel,{passive:false});
     stage.addEventListener("keydown",key);
     stage.tabIndex=0;
     stage.setAttribute("aria-label","Patient and doctor conversation. Scroll or swipe up for the next exchange.");
 
-    function syncLockState(){
-      const locked=atConversationLockPoint();
-      stage.classList.toggle("at-lock-point",locked);
-      if(!locked)setEngaged(false);
-    }
-
-    window.addEventListener("resize",layout,{passive:true});
-    window.visualViewport?.addEventListener("resize",layout,{passive:true});
-    window.addEventListener("scroll",syncLockState,{passive:true});
+    window.addEventListener("scroll",syncFromScroll,{passive:true});
+    window.addEventListener("resize",()=>{layout();syncFromScroll();},{passive:true});
+    window.visualViewport?.addEventListener("resize",()=>{layout();syncFromScroll();},{passive:true});
 
     requestAnimationFrame(()=>requestAnimationFrame(()=>{
-      setEngaged(false);
-      stage.classList.remove("at-lock-point");
       layout();
-      syncLockState();
+      syncFromScroll();
     }));
   }
 
