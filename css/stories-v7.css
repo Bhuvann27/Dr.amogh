@@ -126,3 +126,50 @@ body{overflow-x:hidden!important;}
   .patient-stories-page .conv-consultation-cue{top:clamp(24px,5.2vh,46px)!important;width:calc(100% - 54px)!important;}
   .patient-stories-page .conv-consultation-cue strong{margin-top:5px!important;}
 }
+
+/* Short-phone protection. On compact iPhone/S-series viewports the old
+   460px minimum card could rise into the consultation cue. Keep the same
+   visual proportions on normal phones, but give short screens enough room
+   for the cue, card and progress without overlap. */
+@media(max-width:700px) and (max-height:760px){
+  .patient-stories-page .conv-consultation-cue{
+    top:18px!important;
+    width:calc(100% - 44px)!important;
+  }
+  .patient-stories-page .conv-consultation-cue span{
+    font-size:.60rem!important;
+    line-height:1.16!important;
+    letter-spacing:.13em!important;
+  }
+  .patient-stories-page .conv-consultation-cue strong{
+    margin-top:4px!important;
+    font-size:.82rem!important;
+    line-height:1.25!important;
+  }
+  .patient-stories-page .conv-carousel-viewport{
+    top:calc(50% + 28px)!important;
+    height:min(60svh,calc(100svh - 190px))!important;
+    min-height:0!important;
+    max-height:none!important;
+  }
+  .patient-stories-page .conv-pair{
+    height:min(60svh,calc(100svh - 190px))!important;
+    min-height:0!important;
+    max-height:none!important;
+  }
+  .patient-stories-page .conv-card-inner{
+    padding:22px 20px 24px!important;
+  }
+  .patient-stories-page .conv-progress-num{
+    top:calc(50% + 28px + (min(60svh,calc(100svh - 190px)) / 2) - 20px)!important;
+    font-size:.70rem!important;
+  }
+}
+
+@media(max-width:380px){
+  .patient-stories-page .conv-carousel-viewport{width:calc(100% - 48px)!important;border-radius:23px!important;}
+  .patient-stories-page .conv-pair{padding:3px!important;}
+  .patient-stories-page .conv-card-inner{padding:20px 18px 22px!important;border-radius:20px!important;}
+  .patient-stories-page .conv-pair .q{font-size:.86rem!important;line-height:1.44!important;}
+  .patient-stories-page .conv-pair .a{font-size:clamp(1.04rem,5vw,1.42rem)!important;}
+}
