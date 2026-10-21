@@ -47,11 +47,18 @@
     .patient-insights-float:active,.patient-insights-float.is-tapped{transform:translate3d(0,0,0) scale(.96);border-color:rgba(255,138,85,.82);box-shadow:0 10px 28px rgba(23,19,15,.32),0 0 0 6px rgba(242,84,12,.13),0 0 42px rgba(242,84,12,.44);}
     .patient-insights-float:active .patient-insights-float-arrow,.patient-insights-float.is-tapped .patient-insights-float-arrow,.patient-insights-float:focus-visible .patient-insights-float-arrow{transform:translate(2px,-2px) scale(1.08);box-shadow:0 5px 18px rgba(242,84,12,.48),0 0 24px rgba(242,84,12,.38);}
     @media(max-width:700px){
-      .patient-insights-float{left:12px;bottom:max(16px,env(safe-area-inset-bottom));max-width:calc(100vw - 76px);min-height:68px;padding:10px 12px 10px 16px;gap:11px;border-radius:19px;}
-      .patient-insights-float-text{gap:6px;}
-      .patient-insights-float-kicker{font-size:7px;letter-spacing:.17em;}
-      .patient-insights-float-copy{font-size:10px;letter-spacing:.08em;}
-      .patient-insights-float-arrow{width:34px;height:34px;font-size:16px;}
+      .patient-insights-float{left:12px;bottom:max(16px,env(safe-area-inset-bottom));max-width:calc(100vw - 104px);min-height:60px;padding:9px 10px 9px 14px;gap:9px;border-radius:19px;}
+      .patient-insights-float-text{gap:5px;min-width:0;}
+      .patient-insights-float-kicker{font-size:7px;letter-spacing:.15em;}
+      .patient-insights-float-copy{font-size:9px;letter-spacing:.065em;}
+      .patient-insights-float-arrow{width:32px;height:32px;font-size:15px;}
+    }
+    @media(max-width:380px){
+      .patient-insights-float{max-width:calc(100vw - 104px);min-height:56px;padding:8px 9px 8px 12px;gap:7px;border-radius:17px;}
+      .patient-insights-float-text{gap:4px;}
+      .patient-insights-float-kicker{font-size:6.5px;letter-spacing:.12em;}
+      .patient-insights-float-copy{font-size:8px;letter-spacing:.045em;}
+      .patient-insights-float-arrow{width:29px;height:29px;font-size:14px;}
     }
     @media(prefers-reduced-motion:reduce){.patient-insights-float::before{animation:none;}}
   `;
