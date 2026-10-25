@@ -375,4 +375,10 @@
   } else {
     revealEls.forEach((el) => el.classList.add("is-visible"));
   }
+
+  // Patient Insights floating CTA controller.
+  // Loaded from a separate file so the Patient Stories interaction remains isolated.
+  const patientInsightsFloatScript = document.createElement("script");
+  patientInsightsFloatScript.src = "extra-mod/patient-insights-float.js?v=20261020-1";
+  document.head.appendChild(patientInsightsFloatScript);
 })();

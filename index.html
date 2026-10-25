@@ -11,6 +11,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/main.css">
 <link rel="stylesheet" href="css/hero.css">
+<link rel="stylesheet" href="extra-mod/patient-insights.css">
 <style>
 .about-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(300px,.75fr);gap:48px;align-items:start}
 .about-credentials{display:grid;gap:12px}
@@ -100,6 +101,15 @@
       </div>
       <p>Real experiences, shared anonymously with appropriate consent. Start with a story that feels close to what you're going through, then explore what it may mean.</p>
     </div>
+
+    <a class="stories-conversation-doorway reveal" href="stories.html" aria-label="Step into the Patient Insights conversation">
+      <div class="stories-conversation-copy">
+        <span class="stories-conversation-kicker">PATIENT INSIGHTS</span>
+        <strong>STEP INTO THE CONVERSATION</strong>
+        <p>Read one patient's experience as a conversation, not just a summary. Follow the questions, the answers, and the moment when the story starts to make sense.</p>
+      </div>
+      <span class="stories-conversation-action">OPEN PATIENT INSIGHTS <span aria-hidden="true">↗</span></span>
+    </a>
 
     <div class="story-cards story-cards-focus reveal">
       <a class="story-card story-card-primary" href="stories.html?story=fatigue" aria-label="Read patient story: I thought I was just tired">
@@ -207,5 +217,6 @@
 <script src="js/main.js"></script>
 <script src="js/hero-desktop.js"></script>
 <script src="js/booking-widget.js"></script>
+<script src="extra-mod/patient-insights-float.js"></script>
 </body>
 </html>

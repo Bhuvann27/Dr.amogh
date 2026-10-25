@@ -1,0 +1,187 @@
+/* Extra Mod: Patient Insights CTA.
+   The source CTA stays in normal document flow. It exits gracefully near
+   the end of the section, then a separate compact reminder floats in. */
+
+/* Keep the Patient Insights doorway out of this focused homepage treatment. */
+.stories-conversation-doorway{display:none !important;}
+
+/* Never let the floating treatment change the source CTA's layout. */
+#stories .stories-focus-footer .btn-primary{
+  position:relative;
+  z-index:2;
+  min-height:48px;
+  min-width:min(292px,100%);
+  padding:13px 20px;
+  border-radius:999px;
+  touch-action:manipulation;
+  -webkit-tap-highlight-color:transparent;
+  cursor:pointer;
+  text-decoration:none;
+  transition:
+    opacity .32s cubic-bezier(.22,1,.36,1),
+    transform .42s cubic-bezier(.22,1,.36,1),
+    filter .32s ease;
+}
+
+/* The original CTA gets a real exit treatment before the section ends.
+   It remains in document flow, so it can never jump into the header. */
+#stories .stories-focus-footer .btn-primary.is-exiting{
+  opacity:0;
+  transform:translate3d(0,18px,0) scale(.94);
+  filter:blur(1.5px);
+  pointer-events:none;
+}
+
+/* Keep the footer itself stable. Only the CTA exits, preventing a layout
+   collapse or a second copy of the CTA from appearing elsewhere. */
+#stories .stories-focus-footer.is-exiting{
+  transform:none;
+}
+
+/* Separate floating reminder. It is deliberately a compact pill rather than
+   a full-width bar or an unexplained icon. */
+.patient-insights-float{
+  position:fixed;
+  z-index:1200;
+  left:14px;
+  bottom:max(18px,env(safe-area-inset-bottom));
+  width:auto;
+  max-width:calc(100vw - 28px);
+  min-height:48px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  padding:0 15px 0 17px;
+  border-radius:999px;
+  background:var(--orange);
+  color:#fff;
+  text-decoration:none;
+  opacity:0;
+  pointer-events:none;
+  transform:translate3d(-4px,14px,0) scale(.9);
+  transform-origin:left bottom;
+  box-shadow:0 10px 28px rgba(23,19,15,.20),0 0 0 1px rgba(242,84,12,.16),0 0 24px rgba(242,84,12,.16);
+  transition:
+    opacity .24s ease,
+    transform .42s cubic-bezier(.22,1,.36,1),
+    box-shadow .25s ease;
+  isolation:isolate;
+  touch-action:manipulation;
+  -webkit-tap-highlight-color:transparent;
+}
+
+.patient-insights-float.is-visible{
+  opacity:1;
+  pointer-events:auto;
+  transform:translate3d(0,0,0) scale(1);
+}
+
+.patient-insights-float.is-leaving{
+  opacity:0;
+  pointer-events:none;
+  transform:translate3d(-4px,10px,0) scale(.9);
+}
+
+.patient-insights-float-copy{
+  display:block;
+  min-width:0;
+  overflow:hidden;
+  white-space:nowrap;
+  text-overflow:ellipsis;
+  font-size:10px;
+  line-height:1;
+  letter-spacing:.12em;
+  font-weight:800;
+}
+
+.patient-insights-float-arrow{
+  flex:0 0 auto;
+  display:grid;
+  place-items:center;
+  width:22px;
+  height:22px;
+  border-radius:50%;
+  background:rgba(255,255,255,.14);
+  font-size:15px;
+  line-height:1;
+  font-weight:800;
+  transition:transform .25s cubic-bezier(.22,1,.36,1),background .25s ease;
+}
+
+/* Quiet ambient glow. It never changes layout and stays contained around the pill. */
+.patient-insights-float::before{
+  content:"";
+  position:absolute;
+  inset:-5px;
+  z-index:-1;
+  border-radius:inherit;
+  background:rgba(242,84,12,.12);
+  box-shadow:0 0 0 0 rgba(242,84,12,.20);
+  animation:patientInsightsFloatGlow 2.8s ease-out infinite;
+  pointer-events:none;
+}
+
+@keyframes patientInsightsFloatGlow{
+  0%,100%{opacity:.58;transform:scale(.98);box-shadow:0 0 0 0 rgba(242,84,12,.15);}
+  48%{opacity:0;transform:scale(1.045);box-shadow:0 0 0 8px rgba(242,84,12,0);}
+}
+
+/* Small tactile response before navigation. */
+.patient-insights-float:active,
+.patient-insights-float.is-tapped{
+  transform:translate3d(0,0,0) scale(.95);
+  box-shadow:0 7px 20px rgba(23,19,15,.22),0 0 0 6px rgba(242,84,12,.12),0 0 30px rgba(242,84,12,.28);
+}
+
+.patient-insights-float:active .patient-insights-float-arrow,
+.patient-insights-float.is-tapped .patient-insights-float-arrow,
+.patient-insights-float:focus-visible .patient-insights-float-arrow{
+  transform:translate(2px,-2px) scale(1.08);
+  background:rgba(255,255,255,.22);
+}
+
+.patient-insights-float:focus-visible{
+  outline:2px solid rgba(255,255,255,.92);
+  outline-offset:3px;
+}
+
+@media(max-width:700px){
+  #stories .stories-focus-footer .btn-primary{
+    min-height:48px;
+    min-width:min(292px,100%);
+    padding:13px 16px;
+  }
+
+  .patient-insights-float{
+    left:14px;
+    bottom:max(18px,env(safe-area-inset-bottom));
+    max-width:calc(100vw - 28px);
+    min-height:46px;
+    padding:0 13px 0 15px;
+    gap:8px;
+  }
+
+  .patient-insights-float-copy{
+    font-size:9px;
+    letter-spacing:.105em;
+  }
+
+  .patient-insights-float-arrow{
+    width:21px;
+    height:21px;
+    font-size:14px;
+  }
+}
+
+@media(prefers-reduced-motion:reduce){
+  #stories .stories-focus-footer .btn-primary{
+    transition:opacity .01ms linear;
+  }
+  .patient-insights-float{
+    transition:opacity .01ms linear;
+  }
+  .patient-insights-float::before{
+    animation:none;
+  }
+}
