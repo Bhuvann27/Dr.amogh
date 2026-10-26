@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Check Later — Admin</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="../css/main.css">
+<link rel="stylesheet" href="css/admin.css">
+<link rel="stylesheet" href="css/check-later.css">
+</head>
+<body class="admin-body check-later-body">
+  <div class="admin-topbar">
+    <div class="wordmark">Dr. Amogh G <span>&middot;</span> Admin</div>
+    <nav>
+      <a href="../index.html" target="_blank" rel="noopener">View site</a>
+      <button id="logoutBtn" type="button">Log out</button>
+    </nav>
+  </div>
+  <div class="admin-tabs">
+    <a href="index.html">Patient Insights</a>
+    <a href="check-later.html" class="active">Check Later</a>
+    <a href="appointments.html">Appointments</a>
+    <a href="availability.html">Consultation Availability</a>
+  </div>
+
+  <main class="admin-shell check-later-shell">
+    <section class="admin-hero">
+      <h1>Check Later</h1>
+      <p>Quickly save people you notice now and research when you have time. Keep this light. Move the useful ones to People later.</p>
+      <div class="admin-stats" id="checkLaterStats"></div>
+    </section>
+
+    <div class="check-later-toolbar">
+      <div class="check-later-search-wrap">
+        <input class="admin-search" id="checkLaterSearch" type="search" placeholder="Search saved people…">
+      </div>
+      <button class="btn-add" id="addCheckLaterBtn" type="button">+ Save Person</button>
+    </div>
+
+    <section class="check-later-section">
+      <div class="section-heading">
+        <div><span class="section-kicker">01</span><h2>Instagram / Chat Later</h2><p>People you noticed through Instagram and direct chats.</p></div>
+      </div>
+      <div class="category-grid" id="instagramCategories"></div>
+    </section>
+
+    <section class="check-later-section">
+      <div class="section-heading">
+        <div><span class="section-kicker">02</span><h2>Other</h2><p>Other places, referrals and sources worth remembering.</p></div>
+      </div>
+      <div class="category-grid" id="otherCategories"></div>
+      <button class="custom-category-btn" id="addCategoryBtn" type="button">+ Add your own category</button>
+    </section>
+
+    <section class="check-later-list-panel" id="categoryPanel" hidden>
+      <div class="panel-heading">
+        <div>
+          <span class="section-kicker" id="panelKicker">CATEGORY</span>
+          <h2 id="panelTitle">Instagram</h2>
+          <p id="panelSummary"></p>
+        </div>
+        <button class="btn-ghost" id="closePanelBtn" type="button">Close</button>
+      </div>
+      <div id="categoryEntries"></div>
+    </section>
+  </main>
+
+  <div class="check-later-modal" id="entryModal" hidden>
+    <div class="modal-backdrop" data-close-modal></div>
+    <div class="check-later-dialog" role="dialog" aria-modal="true" aria-labelledby="entryModalTitle">
+      <div class="dialog-head">
+        <div><span class="section-kicker">QUICK CAPTURE</span><h2 id="entryModalTitle">Save a person for later</h2><p>No research required now. Just save enough to recognise them later.</p></div>
+        <button class="dialog-close" id="closeModalBtn" type="button" aria-label="Close">&times;</button>
+      </div>
+      <form id="entryForm">
+        <div class="quick-form-grid">
+          <div class="field-group"><label for="entryName">Name *</label><input class="field-input" id="entryName" required placeholder="e.g. Dr. Rahul Kumar"></div>
+          <div class="field-group"><label for="entryCategory">Category *</label><select class="field-input" id="entryCategory" required></select></div>
+        </div>
+        <div class="quick-form-grid">
+          <div class="field-group"><label for="entryUrl">Profile / link</label><input class="field-input" id="entryUrl" type="url" placeholder="Instagram, website, Maps, etc."></div>
+          <div class="field-group"><label for="entryContact">Contact</label><input class="field-input" id="entryContact" placeholder="Phone, email or handle"></div>
+        </div>
+        <div class="field-group"><label for="entryNote">Quick note</label><textarea class="field-textarea" id="entryNote" placeholder="Why did you save this person? Keep it short."></textarea></div>
+        <div class="field-group"><label>Potential score <strong id="scoreValue">5/10</strong></label><div class="score-picker" id="scorePicker"></div><div class="score-help"><span>Low potential</span><span>High potential</span></div></div>
+        <div class="dialog-actions"><button class="btn-ghost" type="button" data-close-modal>Cancel</button><button class="btn-orange" type="submit">Save for Later</button></div>
+        <p class="form-error" id="formError" role="alert"></p>
+      </form>
+    </div>
+  </div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="../js/supabase-config.js"></script>
+<script src="js/admin-auth.js"></script>
+<script src="js/check-later.js"></script>
+</body>
+</html>
